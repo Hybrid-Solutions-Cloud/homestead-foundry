@@ -6,14 +6,13 @@ export default defineConfig({
   // GitHub Pages serves a project site under /<repo-name>/, a custom domain serves it at the root.
   base: process.env.GITHUB_PAGES_BASE ?? "/",
   cleanUrls: true,
-  // The ADR / design / research / implementation pages are copied in from ai/
-  // at build time (see scripts/sync-content.mjs); don't fail the build on any
-  // stray relative link inside that canonical content.
+  // Don't fail the build on any stray relative link inside the canonical
+  // architecture content that now lives under docs/.
   ignoreDeadLinks: true,
   themeConfig: {
     nav: [
       { text: "Guide", link: "/guide/getting-started" },
-      { text: "Architecture", link: "/architecture/architecture-overview" },
+      { text: "Architecture", link: "/design/architecture-overview" },
       { text: "ADRs", link: "/adr/" },
       { text: "Research", link: "/research/" },
       { text: "Implementation", link: "/implementation/implementation-guide" },
@@ -32,18 +31,18 @@ export default defineConfig({
           ],
         },
       ],
-      "/architecture/": [
+      "/design/": [
         {
           text: "Design (Well-Architected)",
           items: [
-            { text: "Architecture overview", link: "/architecture/architecture-overview" },
-            { text: "Resource topology and CAF naming", link: "/architecture/resource-topology-and-caf-naming" },
-            { text: "Identity and security", link: "/architecture/identity-and-security" },
-            { text: "Reliability and operations", link: "/architecture/reliability-and-operations" },
-            { text: "Performance efficiency", link: "/architecture/performance-efficiency" },
-            { text: "Cost and governance", link: "/architecture/cost-and-governance" },
-            { text: "Publish-pipeline integration", link: "/architecture/pipeline-integration-design" },
-            { text: "Diagrams (Lucid index)", link: "/architecture/diagrams" },
+            { text: "Architecture overview", link: "/design/architecture-overview" },
+            { text: "Resource topology and CAF naming", link: "/design/resource-topology-and-caf-naming" },
+            { text: "Identity and security", link: "/design/identity-and-security" },
+            { text: "Reliability and operations", link: "/design/reliability-and-operations" },
+            { text: "Performance efficiency", link: "/design/performance-efficiency" },
+            { text: "Cost and governance", link: "/design/cost-and-governance" },
+            { text: "Publish-pipeline integration", link: "/design/pipeline-integration-design" },
+            { text: "Diagrams (Lucid index)", link: "/design/diagrams" },
           ],
         },
       ],

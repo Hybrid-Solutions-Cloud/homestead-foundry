@@ -75,7 +75,7 @@
       "sourceRef": {
         "type": "string",
         "minLength": 1,
-        "description": "Relative path to the spike, ADR, or backlog entry that backs this entry (for example ai/research/SPIKE-01-image-model.md)."
+        "description": "Relative path to the spike, ADR, or backlog entry that backs this entry (for example docs/research/SPIKE-01-image-model.md)."
       }
     }
   }

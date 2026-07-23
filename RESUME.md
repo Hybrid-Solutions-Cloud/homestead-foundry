@@ -13,7 +13,7 @@ This repo used to be called `studio-foundry`. It has been renamed to
 for deploying and managing Azure AI Foundry resources and model catalogs
 (image, voice, video, reasoning/review models), built out of what started
 as a two-brand MAI-Image-2.5 + MAI-Voice-2 deployment (see the "Worked
-example" appendices in `ai/design/*` for the real brands). Full plan lives
+example" appendices in `docs/design/*` for the real brands). Full plan lives
 in the private planning workspace - start with the planning docs, then
 the project charter, the decision log (D-01 through D-14 - D-14 is the most
 recent and important, read it first if short on time), the project roadmap,

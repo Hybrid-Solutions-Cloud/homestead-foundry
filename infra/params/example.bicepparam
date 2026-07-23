@@ -1,6 +1,6 @@
 // Placeholder parameters only. Nothing below is a real tenant, subscription,
 // group object id, email address, or vault. Values mirror the worked
-// placeholder example (contoso-ai) in ai/design/resource-topology-and-caf-naming.md.
+// placeholder example (contoso-ai) in docs/design/resource-topology-and-caf-naming.md.
 using '../main.bicep'
 
 // CAF name segments: compose to rg-contosoai-prod-eus-01 and so on.

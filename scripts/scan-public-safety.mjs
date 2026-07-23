@@ -257,7 +257,7 @@ function run() {
           blocking: !inWorkedExample,
         });
       } else {
-        // A real-looking CAF name is expected in private-phase content (ai/implementation) per
+        // A real-looking CAF name is expected in private-phase content (docs/implementation) per
         // DECISIONS.md D-14 - warn so it gets caught at the Phase F pre-public scrub, don't block every commit.
         findings.push({ rule: "caf-shaped-non-placeholder", file, line, detail: `"${token}" is a fully CAF-shaped, non-placeholder name - confirm it is safe to publish`, blocking: false });
       }

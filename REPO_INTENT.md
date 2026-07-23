@@ -54,7 +54,7 @@ behind every box below; re-run it before trusting this checklist on a later read
       needs an explicit owner confirm-safe-to-publish decision before flip, not a
       silent pass.
 - [x] **People.** Real owner email and full name removed from `ai/TASKS.md` and
-      `ai/implementation/as-built.md` (full pre-public scrub, 2026-07-23).
+      `docs/implementation/as-built.md` (full pre-public scrub, 2026-07-23).
 - [~] **Brand content.** Not removed - confined instead to marked worked-example
       regions (D-03), which the scanner downgrades to non-blocking warnings. This is a
       deliberate, owner-ratified deviation from this item's original wording, not an
@@ -97,8 +97,8 @@ Keep the reusable methodology intact while genericizing:
 
 - `ai/MASTER-PLAN.md` - the master plan for the initiative
 - `ai/TASKS.md` - the phase board
-- `ai/adr/` - the decision records
-- `ai/design/` - the architecture and design docs
-- `ai/implementation/` - the implementation guide and as-built template
+- `docs/adr/` - the decision records
+- `docs/design/` - the architecture and design docs
+- `docs/implementation/` - the implementation guide and as-built template
 - `ai/verification/` - readiness and verification
 - `AGENTS.md` and `.claude/agents/` - the agent roster and hard rules

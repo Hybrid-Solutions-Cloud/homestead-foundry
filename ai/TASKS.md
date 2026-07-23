@@ -70,19 +70,19 @@ The claude.ai Artifact board mirrors this file's original scope only.
 - ✅ Confirmed the Lucid "Microsoft AI Foundry" folder (id 445735630)
 - ✅ Authored 11 diagrams (context, topology, identity, image sequence, voice sequence, pipeline, cost, content-safety, tenant-fallback flowchart, deployment flowchart, data/state ERD)
 - ✅ Independent Sonnet layout QA: 11/11 PASS (added missing titles, labeled 25 connectors, re-anchored overlaps)
-- ✅ Share-link index in `ai/diagrams/INDEX.md` + `ai/diagrams/QA-REPORT.md`
+- ✅ Share-link index in `docs/design/diagrams.md` + `ai/diagrams/QA-REPORT.md`
 
 **Manual (owner) in Lucid UI:** diagrams 4 and 5 (sequence) have a cosmetic title typo (double space; #4 a double slash) that the MCP cannot edit - retype in the Lucid editor. Also 4 superseded drafts renamed "ZZ SUPERSEDED" moved to My Documents root; trash them if desired.
 
 ## Phase 6 - Implementation guide  ✅  (foundry-implementer, Fable)
 
-- ✅ Wrote `ai/implementation/implementation-guide.md` (12 sections, 11 gated writes, rollback, fallback)
+- ✅ Wrote `docs/implementation/implementation-guide.md` (12 sections, 11 gated writes, rollback, fallback)
 
 ## Phase 7 - Review and fact-check  ✅  (foundry-reviewer, Sonnet)
 
 - ✅ Reviewed the whole `ai/` set: APPROVED for deploy, no blockers, facts verified vs Microsoft Learn, zero em-dashes, zero secrets (`ai/REVIEW.md`)
 
-## Phase 8 - Deploy (gated)  ✅  (orchestrator, gated) - DEPLOYED 2026-07-11 (see ai/implementation/as-built.md)
+## Phase 8 - Deploy (gated)  ✅  (orchestrator, gated) - DEPLOYED 2026-07-11 (see docs/implementation/as-built.md)
 
 **OWNER AUTHORIZATION (2026-07-11, live session):** The repo owner explicitly approved Phase 8 and made these decisions. This gate is now OPEN.
 
@@ -98,10 +98,10 @@ The claude.ai Artifact board mirrors this file's original scope only.
 - ✅ Assign identity and least-privilege role (two security groups)
 - ✅ Store secrets in the tenant Key Vault (names only in repo) (`studio-foundry-speech-key`)
 - ✅ Set the budget alert and cap (100 US dollars per month)
-- ✅ Write `ai/implementation/as-built.md`
+- ✅ Write `docs/implementation/as-built.md`
 
 **Correction (2026-07-21):** these sub-items were left unchecked despite the
-work being fully done and documented in `ai/implementation/as-built.md` since
+work being fully done and documented in `docs/implementation/as-built.md` since
 2026-07-11. Flipped to ✅ to match reality; see the project roadmap for how this
 was found and why the checkboxes drifted from the actual state.
 

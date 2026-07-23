@@ -1,6 +1,6 @@
 # Deployment
 
-**Status: authored, not yet deployed.** This page describes the approach locked in the Architecture Decision Records (see `ai/adr/`, especially ADR-0004 on topology and region). The parameterized `infra/` Bicep exists and validates (`az bicep build` and `what-if`), but no live deployment has been run from it. Check the [roadmap](../roadmap) page for the current status before assuming any of this is deployed today.
+**Status: authored, not yet deployed.** This page describes the approach locked in the Architecture Decision Records (see `docs/adr/`, especially ADR-0004 on topology and region). The parameterized `infra/` Bicep exists and validates (`az bicep build` and `what-if`), but no live deployment has been run from it. Check the [roadmap](../roadmap) page for the current status before assuming any of this is deployed today.
 
 ## Planned shape
 

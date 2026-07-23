@@ -1,5 +1,5 @@
 // homestead-foundry: parameterized, registry-driven Azure AI Foundry stack.
-// Reproduces the Phase 8/9 as-built shape (ai/implementation/as-built.md) in any
+// Reproduces the Phase 8/9 as-built shape (docs/implementation/as-built.md) in any
 // subscription: resource group, AIServices (Foundry) account, registry-driven
 // model deployments, two-security-group RBAC (ADR-0005 as amended by the
 // as-built), Key Vault secret-name references (names only), and the RG budget
@@ -138,7 +138,7 @@ param budgetStartDate string = utcNow('yyyy-MM-01')
 var baseName = '${workload}-${env}-${regionToken}-${instance}'
 
 // aif- per the current CAF Learn mapping for kind AIServices (owner directive;
-// as-built deviation 1 supersedes the older ais- strings in ai/design).
+// as-built deviation 1 supersedes the older ais- strings in docs/design).
 var names = {
   resourceGroup: 'rg-${baseName}'
   account: 'aif-${baseName}'

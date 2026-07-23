@@ -108,7 +108,7 @@ deleted during this check. Two bounded data-plane smoke calls were made (one
 image generation, one speech synthesis).
 Date: 2026-07-11
 Author: foundry-env-verifier
-Phase: 9 (`ai/implementation/as-built.md`)
+Phase: 9 (`docs/implementation/as-built.md`)
 
 ### Checks
 
@@ -181,7 +181,7 @@ header set, nothing timing-related present). Getting `WordBoundary` events
 requires the Speech SDK's streaming synthesis path (websocket-based
 `SpeechSynthesizer` with the word-boundary event subscribed), which is a
 different integration than this REST smoke test exercised. This matches the
-open question already on record in `ai/implementation/as-built.md` ("whether
+open question already on record in `docs/implementation/as-built.md` ("whether
 MAI-Voice-2 emits usable WordBoundary events") and in
 `ai/verification/environment-readiness.md`; it remains UNCONFIRMED and is
 correctly scoped as read-along (the feature that needs word-boundary)
@@ -217,7 +217,7 @@ was that checkpoint. The two smoke artifacts
 (`ai/verification/smoke/image-smoke.png`, `ai/verification/smoke/voice-smoke.mp3`)
 were reviewed by the owner before any bulk image or audio generation was
 authorized. Non-blocking items already tracked in
-`ai/implementation/as-built.md` remained open at the time (Lisa en-AU voice
+`docs/implementation/as-built.md` remained open at the time (Lisa en-AU voice
 id and the exact "excited" style token sign-off, the `ais-` to `aif-` naming
 cleanup in older docs and diagrams, image-catalog size reconciliation,
 Speech-key rotation cadence) and were unaffected by this verification.

@@ -37,8 +37,8 @@ You are the diagram author for the studio-foundry Azure AI Foundry initiative. Y
 
 ## Inputs
 
-- Design docs in `ai/design/` are your source of truth. Read them before drawing.
-- ADRs in `ai/adr/` and spikes in `ai/research/` give context.
+- Design docs in `docs/design/` are your source of truth. Read them before drawing.
+- ADRs in `docs/adr/` and spikes in `docs/research/` give context.
 
 ## What good looks like
 

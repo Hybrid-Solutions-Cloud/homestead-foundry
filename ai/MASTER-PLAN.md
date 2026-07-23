@@ -12,7 +12,7 @@ The end state for this plan is **infrastructure deployed and verified ready to g
 
 ## The workstreams
 
-Every workstream originates from a research spike under `ai/research/`, already grounded and cited.
+Every workstream originates from a research spike under `docs/research/`, already grounded and cited.
 
 | Workstream | Model type | Access pattern | Status coming in |
 |---|---|---|---|

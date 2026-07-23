@@ -9,8 +9,8 @@
     "status": "deployed",
     "accessGating": "none",
     "capabilities": ["text-to-image", "image-edit"],
-    "notes": "Placeholder entry demonstrating a deployed image model. See ai/research/SPIKE-01-image-model.md for the real methodology this generalizes from.",
-    "sourceRef": "ai/research/SPIKE-01-image-model.md"
+    "notes": "Placeholder entry demonstrating a deployed image model. See docs/research/SPIKE-01-image-model.md for the real methodology this generalizes from.",
+    "sourceRef": "docs/research/SPIKE-01-image-model.md"
   },
   {
     "id": "example-image-model-legacy",
@@ -35,8 +35,8 @@
     "status": "deployed",
     "accessGating": "none",
     "capabilities": ["text-to-speech"],
-    "notes": "Placeholder entry demonstrating a deployed voice model without word-level timestamps. See ai/research/SPIKE-02-voice-model.md.",
-    "sourceRef": "ai/research/SPIKE-02-voice-model.md"
+    "notes": "Placeholder entry demonstrating a deployed voice model without word-level timestamps. See docs/research/SPIKE-02-voice-model.md.",
+    "sourceRef": "docs/research/SPIKE-02-voice-model.md"
   },
   {
     "id": "example-video-model-01",

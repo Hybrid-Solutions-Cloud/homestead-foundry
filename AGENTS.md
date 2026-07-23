@@ -2,7 +2,7 @@
 
 ## What this repo is
 
-A private, personally-run studio for designing, deploying, and documenting **Azure AI Foundry** infrastructure - research, decisions, design, diagrams, and as-built records for standing up Foundry model backbones (image, voice, and future modalities). The methodology is built to become an open-source knowledge and automation center: detailed documentation on Azure AI Foundry itself, plus the agent roster and Bicep automation that does the deploying. Its first proven build is a media backbone (MAI-Image-2.5 for scene art, MAI-Voice-2 for narration) serving two publishing brands - kept as a worked example in `ai/design/*.md`, not the primary framing.
+A private, personally-run studio for designing, deploying, and documenting **Azure AI Foundry** infrastructure - research, decisions, design, diagrams, and as-built records for standing up Foundry model backbones (image, voice, and future modalities). The methodology is built to become an open-source knowledge and automation center: detailed documentation on Azure AI Foundry itself, plus the agent roster and Bicep automation that does the deploying. Its first proven build is a media backbone (MAI-Image-2.5 for scene art, MAI-Voice-2 for narration) serving two publishing brands - kept as a worked example in `docs/design/*.md`, not the primary framing.
 
 The whole initiative is under `ai/`. Start at `ai/MASTER-PLAN.md`, then `ai/TASKS.md`. Planning and backlog live under the private planning workspace.
 
@@ -49,5 +49,5 @@ Sonnet for everything else. See `CLAUDE.md`'s "Model policy for this repo."
 | GitHub org | Hybrid-Solutions-Cloud (private repo) |
 | Local path | `D:/git/hybrid-solutions-cloud/homestead-foundry` |
 | Primary tenant | Decided by the environment check (credit sub preferred; azurelocal.cloud is the fallback) |
-| Key Vault | The chosen tenant's platform vault (named in `ai/design/*` worked-example appendices) |
-| Worked example | Two publishing brands (proves the methodology in production; see `ai/design/*` appendices) |
+| Key Vault | The chosen tenant's platform vault (named in `docs/design/*` worked-example appendices) |
+| Worked example | Two publishing brands (proves the methodology in production; see `docs/design/*` appendices) |

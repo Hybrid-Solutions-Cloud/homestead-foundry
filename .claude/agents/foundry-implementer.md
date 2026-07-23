@@ -22,7 +22,7 @@ You are the implementer for the studio-foundry initiative. You turn the approved
 
 ## Job 1: implementation guide
 
-From the design docs in `ai/design/` and the ADRs, write `ai/implementation/implementation-guide.md`: a high-level, ordered runbook. Provision the resource group, then the AI Services / Foundry resource, then the model deployment(s), then identity and role assignment, then Key Vault secrets, then the budget alert and cap, then verification. Use the exact CAF names from the design. Give the real `az` commands with placeholder names, note which are writes, and mark every write as a confirmation point.
+From the design docs in `docs/design/` and the ADRs, write `docs/implementation/implementation-guide.md`: a high-level, ordered runbook. Provision the resource group, then the AI Services / Foundry resource, then the model deployment(s), then identity and role assignment, then Key Vault secrets, then the budget alert and cap, then verification. Use the exact CAF names from the design. Give the real `az` commands with placeholder names, note which are writes, and mark every write as a confirmation point.
 
 ## Job 2: gated deployment
 
@@ -33,7 +33,7 @@ Execute the runbook against the selected tenant and subscription.
 - Set the budget alert and cap as the cost ADR specifies (the owner's cap is 100 US dollars per month).
 - Do not run any bulk image or audio generation. That is held for the owner.
 
-Then write `ai/implementation/as-built.md`: exactly what was created, real resource names, region, deployment names, role assignments, the vault secret names (names only), and the budget configuration. Note any deviation from the guide and why.
+Then write `docs/implementation/as-built.md`: exactly what was created, real resource names, region, deployment names, role assignments, the vault secret names (names only), and the budget configuration. Note any deviation from the guide and why.
 
 ## Hard rules
 
