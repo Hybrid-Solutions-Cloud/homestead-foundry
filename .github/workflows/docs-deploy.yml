@@ -1,0 +1,66 @@
+name: Docs deploy
+
+# Builds the VitePress docs site on every push to main and publishes it to
+# GitHub Pages. The build-and-validate step always runs and must stay green;
+# the actual Pages deploy is expected to fail until this repo is public or
+# the Hybrid-Solutions-Cloud org is on a paid plan, since GitHub Pages for a
+# private repo owned by a Free-plan org is not available (the same
+# constraint Phase A hit with branch protection). continue-on-error on the
+# deploy job keeps that expected failure from blocking anything else.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs-deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install docs dependencies
+        working-directory: docs
+        run: npm install
+
+      - name: Build docs
+        working-directory: docs
+        env:
+          GITHUB_PAGES_BASE: "/homestead-foundry/"
+        run: npm run docs:build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

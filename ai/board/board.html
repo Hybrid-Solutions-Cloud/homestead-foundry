@@ -1,0 +1,287 @@
+<title>AI Foundry Studio - Build Board</title>
+<style>
+  :root {
+    --ground:#eef1f5; --surface:#ffffff; --surface-2:#f7f9fb;
+    --ink:#16202e; --muted:#59677a; --hairline:#d8dfe8;
+    --accent:#c2521c; --accent-ink:#ffffff; --spine:#c6cfda;
+    --done:#0e8a63; --done-bg:rgba(14,138,99,.12);
+    --active:#c2521c; --active-bg:rgba(194,82,28,.13);
+    --todo:#71809380; --todo-solid:#718093; --todo-bg:rgba(113,128,147,.12);
+    --decision:#7a54c0; --decision-bg:rgba(122,84,192,.12);
+    --blocked:#c1382c; --blocked-bg:rgba(193,56,44,.12);
+    --shadow:0 1px 2px rgba(20,32,46,.06),0 8px 24px rgba(20,32,46,.05);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ground:#0e131b; --surface:#161d27; --surface-2:#1b2431;
+      --ink:#e7edf4; --muted:#8a98aa; --hairline:#263140;
+      --accent:#f0813a; --accent-ink:#1a1206; --spine:#2c3849;
+      --done:#2ab183; --done-bg:rgba(42,177,131,.15);
+      --active:#f0813a; --active-bg:rgba(240,129,58,.15);
+      --todo:#6b7a8f; --todo-solid:#8a98aa; --todo-bg:rgba(116,131,154,.14);
+      --decision:#a98ae6; --decision-bg:rgba(169,138,230,.15);
+      --blocked:#e56b5d; --blocked-bg:rgba(229,107,93,.15);
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0e131b; --surface:#161d27; --surface-2:#1b2431;
+    --ink:#e7edf4; --muted:#8a98aa; --hairline:#263140;
+    --accent:#f0813a; --accent-ink:#1a1206; --spine:#2c3849;
+    --done:#2ab183; --done-bg:rgba(42,177,131,.15);
+    --active:#f0813a; --active-bg:rgba(240,129,58,.15);
+    --todo:#6b7a8f; --todo-solid:#8a98aa; --todo-bg:rgba(116,131,154,.14);
+    --decision:#a98ae6; --decision-bg:rgba(169,138,230,.15);
+    --blocked:#e56b5d; --blocked-bg:rgba(229,107,93,.15);
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.32);
+  }
+  :root[data-theme="light"]{
+    --ground:#eef1f5; --surface:#ffffff; --surface-2:#f7f9fb;
+    --ink:#16202e; --muted:#59677a; --hairline:#d8dfe8;
+    --accent:#c2521c; --accent-ink:#ffffff; --spine:#c6cfda;
+    --done:#0e8a63; --done-bg:rgba(14,138,99,.12);
+    --active:#c2521c; --active-bg:rgba(194,82,28,.13);
+    --todo:#71809380; --todo-solid:#718093; --todo-bg:rgba(113,128,147,.12);
+    --decision:#7a54c0; --decision-bg:rgba(122,84,192,.12);
+    --blocked:#c1382c; --blocked-bg:rgba(193,56,44,.12);
+    --shadow:0 1px 2px rgba(20,32,46,.06),0 8px 24px rgba(20,32,46,.05);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--ground);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased}
+  .mono{font-family:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace}
+  .wrap{max-width:1000px;margin:0 auto;padding:clamp(20px,4vw,52px) clamp(16px,4vw,32px)}
+  a{color:var(--accent)}
+
+  .eyebrow{font-family:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
+    font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);
+    display:flex;align-items:center;gap:10px;margin:0 0 14px}
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--accent);display:inline-block}
+  h1{font-size:clamp(28px,5vw,44px);line-height:1.05;margin:0 0 10px;
+    letter-spacing:-.02em;font-weight:800;text-wrap:balance}
+  .lede{color:var(--muted);max-width:60ch;margin:0 0 4px;font-size:16px}
+  .meta{font-size:12.5px;color:var(--muted);margin-top:14px;display:flex;flex-wrap:wrap;gap:8px 18px}
+  .meta b{color:var(--ink);font-weight:600}
+
+  .summary{margin:30px 0 8px;background:var(--surface);border:1px solid var(--hairline);
+    border-radius:16px;padding:22px clamp(18px,3vw,28px);box-shadow:var(--shadow);
+    display:grid;grid-template-columns:1.3fr 1fr;gap:26px}
+  @media (max-width:640px){.summary{grid-template-columns:1fr;gap:20px}}
+  .prog-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .prog-pct{font-size:34px;font-weight:800;letter-spacing:-.02em}
+  .prog-frac{color:var(--muted);font-size:14px}
+  .bar{height:12px;border-radius:99px;background:var(--todo-bg);overflow:hidden;
+    border:1px solid var(--hairline)}
+  .bar > i{display:block;height:100%;width:16%;border-radius:99px;
+    background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 70%,#e8a23a));
+    transition:width .5s ease}
+  .phase-now{margin-top:16px;font-size:13.5px;color:var(--muted)}
+  .phase-now b{color:var(--ink)}
+
+  .counts{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start}
+  .count{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:11px;
+    background:var(--surface-2);border:1px solid var(--hairline)}
+  .count .n{font-family:ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums;
+    font-weight:700;font-size:17px;margin-left:auto}
+  .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+  .dot.done{background:var(--done)} .dot.active{background:var(--active)}
+  .dot.todo{background:var(--todo-solid)} .dot.decision{background:var(--decision)}
+  .dot.blocked{background:var(--blocked)}
+  .count .lbl{font-size:13px;color:var(--muted)}
+
+  .pipeline{list-style:none;margin:34px 0 0;padding:0;position:relative}
+  .pipeline::before{content:"";position:absolute;left:19px;top:8px;bottom:36px;width:2px;
+    background:var(--spine)}
+  .phase{position:relative;padding:0 0 16px 56px;margin:0}
+  .node{position:absolute;left:0;top:2px;width:40px;height:40px;border-radius:50%;
+    display:grid;place-items:center;font-family:ui-monospace,Consolas,monospace;font-weight:700;
+    font-size:15px;background:var(--surface);border:2px solid var(--spine);color:var(--muted);
+    z-index:1;font-variant-numeric:tabular-nums}
+  .phase[data-status="done"] .node{border-color:var(--done);color:var(--done);background:var(--done-bg)}
+  .phase[data-status="active"] .node{border-color:var(--active);color:var(--active);background:var(--active-bg);
+    box-shadow:0 0 0 4px var(--active-bg)}
+  .card{background:var(--surface);border:1px solid var(--hairline);border-radius:14px;
+    padding:16px 18px;box-shadow:var(--shadow)}
+  .phase[data-status="active"] .card{border-color:color-mix(in srgb,var(--active) 45%,var(--hairline))}
+  .card-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .card-head h2{font-size:17px;margin:0;font-weight:700;letter-spacing:-.01em}
+  .pill{font-family:ui-monospace,Consolas,monospace;font-size:11px;letter-spacing:.06em;
+    text-transform:uppercase;padding:3px 9px;border-radius:99px;font-weight:600;white-space:nowrap}
+  .pill.done{color:var(--done);background:var(--done-bg)}
+  .pill.active{color:var(--active);background:var(--active-bg)}
+  .pill.todo{color:var(--todo-solid);background:var(--todo-bg)}
+  .agent{margin-left:auto;font-family:ui-monospace,Consolas,monospace;font-size:11.5px;
+    color:var(--muted);white-space:nowrap}
+  .agent .m{color:var(--accent)}
+  .tasks{list-style:none;margin:13px 0 0;padding:0;display:grid;gap:7px}
+  .tasks li{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:var(--ink)}
+  .tasks li.t-todo{color:var(--muted)}
+  .glyph{flex:0 0 auto;width:15px;height:15px;margin-top:3px;border-radius:4px;
+    display:grid;place-items:center;font-size:10px;line-height:1;font-weight:700}
+  .glyph.done{background:var(--done);color:#fff}
+  .glyph.active{background:var(--active);color:#fff}
+  .glyph.todo{background:transparent;border:1.5px solid var(--spine)}
+  .glyph.decision{background:var(--decision);color:#fff}
+
+  footer{margin-top:30px;padding-top:18px;border-top:1px solid var(--hairline);
+    color:var(--muted);font-size:12.5px;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+  .legend{display:flex;flex-wrap:wrap;gap:12px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Azure AI Foundry Studio</p>
+    <h1>Build Board</h1>
+    <p class="lede">Standing up the shared Azure AI Foundry backbone (MAI-Image-2.5 for scene art, MAI-Voice-2 for narration) for two publishing brands' reader apps. From research to a deployed, verified endpoint.</p>
+    <div class="meta mono">
+      <span>repo <b>thisismydemo/studio-foundry</b></span>
+      <span>tenant <b>This Is My Demo MVP, East US</b></span>
+      <span>updated <b>2026-07-11</b></span>
+    </div>
+  </header>
+
+  <section class="summary">
+    <div>
+      <div class="prog-head">
+        <span class="prog-pct mono">100%</span>
+        <span class="prog-frac mono">50 / 50 tasks</span>
+      </div>
+      <div class="bar"><i style="width:100%"></i></div>
+      <p class="phase-now"><b>COMPLETE and verified READY.</b> The smoke test passed both endpoints on the first try (a real 1248x832 image and a Harper voice clip), and measured MAI-Image-2.5 at about 0.048 USD per image. Holding here for owner review before any bulk generation.</p>
+    </div>
+    <div class="counts">
+      <div class="count"><span class="dot done"></span><span class="lbl">Done</span><span class="n">50</span></div>
+      <div class="count"><span class="dot active"></span><span class="lbl">Active</span><span class="n">0</span></div>
+      <div class="count"><span class="dot todo"></span><span class="lbl">To do</span><span class="n">0</span></div>
+      <div class="count"><span class="dot decision"></span><span class="lbl">Decisions</span><span class="n">0</span></div>
+    </div>
+  </section>
+
+  <ol class="pipeline">
+    <li class="phase" data-status="done">
+      <div class="node">0</div>
+      <div class="card">
+        <div class="card-head"><h2>Scaffold</h2><span class="pill done">Done</span><span class="agent mono">orchestrator + foundry-ops <span class="m">sonnet</span></span></div>
+        <ul class="tasks">
+          <li class="t-done"><span class="glyph done">&check;</span>Create studio-foundry private repo (thisismydemo org)</li>
+          <li class="t-done"><span class="glyph done">&check;</span>Clone to d:/git/thisismydemo and add to VS Code workspace</li>
+          <li class="t-done"><span class="glyph done">&check;</span>Move the two source plans out of the public repo</li>
+          <li class="t-done"><span class="glyph done">&check;</span>Scaffold .claude (8 foundry agents, settings, MCP) and repo meta</li>
+          <li class="t-done"><span class="glyph done">&check;</span>Scaffold the ai/ tree, master plan, and this board</li>
+          <li class="t-done"><span class="glyph done">&check;</span>Commit and push Phase 0</li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="phase" data-status="done">
+      <div class="node">1</div>
+      <div class="card">
+        <div class="card-head"><h2>Environment check</h2><span class="pill done">Done</span><span class="agent mono">foundry-env-verifier <span class="m">sonnet</span></span></div>
+        <ul class="tasks">
+          <li class="t-done"><span class="glyph done">&check;</span>Enumerate subscriptions in the candidate tenants</li>
+          <li class="t-done"><span class="glyph done">&check;</span>Verify Foundry + MAI-Image-2.5 + MAI-Voice-2 availability, region, quota</li>
+          <li class="t-done"><span class="glyph done">&check;</span>GO: This Is My Demo MVP, East US (fallback azlz-cmp-lz-core-001)</li>
+          <li class="t-done"><span class="glyph done">&check;</span>Write environment-readiness.md</li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="phase" data-status="done">
+      <div class="node">2</div>
+      <div class="card">
+        <div class="card-head"><h2>Research spikes</h2><span class="pill done">Done</span><span class="agent mono">foundry-researcher <span class="m">opus</span></span></div>
+        <ul class="tasks">
+          <li class="t-done"><span class="glyph done">&check;</span>Image model, voice model, tenant readiness (all cited)</li>
+          <li class="t-done"><span class="glyph done">&check;</span>Identity/security, cost governance, pipeline integration</li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="phase" data-status="done">
+      <div class="node">3</div>
+      <div class="card">
+        <div class="card-head"><h2>ADRs</h2><span class="pill done">Done</span><span class="agent mono">foundry-researcher <span class="m">opus</span></span></div>
+        <ul class="tasks">
+          <li class="t-done"><span class="glyph done">&check;</span>Eight decision records grounded in the spikes (tenant, models, topology, identity, cost, safety, integration)</li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="phase" data-status="done">
+      <div class="node">4</div>
+      <div class="card">
+        <div class="card-head"><h2>Architecture and design</h2><span class="pill done">Done</span><span class="agent mono">foundry-architect <span class="m">fable</span></span></div>
+        <ul class="tasks">
+          <li class="t-done"><span class="glyph done">&check;</span>Seven WAF 5-pillar design docs with CAF resource naming, built from the ADRs</li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="phase" data-status="done">
+      <div class="node">5</div>
+      <div class="card">
+        <div class="card-head"><h2>Lucid diagrams</h2><span class="pill done">Done</span><span class="agent mono">foundry-diagrammer <span class="m">opus</span> + qa <span class="m">sonnet</span></span></div>
+        <ul class="tasks">
+          <li class="t-done"><span class="glyph done">&check;</span>11 diagrams in the Microsoft AI Foundry folder, independently QA-passed (11/11)</li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="phase" data-status="done">
+      <div class="node">6</div>
+      <div class="card">
+        <div class="card-head"><h2>Implementation guide</h2><span class="pill done">Done</span><span class="agent mono">foundry-implementer <span class="m">fable</span></span></div>
+        <ul class="tasks">
+          <li class="t-done"><span class="glyph done">&check;</span>Ordered, gated deployment runbook (11 confirmation-point writes, rollback, fallback)</li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="phase" data-status="done">
+      <div class="node">7</div>
+      <div class="card">
+        <div class="card-head"><h2>Review and fact-check</h2><span class="pill done">Done</span><span class="agent mono">foundry-reviewer <span class="m">sonnet</span></span></div>
+        <ul class="tasks">
+          <li class="t-done"><span class="glyph done">&check;</span>APPROVED for deploy: no blockers, facts verified vs Microsoft Learn, no em-dashes, no secrets</li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="phase" data-status="done">
+      <div class="node">8</div>
+      <div class="card">
+        <div class="card-head"><h2>Deploy (gated)</h2><span class="pill done">Done</span><span class="agent mono">orchestrator, gated</span></div>
+        <ul class="tasks">
+          <li class="t-done"><span class="glyph done">&check;</span>RG, aif- account (S0), mai-image-25 (Succeeded), 2 security groups + roles, Speech key in Key Vault, 100/month budget</li>
+          <li class="t-done"><span class="glyph done">&check;</span>as-built documented (ai/implementation/as-built.md)</li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="phase" data-status="done">
+      <div class="node">9</div>
+      <div class="card">
+        <div class="card-head"><h2>Verify and hold</h2><span class="pill done">Done</span><span class="agent mono">foundry-env-verifier <span class="m">sonnet</span></span></div>
+        <ul class="tasks">
+          <li class="t-done"><span class="glyph done">&check;</span>9/9 checks PASS: real image + voice clip generated, ~0.048 USD/image measured, listen-only confirmed</li>
+          <li class="t-done"><span class="glyph done">&check;</span>Holding for owner double-check, no bulk generation</li>
+        </ul>
+      </div>
+    </li>
+  </ol>
+
+  <footer>
+    <span class="legend mono">
+      <span><span class="dot done"></span>done</span>
+      <span><span class="dot active"></span>active</span>
+      <span><span class="dot todo"></span>to do</span>
+      <span><span class="dot decision"></span>needs decision</span>
+      <span><span class="dot blocked"></span>blocked</span>
+    </span>
+    <span style="margin-left:auto">Opus research and diagrams. Fable design and build. Sonnet review, verify, ops.</span>
+  </footer>
+</div>

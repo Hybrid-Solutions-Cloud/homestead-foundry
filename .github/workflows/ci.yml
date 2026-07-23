@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  scan-public-safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Scan PR diff
+        if: github.event_name == 'pull_request'
+        run: node scripts/scan-public-safety.mjs --range=${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}
+
+      - name: Scan pushed commits
+        if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
+        run: node scripts/scan-public-safety.mjs --range=${{ github.event.before }}..${{ github.sha }}
+
+      - name: Scan initial push (no prior commit to diff against)
+        if: github.event_name == 'push' && github.event.before == '0000000000000000000000000000000000000000'
+        run: node scripts/scan-public-safety.mjs --full

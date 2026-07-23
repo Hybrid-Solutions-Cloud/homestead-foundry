@@ -1,0 +1,5 @@
+{
+  "identityTokens": ["owner@example.com", "example-tenant.onmicrosoft.com"],
+  "resourceNameTokens": ["aif-realworkload-prod-eus-01"],
+  "brandTokens": []
+}

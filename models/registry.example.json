@@ -1,0 +1,80 @@
+[
+  {
+    "id": "example-image-model-01",
+    "kind": "image",
+    "provider": "Microsoft",
+    "deploymentName": "example-image-model-01",
+    "sku": "GlobalStandard",
+    "region": "eastus",
+    "status": "deployed",
+    "accessGating": "none",
+    "capabilities": ["text-to-image", "image-edit"],
+    "notes": "Placeholder entry demonstrating a deployed image model. See ai/research/SPIKE-01-image-model.md for the real methodology this generalizes from.",
+    "sourceRef": "ai/research/SPIKE-01-image-model.md"
+  },
+  {
+    "id": "example-image-model-legacy",
+    "kind": "image",
+    "provider": "ExampleVendor",
+    "deploymentName": "example-image-model-legacy",
+    "sku": "GlobalStandard",
+    "region": "eastus",
+    "status": "rejected",
+    "accessGating": "none",
+    "capabilities": ["text-to-image"],
+    "notes": "Placeholder rejected entry, kept for the record rather than deleted. A real rejected entry states why (for example: failed style-match on a text-only prompt, or retired by the vendor) instead of re-researching the same candidate later.",
+    "sourceRef": "pmo/BACKLOG.md"
+  },
+  {
+    "id": "example-voice-model-01",
+    "kind": "voice",
+    "provider": "Microsoft",
+    "deploymentName": "example-voice-model-01",
+    "sku": "S0",
+    "region": "eastus",
+    "status": "deployed",
+    "accessGating": "none",
+    "capabilities": ["text-to-speech"],
+    "notes": "Placeholder entry demonstrating a deployed voice model without word-level timestamps. See ai/research/SPIKE-02-voice-model.md.",
+    "sourceRef": "ai/research/SPIKE-02-voice-model.md"
+  },
+  {
+    "id": "example-video-model-01",
+    "kind": "video",
+    "provider": "ExampleVendor",
+    "deploymentName": "example-video-model-01",
+    "sku": "GlobalStandard",
+    "region": "eastus2",
+    "status": "planned",
+    "accessGating": "limited-access: https://example.microsoft.com/access-request",
+    "capabilities": ["text-to-video"],
+    "notes": "Placeholder entry for a video model kept planned rather than deployed or rejected outright, because a use case for it remains plausible even though it is not the core path today.",
+    "sourceRef": "pmo/BACKLOG.md"
+  },
+  {
+    "id": "example-reasoning-model-01",
+    "kind": "reasoning",
+    "provider": "ExampleVendor",
+    "deploymentName": "example-reasoning-model-01",
+    "sku": "GlobalStandard",
+    "region": "eastus",
+    "status": "planned",
+    "accessGating": "limited-access: one-time registration required",
+    "capabilities": ["vision-input", "long-context"],
+    "notes": "Placeholder entry for a gated reviewer/reasoning model awaiting an access approval before it can move to deployed.",
+    "sourceRef": "pmo/BACKLOG.md"
+  },
+  {
+    "id": "example-reasoning-model-text-only",
+    "kind": "reasoning",
+    "provider": "ExampleVendor",
+    "deploymentName": "example-reasoning-model-text-only",
+    "sku": "GlobalStandard",
+    "region": "eastus",
+    "status": "rejected",
+    "accessGating": "none",
+    "capabilities": ["long-context"],
+    "notes": "Placeholder rejected entry demonstrating why a text-only model was passed over for a vision-required reviewer role, kept so the candidate is not re-researched later.",
+    "sourceRef": "pmo/BACKLOG.md"
+  }
+]

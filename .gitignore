@@ -1,0 +1,34 @@
+# Node / tooling
+node_modules/
+dist/
+*.log
+
+# Secrets and local env (never commit)
+.env
+.env.*
+.dev.vars
+*.key
+*.pem
+*.pfx
+*.p12
+secrets.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+
+# Scratch
+tmp/
+scratch/
+.venv/
+__pycache__/
+
+# Local/real-value overlays (never committed; placeholders live in versioned examples)
+local/
+*.local.bicepparam
+*.local.json
+docs/.vitepress/cache
+docs/.vitepress/dist
+docs/node_modules
+pmo/

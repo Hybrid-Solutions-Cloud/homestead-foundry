@@ -1,0 +1,99 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git show:*)",
+      "Bash(git rm:*)",
+      "Bash(git mv:*)",
+      "Bash(git branch:*)",
+      "Bash(git remote:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git restore:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh issue:*)",
+      "Bash(gh run:*)",
+      "Bash(gh api:*)",
+      "Bash(gh workflow:*)",
+      "Bash(gh release:*)",
+      "Bash(gh repo view:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(pnpm run test:*)",
+      "Bash(pnpm run typecheck:*)",
+      "Bash(pnpm run lint:*)",
+      "Bash(pnpm run build:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm test:*)",
+      "Bash(go test:*)",
+      "Bash(az account show:*)",
+      "Bash(az account list:*)",
+      "Bash(az account list-locations:*)",
+      "Bash(az account get-access-token:*)",
+      "Bash(az cognitiveservices account list:*)",
+      "Bash(az cognitiveservices account show:*)",
+      "Bash(az cognitiveservices account list-skus:*)",
+      "Bash(az cognitiveservices account list-models:*)",
+      "Bash(az cognitiveservices account list-usage:*)",
+      "Bash(az cognitiveservices model list:*)",
+      "Bash(az cognitiveservices usage list:*)",
+      "Bash(az group list:*)",
+      "Bash(az group show:*)",
+      "Bash(az group exists:*)",
+      "Bash(az provider show:*)",
+      "Bash(az provider list:*)",
+      "Bash(az feature show:*)",
+      "Bash(az feature list:*)",
+      "Bash(az version:*)",
+      "Bash(az extension list:*)",
+      "Bash(az extension show:*)",
+      "Read(//d/git/**)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:learn.microsoft.com)",
+      "WebFetch(domain:dev.azure.com)",
+      "WebFetch(domain:microsoft.ai)",
+      "WebFetch(domain:ai.azure.com)",
+      "WebFetch(domain:azure.microsoft.com)",
+      "mcp__claude_ai_HCS_Governance__bootstrap",
+      "mcp__claude_ai_HCS_Governance__list_tenants",
+      "mcp__claude_ai_HCS_Governance__get_tenant",
+      "mcp__claude_ai_HCS_Governance__get_repo",
+      "mcp__claude_ai_HCS_Governance__get_guidance",
+      "mcp__claude_ai_HCS_Governance__which_standards_apply",
+      "mcp__claude_ai_HCS_Governance__get_standard",
+      "mcp__claude_ai_Microsoft_Learn__microsoft_docs_search",
+      "mcp__claude_ai_Microsoft_Learn__microsoft_docs_fetch",
+      "mcp__claude_ai_Microsoft_Learn__microsoft_code_sample_search",
+      "mcp__claude-in-chrome__navigate",
+      "mcp__claude-in-chrome__tabs_context_mcp"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git commit:*)",
+            "command": "node scripts/scan-public-safety.mjs || exit 2",
+            "statusMessage": "Running scan-public-safety before commit..."
+          }
+        ]
+      }
+    ]
+  }
+}

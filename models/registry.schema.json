@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://homestead-foundry/models/registry.schema.json",
+  "title": "Homestead Foundry model registry",
+  "description": "Schema for a single Azure AI Foundry (or Foundry-adjacent) model registry entry. A registry file is a JSON array of entries matching this schema. See pmo/MODEL-REGISTRY-DESIGN.md for the full design rationale and the consumption contract a consuming repo follows to resolve an id to a usable endpoint.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "kind",
+      "provider",
+      "deploymentName",
+      "sku",
+      "region",
+      "status",
+      "accessGating",
+      "capabilities",
+      "notes",
+      "sourceRef"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+        "description": "Stable, kebab-case identifier a consuming repo references. Never reused across two different models once published."
+      },
+      "kind": {
+        "type": "string",
+        "enum": ["image", "voice", "video", "reasoning"],
+        "description": "Add new values here as new modalities are adopted; keep this enum authoritative, do not let consumers infer kind from id or provider."
+      },
+      "provider": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Prefer the vendor's own name (for example Microsoft, BlackForestLabs, OpenAI, xAI). Free text beyond a common set is fine."
+      },
+      "deploymentName": {
+        "type": "string",
+        "minLength": 1,
+        "description": "The actual Foundry deployment name a caller passes as the model parameter. For an entry whose status is planned or rejected, this is the name it would use (or did use) once deployed, not a placeholder."
+      },
+      "sku": {
+        "type": "string",
+        "minLength": 1,
+        "description": "For example GlobalStandard, S0."
+      },
+      "region": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Azure region the deployment targets, or the region a planned deployment would target."
+      },
+      "status": {
+        "type": "string",
+        "enum": ["deployed", "planned", "rejected"],
+        "description": "rejected entries are kept, with notes explaining why, so the decision is not re-researched later - never delete a rejected entry."
+      },
+      "accessGating": {
+        "type": "string",
+        "minLength": 1,
+        "description": "For example none, limited-access: <url>, vendor-terms-acceptance. Use \"none\" literally when nothing gates access."
+      },
+      "capabilities": {
+        "type": "array",
+        "items": { "type": "string", "minLength": 1 },
+        "minItems": 1,
+        "description": "For example text-to-image, image-edit, vision-input, word-timestamps, viseme-output."
+      },
+      "notes": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Short and factual. Longer rationale belongs in the doc sourceRef points at, not here."
+      },
+      "sourceRef": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Relative path to the spike, ADR, or backlog entry that backs this entry (for example ai/research/SPIKE-01-image-model.md)."
+      }
+    }
+  }
+}
