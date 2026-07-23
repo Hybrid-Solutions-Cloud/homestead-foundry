@@ -4,7 +4,7 @@
 (MAI-Image-2.5 + MAI-Voice-2) and is kept as-is for that record. Live status
 going forward - including everything deployed or planned after Phase 9 (FLUX
 models, reviewer LLMs, Sora, and the platform-pivot work) - lives in
-[`pmo/ROADMAP.md`](../pmo/ROADMAP.md) and [`pmo/BACKLOG.md`](../pmo/BACKLOG.md).
+the project roadmap and the model roster.
 The claude.ai Artifact board mirrors this file's original scope only.
 
 **Status key:** ⬜ not started · 🔄 in progress · ✅ done · 💬 needs a decision · 🔴 blocked
@@ -102,7 +102,7 @@ The claude.ai Artifact board mirrors this file's original scope only.
 
 **Correction (2026-07-21):** these sub-items were left unchecked despite the
 work being fully done and documented in `ai/implementation/as-built.md` since
-2026-07-11. Flipped to ✅ to match reality; see `pmo/ROADMAP.md` for how this
+2026-07-11. Flipped to ✅ to match reality; see the project roadmap for how this
 was found and why the checkboxes drifted from the actual state.
 
 ## Phase 9 - Deployment verification  ✅  (foundry-env-verifier, Sonnet)
@@ -121,5 +121,5 @@ match reality.
 
 **This board stops at Phase 9.** Everything after this point - the live FLUX
 image models, planned reviewer LLMs, Sora, and the platform-pivot work - is
-tracked in [`pmo/ROADMAP.md`](../pmo/ROADMAP.md) and
-[`pmo/BACKLOG.md`](../pmo/BACKLOG.md), not appended here.
+tracked in the project roadmap and
+the model roster, not appended here.

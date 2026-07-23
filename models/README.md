@@ -8,7 +8,7 @@ shape without hardcoding this repo's own private deployment names.
 
 Design rationale, the full field reference, and the consumption contract a
 consuming repo follows to resolve an `id` to a usable endpoint all live in
-`pmo/MODEL-REGISTRY-DESIGN.md` - read that first if you are integrating
+the model registry design notes - read that first if you are integrating
 against this registry or extending the schema.
 
 A real, populated registry with this repo's actual deployment names is not

@@ -4,7 +4,7 @@
 
 A private, personally-run studio for designing, deploying, and documenting **Azure AI Foundry** infrastructure - research, decisions, design, diagrams, and as-built records for standing up Foundry model backbones (image, voice, and future modalities). The methodology is built to become an open-source knowledge and automation center: detailed documentation on Azure AI Foundry itself, plus the agent roster and Bicep automation that does the deploying. Its first proven build is a media backbone (MAI-Image-2.5 for scene art, MAI-Voice-2 for narration) serving two publishing brands - kept as a worked example in `ai/design/*.md`, not the primary framing.
 
-The whole initiative is under `ai/`. Start at `ai/MASTER-PLAN.md`, then `ai/TASKS.md`. Planning and backlog live under `pmo/`.
+The whole initiative is under `ai/`. Start at `ai/MASTER-PLAN.md`, then `ai/TASKS.md`. Planning and backlog live under the private planning workspace.
 
 ## Governance
 

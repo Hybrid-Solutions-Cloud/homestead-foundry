@@ -2,7 +2,7 @@
 
 ## Phase / roadmap reference
 
-Which `pmo/ROADMAP.md` phase (or `ai/TASKS.md` phase) does this belong to?
+Which the project roadmap phase (or `ai/TASKS.md` phase) does this belong to?
 
 ## Checklist
 
@@ -10,4 +10,4 @@ Which `pmo/ROADMAP.md` phase (or `ai/TASKS.md` phase) does this belong to?
 - [ ] No em-dashes in committed prose
 - [ ] No secrets committed (reference Key Vault by name only)
 - [ ] CAF naming used for any new Azure resource names
-- [ ] Relevant `pmo/ROADMAP.md` or `ai/TASKS.md` checkboxes updated
+- [ ] Relevant the project roadmap or `ai/TASKS.md` checkboxes updated

@@ -4,7 +4,7 @@ Role: foundry-researcher (Opus). Status: research spike complete. No Azure resou
 Date: 2026-07-22
 Scope: independent, first-party assessment of niche or emerging models for a CODE and DOCUMENT reviewer role, reviewing this repo's own docs, Bicep, and scripts, not generated art. This is a DIFFERENT reviewer role from the vision-capable image/content reviewer pair (`gpt-5.6-terra` / `grok-4-1-fast-reasoning`) covered by SPIKE-10 and SPIKE-11; this spike does not duplicate or replace that pair. Every factual claim is grounded in a first-party (Microsoft Learn) source, cited inline. Anything not published first-party is marked UNKNOWN with the test or doc that would resolve it. Model quality claims sourced only to third parties are labelled as such and never treated as verified.
 
-Grounding read first: `pmo/backlog/SPIKE-15-niche-reviewer-models.md` (the tasking), `pmo/BACKLOG.md`, and the model-roster reference. This spike verifies and deepens; it does not restate the plans.
+Grounding read first: this spike's brief (the tasking), the model roster, and the model-roster reference. This spike verifies and deepens; it does not restate the plans.
 
 ---
 
@@ -12,7 +12,7 @@ Grounding read first: `pmo/backlog/SPIKE-15-niche-reviewer-models.md` (the taski
 
 The owner said "K3" going in without being sure what it referred to. Confirmed interpretation:
 
-**"K3" refers to the Moonshot AI Kimi K-series lineage, and specifically to Kimi K3, a real Moonshot flagship that launched on the Moonshot platform on 2026-07-16.** It is not the same thing as the "Moonshot Kimi-K2.6 (Preview)" entry already in `pmo/BACKLOG.md`: that BACKLOG entry is a considered-but-not-adopted THIRD IMAGE reviewer (a content/vision role), whereas "K3" here is the newer K-series release and the subject of a code/document reviewer question. They are the same vendor and lineage, different releases, different roles.
+**"K3" refers to the Moonshot AI Kimi K-series lineage, and specifically to Kimi K3, a real Moonshot flagship that launched on the Moonshot platform on 2026-07-16.** It is not the same thing as the "Moonshot Kimi-K2.6 (Preview)" entry already in the model roster: that BACKLOG entry is a considered-but-not-adopted THIRD IMAGE reviewer (a content/vision role), whereas "K3" here is the newer K-series release and the subject of a code/document reviewer question. They are the same vendor and lineage, different releases, different roles.
 
 Two facts must be held together, because they point in opposite directions:
 
@@ -138,4 +138,4 @@ All first-party (Microsoft Learn) unless labelled, reviewed 2026-07-22:
 - Microsoft Foundry Models overview (catalog structure, sold-by-Azure vs partners and community, responsible-AI and acceptable-use responsibility): <https://learn.microsoft.com/azure/foundry/concepts/foundry-models-overview>
 - Microsoft Q&A, Kimi-K2.5 and Azure Sponsorship credits (Q&A answer, not formal pricing; verify in Cost Management): <https://learn.microsoft.com/answers/a/12613918>
 - Third-party, UNVERIFIED, recorded for the K3 watch item only (Kimi K3 launched 2026-07-16, ~2.8T MoE, 1M-token context, weights around 2026-07-27): kie.ai "What Is Kimi K3", felloai.com "Kimi K3", explainx.ai "Kimi K3 API Guide". These are not first-party and are not the basis for any recommendation.
-- Local, this repo: `pmo/backlog/SPIKE-15-niche-reviewer-models.md` (tasking), `pmo/BACKLOG.md` (roster, Kimi-K2.6 listed as a considered third IMAGE reviewer), model-roster reference; sibling SPIKE-10 (latest GPT) and SPIKE-11 (newer Grok) for the distinct image-review pair.
+- Local, this repo: this spike's brief (tasking), the model roster (roster, Kimi-K2.6 listed as a considered third IMAGE reviewer), model-roster reference; sibling SPIKE-10 (latest GPT) and SPIKE-11 (newer Grok) for the distinct image-review pair.

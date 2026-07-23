@@ -7,11 +7,11 @@ Scope: survey natural-sounding text-to-speech models, outside MAI-Voice and outs
 - **Word-sync**: word-level timestamps for read-along word highlighting.
 - **Lip-sync**: viseme or phoneme-level timing for future avatar/video mouth animation.
 
-The candidate set spans cloud vendor APIs and open/self-hostable models (per `pmo/DECISIONS.md` D-05). This spike is written model-general; the concrete build context (the read-along track, the brands) that motivated it is isolated in the marked worked-example section at the end.
+The candidate set spans cloud vendor APIs and open/self-hostable models (per the decision log D-05). This spike is written model-general; the concrete build context (the read-along track, the brands) that motivated it is isolated in the marked worked-example section at the end.
 
 Grounding rule: every load-bearing factual claim is tied to a first-party source (Microsoft Learn or the vendor's own docs) with an inline URL. Anything a first-party source does not state is marked UNKNOWN with the test that resolves it. No figure here is invented. Where only a third-party integration doc (LiveKit, Pipecat) could be found for a vendor feature, that is called out so it can be confirmed against the vendor's own reference before adoption.
 
-Companion documents: `ai/research/SPIKE-02-voice-model.md` (the MAI-Voice-2 word-boundary gap this spike responds to), `pmo/backlog/SPIKE-07-speech-models.md` (the tasking brief), and `ai/design/pipeline-integration-design.md` (the publish pipeline any adopted model would feed).
+Companion documents: `ai/research/SPIKE-02-voice-model.md` (the MAI-Voice-2 word-boundary gap this spike responds to), this spike's brief (the tasking brief), and `ai/design/pipeline-integration-design.md` (the publish pipeline any adopted model would feed).
 
 ---
 

@@ -96,5 +96,5 @@ This methodology is deployed and verified in production today. The first real bu
 - **Locked owner decisions:** spend approved; each brand keeps its current narrator as the default; added listen-only voices are Harper (en-US), Lisa (en-AU), and Ethan (en-US, excited style); Holdfast Press keeps its British narrator as default; preview risk accepted; budget cap of 100 US dollars per month.
 - **Status:** infrastructure deployed and verified ready to generate. Bulk image and audio generation is held for the owner as a separate, budgeted step that follows this plan.
 
-See `pmo/DECISIONS.md` for the full decision history behind this build, and `pmo/plans/source/` for the two original source plans this build's workstreams were drawn from.
+See the decision log for the full decision history behind this build, and the source plans for the two original source plans this build's workstreams were drawn from.
 <!-- safety-scan-worked-example:end -->

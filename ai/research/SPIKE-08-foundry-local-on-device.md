@@ -4,7 +4,7 @@ Role: foundry-researcher (Opus). Status: research spike complete. No Azure resou
 Date: 2026-07-22
 Scope: independent, first-party assessment of Microsoft's **Foundry Local** on-device inferencing runtime as a possible deployment target alongside the cloud Azure AI Foundry (AIServices) path this repo already runs. Grounds every factual claim in a Microsoft source, cited inline. Anything Microsoft has not published is marked UNKNOWN with the test that would resolve it.
 
-Grounding documents read first: `pmo/BACKLOG.md` (current and planned model roster), `ai/research/SPIKE-01-image-model.md`, and `ai/research/SPIKE-02-voice-model.md`. This spike does not restate the cloud plans; it evaluates a distinct runtime.
+Grounding documents read first: the model roster (current and planned model roster), `ai/research/SPIKE-01-image-model.md`, and `ai/research/SPIKE-02-voice-model.md`. This spike does not restate the cloud plans; it evaluates a distinct runtime.
 
 A note on naming: two different Microsoft products share the "Foundry Local" name. This spike is about **Foundry Local**, the device-side SDK and runtime (Windows, macOS, Linux, no Azure subscription). A separate product, **Foundry Local on Azure Local**, is an Arc-enabled Kubernetes inference stack for on-premises servers with an Entra identity and governance story. Where the distinction matters it is called out explicitly, because they answer the CAF/WAF question very differently.
 
@@ -40,7 +40,7 @@ The single most load-bearing fact: **the Foundry Local curated catalog covers ch
 
 There is **no image-generation endpoint and no text-to-speech (synthesis) endpoint** documented for Foundry Local. Whisper is transcription (audio in, text out), the opposite direction from MAI-Voice-2. The catalog is deliberately curated and skews to small open-weight language models; Microsoft states it "doesn't support every available model" by design. Source: [What is Foundry Local?, FAQ](https://learn.microsoft.com/azure/foundry-local/what-is-foundry-local#frequently-asked-questions).
 
-Per-model verdict for this repo's roster (`pmo/BACKLOG.md`):
+Per-model verdict for this repo's roster (the model roster):
 
 | Roster model | Modality | Runs on Foundry Local today | Source |
 |---|---|---|---|
@@ -140,4 +140,4 @@ All first-party (Microsoft Learn), reviewed 2026-07-22:
 - Model catalog and sourcing in Foundry Local (representative catalog: Phi-4, Mistral, DeepSeek R1 distill, Qwen2.5, gpt-oss-20b, Whisper; all chat/reasoning/transcription): <https://learn.microsoft.com/azure/azure-sovereign-clouds/private/foundry-local/concept-model-catalog>
 - What is Foundry Local on Azure Local? (the separate Arc/Kubernetes product with Entra ID, API keys, TLS gateway, GPU nodes, preview by request): <https://learn.microsoft.com/azure/azure-sovereign-clouds/private/foundry-local/overview>
 - Agentic Retrieval in Foundry Local, requirements (GPT-OSS-20B server sizing: 1x NVIDIA GPU >= 24 GB VRAM; note this is the Azure Local product, not the device SDK): <https://learn.microsoft.com/azure/azure-arc/agents-tools-foundry-local/requirements>
-- Local, this repo: `pmo/BACKLOG.md` (roster: MAI-Image-2.5, FLUX.2-pro, FLUX.1-Kontext-pro, FLUX-1.1-pro, MAI-Voice-2, gpt-5.6-terra, grok-4-1-fast-reasoning, Sora); `ai/research/SPIKE-01-image-model.md`; `ai/research/SPIKE-02-voice-model.md`
+- Local, this repo: the model roster (roster: MAI-Image-2.5, FLUX.2-pro, FLUX.1-Kontext-pro, FLUX-1.1-pro, MAI-Voice-2, gpt-5.6-terra, grok-4-1-fast-reasoning, Sora); `ai/research/SPIKE-01-image-model.md`; `ai/research/SPIKE-02-voice-model.md`

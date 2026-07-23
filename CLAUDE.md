@@ -11,7 +11,7 @@
 ## Model policy for this repo (owner directive)
 
 - **Opus or Fable**: research spikes, ADR creation, Bicep authoring, and automation/deployment scripts. This covers `ai/research/SPIKE-*`, `ai/adr/ADR-*`, everything under `infra/` (Bicep modules and params), and any deployment/automation tooling.
-- **Sonnet**: everything else - architecture and design docs, diagram authoring and layout QA, implementation guides, doc review and fact-check, environment checks, deployment verification, commit and push, planning/backlog docs (`pmo/`), docs-site work.
+- **Sonnet**: everything else - architecture and design docs, diagram authoring and layout QA, implementation guides, doc review and fact-check, environment checks, deployment verification, commit and push, planning/backlog docs (the private planning workspace), docs-site work.
 
 Owner directive (2026-07-21): "For the research spikes and the ADR creation and the Bicep and automation, please use Opus or Fable. For all other tasks, use Sonnet." This supersedes the prior per-agent model column below where it conflicts - the roster's assigned models should be reconciled to this rule.
 

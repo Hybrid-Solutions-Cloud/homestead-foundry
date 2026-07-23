@@ -6,7 +6,7 @@ Scope: survey image, animation, and video generation models beyond the roster th
 
 This spike is written generically so its findings apply to any Azure AI Foundry image or video build in this repo (`<initiative>`), for any consuming brand (`<brand>`). The concrete first build it was run for (the East US Foundry account serving two children's-book publishing brands) is preserved in the marked "Worked example" section at the end.
 
-Grounding read first: `pmo/BACKLOG.md` (the deployed image/video roster and the Sora rejection), `ai/research/SPIKE-01-image-model.md` (MAI-Image-2.5 baseline and the style-lock requirement), and the memory roster note. This spike widens SPIKE-01 from one model to the full current catalog and to non-Azure video.
+Grounding read first: the model roster (the deployed image/video roster and the Sora rejection), `ai/research/SPIKE-01-image-model.md` (MAI-Image-2.5 baseline and the style-lock requirement), and the memory roster note. This spike widens SPIKE-01 from one model to the full current catalog and to non-Azure video.
 
 ---
 

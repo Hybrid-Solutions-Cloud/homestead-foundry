@@ -25,4 +25,4 @@ Homestead Foundry runs a real, published production deployment - the Azure AI Fo
 
 ## Status
 
-This repo is private while it's being generalized and scrubbed of anything owner-specific. Once that's done, it opens up as the knowledge and automation center described above. Track progress in [`pmo/`](pmo/) - vision, decisions, roadmap, and backlog of what's left.
+This repo is private while it's being generalized and scrubbed of anything owner-specific. Once that's done, it opens up as the knowledge and automation center described above. Track progress in the private planning workspace - vision, decisions, roadmap, and backlog of what's left.

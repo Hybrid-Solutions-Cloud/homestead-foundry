@@ -46,7 +46,7 @@ a public-facing docs scaffold.
   Grok options, broader image/video alternatives, a tenant-wide TTS
   survey, a tenant/region survey, niche reviewer-model options, and
   virtual-trainer-avatar research.
-- A full pre-public content scrub of every tracked file outside `pmo/`
+- A full pre-public content scrub of every tracked file outside the private planning workspace
   (real names/emails removed or confined to marked worked-example
   regions).
 - LICENSE (MIT, D-17) and `.github/CODEOWNERS` at repo root.
@@ -55,7 +55,7 @@ a public-facing docs scaffold.
 
 ### Known open items
 
-- `pmo/` is intentionally left real/unscrubbed by design (see `pmo/DECISIONS.md`
+- the private planning workspace is intentionally left real/unscrubbed by design (see the decision log
   D-14) - it stays private until its own public-fate decision is made.
 - A handful of real, CAF-shaped resource names remain in `ai/REVIEW.md` and
   `ai/TASKS.md` as a deliberate historical record; each needs an explicit

@@ -14,10 +14,10 @@ for deploying and managing Azure AI Foundry resources and model catalogs
 (image, voice, video, reasoning/review models), built out of what started
 as a two-brand MAI-Image-2.5 + MAI-Voice-2 deployment (see the "Worked
 example" appendices in `ai/design/*` for the real brands). Full plan lives
-in `pmo/` - start with `pmo/README.md`, then
-`pmo/CHARTER.md`, `pmo/DECISIONS.md` (D-01 through D-14 - D-14 is the most
-recent and important, read it first if short on time), `pmo/ROADMAP.md`,
-and `pmo/BACKLOG.md`.
+in the private planning workspace - start with the planning docs, then
+the project charter, the decision log (D-01 through D-14 - D-14 is the most
+recent and important, read it first if short on time), the project roadmap,
+and the model roster.
 
 ## Where things stand right now
 
@@ -30,7 +30,7 @@ and `pmo/BACKLOG.md`.
   couldn't be renamed in place. This folder's git remote already correctly
   points at `homestead-foundry`.
 - **Nothing has been committed or pushed yet.** `git status` here should
-  show the same uncommitted state as when this was copied: a new `pmo/`
+  show the same uncommitted state as when this was copied: a new the private planning workspace
   folder (untracked), and modified `.claude/agents/foundry-architect.md`,
   `.claude/agents/foundry-diagrammer.md`, `AGENTS.md`, `CLAUDE.md`,
   `ai/TASKS.md`. Check `git status` first thing - if the owner hasn't asked
@@ -55,14 +55,14 @@ and `pmo/BACKLOG.md`.
 
 **Opus or Fable**: research spikes, ADR creation, Bicep authoring, and
 automation/deployment scripts. **Sonnet**: everything else (design docs,
-diagrams, planning/pmo docs, docs site, review, ops).
+diagrams, planning docs, docs site, review, ops).
 
 ## What to actually do next, in order
 
-1. **Write the Master Plan and Design doc** (in `pmo/` - exact filename not
-   yet decided, likely `pmo/MASTER-PLAN-AND-DESIGN.md` or folded into
+1. **Write the Master Plan and Design doc** (in the private planning workspace - exact filename not
+   yet decided, likely the private planning workspaceMASTER-PLAN-AND-DESIGN.md` or folded into
    existing docs; use your judgment, ask the owner if genuinely unsure).
-   This translates a large owner brain-dump (see `pmo/BACKLOG.md` and the
+   This translates a large owner brain-dump (see the model roster and the
    memory file `project-platform-expansion-requests` for the full raw
    content) into a readable plan, and must explicitly enumerate how many
    research spikes and ADRs are needed and how the docs folder is

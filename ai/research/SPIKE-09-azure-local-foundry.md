@@ -7,7 +7,7 @@ Scope: independent, first-party verification of whether this repo's Foundry mode
 
 Distinct-product guard: this spike is about **Azure Local** (cluster-scale, Arc-managed on-prem infrastructure). It is the companion to `ai/research/SPIKE-08-foundry-local-on-device.md`, which covers **Foundry Local** as an on-device runtime for a single end-user machine. The two are cross-referenced in Q6. Microsoft's own naming makes this subtle: the first-party mechanism for AI on Azure Local is branded **"Foundry Local on Azure Local"**, the same product family as on-device Foundry Local but a different deployment target. Q1 and Q6 keep that distinction explicit so the two spikes do not blur together.
 
-Grounding documents read first: `pmo/BACKLOG.md` (authoritative roster), `ai/research/SPIKE-01-image-model.md`, and `ai/research/SPIKE-02-voice-model.md` (the cloud baseline this is measured against).
+Grounding documents read first: the model roster (authoritative roster), `ai/research/SPIKE-01-image-model.md`, and `ai/research/SPIKE-02-voice-model.md` (the cloud baseline this is measured against).
 
 ---
 
@@ -33,7 +33,7 @@ Grounding documents read first: `pmo/BACKLOG.md` (authoritative roster), `ai/res
 
 ## Q2. Model catalog fit for this repo's roster
 
-**Question.** Which models on this repo's existing or planned roster (`pmo/BACKLOG.md`) can run on Azure Local at all, and which are cloud-only.
+**Question.** Which models on this repo's existing or planned roster (the model roster) can run on Azure Local at all, and which are cloud-only.
 
 **Findings.**
 
@@ -45,7 +45,7 @@ Grounding documents read first: `pmo/BACKLOG.md` (authoritative roster), `ai/res
 
 - **The reviewer-LLM role is the one place with genuine, if inexact, fit.** The planned `gpt-5.6-terra` (proprietary OpenAI hosted) and `grok-4-1-fast-reasoning` (proprietary xAI hosted) cannot run on Azure Local: they are cloud-only hosted models, not open weights. But **comparable open-weight reasoning models are in the catalog**: `gpt-oss-20b`, Phi-4 / Phi-4-mini-reasoning, DeepSeek R1 Distill Qwen, and Qwen2.5. These could serve a local "second eyes" reviewer or a RAG assistant on the existing cluster. They are substitutes, not the exact planned pairing, and their fitness for the vision part of the reviewer role (grading generated images) is unverified (see UNKNOWN). Source: [Generative small language models](https://learn.microsoft.com/azure/azure-sovereign-clouds/private/foundry-local/concept-models), [Choose your language model for Agentic Retrieval](https://learn.microsoft.com/azure/azure-arc/agents-tools-foundry-local/prepare-language-model).
 
-- **Sora / Sora 2 (video) has no path**: no video-generation engine, proprietary hosted, already rejected for the core look in the roster. Source: roster `pmo/BACKLOG.md`; absence from [supported workloads](https://learn.microsoft.com/azure/azure-sovereign-clouds/private/foundry-local/overview).
+- **Sora / Sora 2 (video) has no path**: no video-generation engine, proprietary hosted, already rejected for the core look in the roster. Source: roster the model roster; absence from [supported workloads](https://learn.microsoft.com/azure/azure-sovereign-clouds/private/foundry-local/overview).
 
 **Roster fit table** (source per row):
 
@@ -182,4 +182,4 @@ All first-party (Microsoft Learn or Microsoft docs), reviewed 2026-07-22:
 - GitHub Enterprise Local billing overview (Azure Local per-core infra billing, AI services priced separately): <https://learn.microsoft.com/azure/azure-sovereign-clouds/private/github-local/github-local-overview#billing-overview>
 - Azure Local subscriptions and OEM license Q&A ($10/core/month host fee, ~$23.30/core Windows Server guest add-on, Azure Hybrid Benefit waiver): <https://learn.microsoft.com/answers/a/12805955>
 - Cloud baseline for cost contrast (token / per-character metering): `ai/research/SPIKE-01-image-model.md`, `ai/research/SPIKE-02-voice-model.md`
-- Roster under research: `pmo/BACKLOG.md`
+- Roster under research: the model roster

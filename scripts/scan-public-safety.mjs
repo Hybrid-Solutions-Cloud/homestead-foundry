@@ -4,7 +4,7 @@
 //
 // Scans a *diff* by default (staged changes locally, or a commit/PR range in
 // CI) rather than the whole tree, because this repo intentionally still
-// carries real values under ai/ and pmo/ while private (see DECISIONS.md
+// carries real values under ai/ while private (see DECISIONS.md
 // D-14). Retroactive re-scrubbing of existing content happens at the
 // genericization pass (ROADMAP.md Track 2 Phase B/F), not here. Pass --full
 // to scan the entire tracked tree instead - that mode is for the pre-public
@@ -43,7 +43,7 @@ const SELF_EXEMPT_FILES = new Set([
   "scripts/scan-public-safety.config.example.json",
 ]);
 const IGNORE_MARKER = "safety-scan-ignore-line";
-// Phase B (pmo/DECISIONS.md D-03) keeps the real Gunner the Lab / Holdfast
+// Phase B (D-03) keeps the real Gunner the Lab / Holdfast
 // Press instance as a clearly-marked "Worked example" appendix in each
 // genericized ai/ doc rather than deleting it. Brand tokens inside a marked
 // region are downgraded from blocking to a warning (still visible for the
@@ -257,7 +257,7 @@ function run() {
           blocking: !inWorkedExample,
         });
       } else {
-        // A real-looking CAF name is expected in private-phase content (pmo/, ai/implementation) per
+        // A real-looking CAF name is expected in private-phase content (ai/implementation) per
         // DECISIONS.md D-14 - warn so it gets caught at the Phase F pre-public scrub, don't block every commit.
         findings.push({ rule: "caf-shaped-non-placeholder", file, line, detail: `"${token}" is a fully CAF-shaped, non-placeholder name - confirm it is safe to publish`, blocking: false });
       }

@@ -25,13 +25,13 @@ organization's environment:
   history was intentionally NOT carried over, because it contains environment-specific
   detail. This copy must never import that history.
 
-## Status: PRIVATE, checklist mostly closed outside `pmo/` - re-verified 2026-07-23
+## Status: PRIVATE, checklist mostly closed outside the private planning workspace - re-verified 2026-07-23
 
 **This repository must stay private until the checklist below is complete and the owner
 has verified it is clean. Only then may it be made public.**
 
 The repo's actual approach diverged from this file's original premise in two owner-
-approved ways (see `pmo/DECISIONS.md` D-14): (1) this is no longer a copy with reset
+approved ways (see the decision log D-14): (1) this is no longer a copy with reset
 history - it is the single, real, continuously-committed working repo, kept private
 until flip; (2) brand content is not fully deleted, it is confined to marked
 `<!-- safety-scan-worked-example:start/end -->` regions that `scripts/scan-public-safety.mjs`
@@ -41,9 +41,9 @@ behind every box below; re-run it before trusting this checklist on a later read
 
 ## What must happen before it can go open source
 
-- [x] **Tenant identity.** Removed outside `pmo/` (full pre-public scrub, 2026-07-23).
-      `pmo/` intentionally excluded, see status note above.
-- [x] **Subscription identity.** No subscription/tenant GUIDs found outside `pmo/` as of
+- [x] **Tenant identity.** Removed outside the private planning workspace (full pre-public scrub, 2026-07-23).
+      the private planning workspace intentionally excluded, see status note above.
+- [x] **Subscription identity.** No subscription/tenant GUIDs found outside the private planning workspace as of
       the 2026-07-23 scan (only public Azure built-in role IDs in `infra/modules/rbac.bicep`
       and bare Lucid/Artifact document IDs with no invitation tokens - both confirmed safe).
 - [ ] **Resource names.** Placeholders everywhere the scanner enforces it, with one
@@ -60,7 +60,7 @@ behind every box below; re-run it before trusting this checklist on a later read
       deliberate, owner-ratified deviation from this item's original wording, not an
       oversight.
 - [x] **External links with tokens.** Zero `lucid-invitation-token` findings in the
-      2026-07-23 full scan (blocking rule, applies everywhere including `pmo/`).
+      2026-07-23 full scan (blocking rule, applies everywhere including the private planning workspace).
 - [x] **Environment data.** `ai/verification/environment-readiness.md` and
       `ai/verification/deployment-verification.md` genericized (full pre-public scrub,
       2026-07-23).
@@ -74,11 +74,11 @@ behind every box below; re-run it before trusting this checklist on a later read
       without explicit, in-the-moment owner authorization, same gate as the visibility
       flip itself.
 - [ ] **Owner review.** Not started. Needs a final read-through covering: the
-      `caf-shaped-non-placeholder` warnings above and `pmo/`'s own public-fate
+      `caf-shaped-non-placeholder` warnings above and the private planning workspace's own public-fate
       decision, before flipping visibility.
 
 **Everything else in this repository (Phases A/B/C/D/E/G/H/I) is done and verified as of
-2026-07-23** - see `CHANGELOG.md` and `pmo/ROADMAP.md` for the full breakdown. What
+2026-07-23** - see `CHANGELOG.md` and the project roadmap for the full breakdown. What
 remains before a public flip is the four unchecked/partial items above (resource
 names, brand content, history rebuild, owner review), all of which require an
 explicit owner decision - none are silently blocked on more agent work.

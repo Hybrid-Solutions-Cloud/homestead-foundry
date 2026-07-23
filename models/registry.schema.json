@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://homestead-foundry/models/registry.schema.json",
   "title": "Homestead Foundry model registry",
-  "description": "Schema for a single Azure AI Foundry (or Foundry-adjacent) model registry entry. A registry file is a JSON array of entries matching this schema. See pmo/MODEL-REGISTRY-DESIGN.md for the full design rationale and the consumption contract a consuming repo follows to resolve an id to a usable endpoint.",
+  "description": "Schema for a single Azure AI Foundry (or Foundry-adjacent) model registry entry. A registry file is a JSON array of entries matching this schema. See models/README.md for the full design rationale and the consumption contract a consuming repo follows to resolve an id to a usable endpoint.",
   "type": "array",
   "items": {
     "type": "object",

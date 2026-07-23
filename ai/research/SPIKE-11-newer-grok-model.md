@@ -4,9 +4,9 @@ Role: foundry-researcher (Opus). Status: research spike complete. No Azure resou
 Date: 2026-07-22
 Scope: independent, first-party verification of whether a newer xAI Grok model than `grok-4-1-fast-reasoning` is available, vision-capable, and deployable in this tenant's Foundry catalog and region, for the xAI half of the two-vendor reviewer-LLM pair. Grounds every claim in a Microsoft source, cited inline. Anything Microsoft has not published is marked UNKNOWN.
 
-Grounding read first: `pmo/backlog/SPIKE-11-newer-grok-model.md` (the brief), `pmo/BACKLOG.md`'s reviewer-LLM roster, and the model-roster memory. This spike verifies whether the planned name is still the right one. It is deliberately non-overlapping with SPIKE-10 (the OpenAI half of the pair): see the cross-reference at the end.
+Grounding read first: this spike's brief (the brief), the model roster's reviewer-LLM roster, and the model-roster memory. This spike verifies whether the planned name is still the right one. It is deliberately non-overlapping with SPIKE-10 (the OpenAI half of the pair): see the cross-reference at the end.
 
-Vision is a hard requirement for this role (the model grades generated images alongside prompt/text review). Text-only Grok variants are already rejected in `pmo/BACKLOG.md`. Any newer candidate must clear the same bar.
+Vision is a hard requirement for this role (the model grades generated images alongside prompt/text review). Text-only Grok variants are already rejected in the model roster. Any newer candidate must clear the same bar.
 
 ---
 
@@ -30,7 +30,7 @@ Vision is a hard requirement for this role (the model grades generated images al
 
   Source: [Foundry Models sold by Azure, xAI models](https://learn.microsoft.com/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure#xai-models-sold-by-azure).
 
-- **Naming note (important, not a discrepancy).** The capabilities table spells the model `grok-4.1-fast-reasoning` (with a dot). The region-availability table and the deployment-name column spell the same model `grok-4-1-fast-reasoning` (with a hyphen), version `1`. Source: [Region availability, Global Standard, Americas](https://learn.microsoft.com/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability#global-standard). These are the same model; `pmo/BACKLOG.md`'s `grok-4-1-fast-reasoning` matches the deployment-name spelling and needs no change.
+- **Naming note (important, not a discrepancy).** The capabilities table spells the model `grok-4.1-fast-reasoning` (with a dot). The region-availability table and the deployment-name column spell the same model `grok-4-1-fast-reasoning` (with a hyphen), version `1`. Source: [Region availability, Global Standard, Americas](https://learn.microsoft.com/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure-region-availability#global-standard). These are the same model; the model roster's `grok-4-1-fast-reasoning` matches the deployment-name spelling and needs no change.
 
 - **There are newer-numbered Grok models than `grok-4.1-fast` in the catalog** (`grok-4.3`, `grok-4-20-reasoning`, `grok-4-20-non-reasoning`), so the brief was right to ask. But every one of those newer-numbered models is text-only (see Q2). `grok-4.1-fast-reasoning` is the newest xAI model that is both vision-capable and GA.
 
@@ -84,7 +84,7 @@ Vision is a hard requirement for this role (the model grades generated images al
 
 ## Recommendation
 
-1. **Keep `grok-4-1-fast-reasoning` as planned** for the xAI half of the two-vendor reviewer pair. It is the newest xAI Grok that is both vision-capable and GA; every newer-numbered Grok (`grok-4.3`, `grok-4-20-reasoning`, `grok-4-20-non-reasoning`) is Preview and text-only and therefore fails the vision hard requirement. No roster change is needed, so `pmo/BACKLOG.md` is left as-is per the brief.
+1. **Keep `grok-4-1-fast-reasoning` as planned** for the xAI half of the two-vendor reviewer pair. It is the newest xAI Grok that is both vision-capable and GA; every newer-numbered Grok (`grok-4.3`, `grok-4-20-reasoning`, `grok-4-20-non-reasoning`) is Preview and text-only and therefore fails the vision hard requirement. No roster change is needed, so the model roster is left as-is per the brief.
 2. **Deploy in East US** to co-locate with the image resource; the model is available there under both Global Standard and Data Zone Standard. Pick the reasoning variant, not the non-reasoning sibling, for a justified second-opinion verdict.
 3. **Gate is xAI terms acceptance plus quota only.** No separate limited-access registration applies to this model (that gate is on `grok-4` and `grok-code-fast-1`). Accept xAI terms on first deploy.
 4. **Read the live per-token price and confirm the quota tier in the portal before any reviewer runs.** Do not rely on the "fast/cheap" positioning as a number; verify it, and set a Cost Management budget alert on the resource group before spend starts.

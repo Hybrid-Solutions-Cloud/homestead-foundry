@@ -72,7 +72,7 @@ style-lock image workload:
 - **Reviewer-LLM candidates are out of scope here.** Two vision-capable reviewer
   models, `gpt-5.6-terra` (OpenAI) and `grok-4-1-fast-reasoning` (xAI), are
   separately researched in `ai/research/SPIKE-10-latest-gpt-model.md` and
-  `ai/research/SPIKE-11-newer-grok-model.md` and tracked in `pmo/BACKLOG.md` as
+  `ai/research/SPIKE-11-newer-grok-model.md` and tracked in the model roster as
   **planned and gated, not deployed**. This ADR writes no decision for them; the
   cross-reference marks where that thread lives so a reader does not mistake this
   FLUX record for a reviewer-LLM decision.
@@ -156,7 +156,7 @@ Access and deployment discipline carries over unchanged from ADR-0002:
   the live GA versions.
 - Reconcile the model registry and the as-built record so the deployed FLUX
   roster is captured in the durable as-built inventory, not only in the backlog
-  roster (`pmo/BACKLOG.md`) and the schema-example registry.
+  roster (the model roster) and the schema-example registry.
 - If a 10-reference A-B arm is ever wanted, evaluate FLUX.2-flex under its own
   ADR per SPIKE-12; do not add it silently.
 
@@ -237,13 +237,13 @@ brands. The concrete instantiation of the decision above:
 - `ai/research/SPIKE-01-image-model.md` (the MAI image family lifecycle, cost
   mechanics, and the documented request surface with no reference-image or
   multi-reference input)
-- `pmo/BACKLOG.md` (the authoritative post-Phase-9 model roster recording
+- the model roster (the authoritative post-Phase-9 model roster recording
   `flux-2-pro`, `flux-1-kontext-pro`, and `flux-1-1-pro` as DEPLOYED and
   MAI-Image-2.5 as retained fallback, plus the planned-and-gated reviewer-LLM
   pair cross-referenced above)
 - `models/registry.example.json` (the brand-neutral registry schema example
   showing how a deployed image model is recorded; the real deployment names live
-  in `pmo/BACKLOG.md` and the Worked example above)
+  in the model roster and the Worked example above)
 - `ai/adr/ADR-0005-identity-and-secrets.md` and
   `ai/adr/ADR-0006-cost-governance.md` (the keyless-Entra data-plane access model
   and the resource-group budget guardrail this decision inherits unchanged)

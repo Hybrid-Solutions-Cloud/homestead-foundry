@@ -1,6 +1,6 @@
 # Implementation guide: Azure AI Foundry deployment runbook
 
-- Status: draft for phase 7 review (guide only; a later phase executes it). Main body rewritten brand-neutral 2026-07-23, per D-03 and D-16 (`pmo/DECISIONS.md`); see the closing "Worked example" section for the real, already-deployed instance this runbook was actually followed to build.
+- Status: draft for phase 7 review (guide only; a later phase executes it). Main body rewritten brand-neutral 2026-07-23, per D-03 and D-16 (the decision log); see the closing "Worked example" section for the real, already-deployed instance this runbook was actually followed to build.
 - Date: 2026-07-11 (original authoring)
 - Author: foundry-implementer
 - Grounded in: the seven design docs in `ai/design/` (especially `resource-topology-and-caf-naming.md`, `identity-and-security.md`, `cost-and-governance.md`, `reliability-and-operations.md`) and ADR-0001 through ADR-0008

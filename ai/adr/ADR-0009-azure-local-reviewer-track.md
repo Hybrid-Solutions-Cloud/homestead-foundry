@@ -6,7 +6,7 @@
 This ADR records the decision to open a narrowly scoped, on-premises track for
 an open-weight reviewer / RAG capability on the owner's existing **Azure Local**
 cluster, as a substitute (not identical) parallel to the cloud reviewer-LLM
-pairing already planned in `pmo/BACKLOG.md` (`gpt-5.6-terra`,
+pairing already planned in the model roster (`gpt-5.6-terra`,
 `grok-4-1-fast-reasoning`). It is grounded entirely in
 `ai/research/SPIKE-09-azure-local-foundry.md`; where that spike logged an
 UNKNOWN, this ADR carries it forward rather than resolving it.
@@ -82,7 +82,7 @@ generation backbone, and not a replacement for the planned cloud reviewers.**
    sovereign, on-prem "second eyes" reviewer or RAG assistant.
 3. **This track is a substitute / parallel option, not a replacement.** The
    planned cloud pair (`gpt-5.6-terra`, `grok-4-1-fast-reasoning`) in
-   `pmo/BACKLOG.md` remains the primary reviewer plan and is not superseded by
+   the model roster remains the primary reviewer plan and is not superseded by
    this ADR. The Azure Local option is recorded as a distinct track the owner may
    pursue where on-prem sovereignty, fixed-cost economics, or disconnected
    operation matter more than exact model parity.
@@ -213,10 +213,10 @@ generation backbone, and not a replacement for the planned cloud reviewers.**
   GPU / DDA-only / Linux-node-pool constraints, per-core cost model, Entra ID /
   Azure RBAC governance fit, preview-by-request status, and all five carried
   UNKNOWNs; this ADR adds no facts beyond it)
-- `pmo/BACKLOG.md` (the planned cloud reviewer pair `gpt-5.6-terra` and
+- the model roster (the planned cloud reviewer pair `gpt-5.6-terra` and
   `grok-4-1-fast-reasoning`, and the CAF / WAF discipline every backlog model
   follows)
-- `pmo/DECISIONS.md` (D-04 CAF / WAF enforcement; decision-numbering convention)
+- the decision log (D-04 CAF / WAF enforcement; decision-numbering convention)
 - `ai/adr/ADR-0006-cost-governance.md` (the 100 USD cap and the cloud
   consumption cost baseline this on-prem cost model is contrasted against)
 - `ai/adr/ADR-0008-publish-pipeline-integration.md` (the cloud generation
