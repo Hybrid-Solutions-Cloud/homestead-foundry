@@ -61,6 +61,7 @@ export default defineConfig({
             { text: "ADR-0008 Publish-pipeline integration", link: "/adr/ADR-0008-publish-pipeline-integration" },
             { text: "ADR-0009 Azure Local reviewer track", link: "/adr/ADR-0009-azure-local-reviewer-track" },
             { text: "ADR-0010 FLUX image model adoption", link: "/adr/ADR-0010-flux-image-model-adoption" },
+            { text: "ADR-0011 Multi-target deployment automation", link: "/adr/ADR-0011-multi-target-deployment-automation" },
           ],
         },
       ],

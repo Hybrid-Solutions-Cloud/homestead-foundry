@@ -14,3 +14,4 @@ Every Architecture Decision Record this project has locked, in decision order. E
 | [ADR-0008](./ADR-0008-publish-pipeline-integration) | Publish-pipeline integration for Foundry voice and image generation |
 | [ADR-0009](./ADR-0009-azure-local-reviewer-track) | Azure Local on-prem reviewer / RAG track (open-weight substitute) |
 | [ADR-0010](./ADR-0010-flux-image-model-adoption) | FLUX image models adopted alongside the MAI-Image baseline |
+| [ADR-0011](./ADR-0011-multi-target-deployment-automation) | Multi-target deployment automation (Azure cloud, Windows Server Foundry Local, Azure Local) |
