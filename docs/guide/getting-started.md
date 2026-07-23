@@ -7,7 +7,10 @@ Homestead Foundry (`Hybrid-Solutions-Cloud/homestead-foundry`) documents and aut
 - **[Methodology](./methodology)** - how a build moves through this repo's phase-gated process: research spike, then Architecture Decision Record, then design doc, then diagram, then implementation, then review.
 - **[Model registry](./model-registry)** - the schema this repo uses to track which models are deployed, planned, or rejected, and why, so a consuming project can resolve a model id to a usable endpoint without hardcoding a deployment name.
 - **[Deployment](./deployment)** - how the Bicep automation stands up (and tears down) the actual Azure resources.
-- **[ADR index](../reference/adr-index)** - every locked architecture decision, in one place, linking back to the source spike that justified it.
+- **[Architecture](../architecture/architecture-overview)** - the full Well-Architected design docs (topology and CAF naming, identity, reliability, performance, cost, pipeline integration) rendered on this site.
+- **[ADRs](../adr/)** - every locked architecture decision, rendered in full, each tracing back to the research spike that justified it.
+- **[Research spikes](../research/)** - the grounded research behind every decision.
+- **[Implementation](../implementation/implementation-guide)** - the deployment runbook and as-built record.
 
 ## Who this is for
 

@@ -13,7 +13,7 @@ hero:
       link: /guide/methodology
     - theme: alt
       text: Browse the ADRs
-      link: /reference/adr-index
+      link: /adr/
 features:
   - title: Knowledge center
     details: Research spikes and Architecture Decision Records, every claim grounded in a first-party Microsoft source, covering model selection, identity, cost governance, and content safety.

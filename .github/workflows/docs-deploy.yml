@@ -13,6 +13,14 @@ on:
     branches: [main]
     paths:
       - "docs/**"
+      # The site renders the ADRs, design docs, research spikes, and
+      # implementation guide by copying ai/ in at build time (see
+      # docs/scripts/sync-content.mjs), so a change under ai/ must republish.
+      - "ai/adr/**"
+      - "ai/design/**"
+      - "ai/research/**"
+      - "ai/implementation/**"
+      - "ai/diagrams/INDEX.md"
       - ".github/workflows/docs-deploy.yml"
   workflow_dispatch:
 

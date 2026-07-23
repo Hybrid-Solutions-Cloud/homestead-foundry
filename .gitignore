@@ -31,4 +31,10 @@ local/
 docs/.vitepress/cache
 docs/.vitepress/dist
 docs/node_modules
+
+# Generated at build time from ai/ by docs/scripts/sync-content.mjs (ai/ is the source of truth)
+docs/adr/
+docs/architecture/
+docs/implementation/
+docs/research/
 pmo/
