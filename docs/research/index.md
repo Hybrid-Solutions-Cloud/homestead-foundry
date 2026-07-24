@@ -20,3 +20,4 @@ Every research spike behind the architecture decisions, in order. Each grounds i
 | [SPIKE-14](./SPIKE-14-tenant-region-survey) | Tenant-wide model and region survey |
 | [SPIKE-15](./SPIKE-15-niche-reviewer-models) | Niche and emerging reviewer models for code and document review |
 | [SPIKE-16](./SPIKE-16-virtual-trainer-avatar) | Photorealistic virtual-trainer avatar |
+| [SPIKE-17](./SPIKE-17-agent-mcp-gateway-governance) | Governing agent MCP tools with an APIM AI gateway |

@@ -15,3 +15,4 @@ Every Architecture Decision Record this project has locked, in decision order. E
 | [ADR-0009](./ADR-0009-azure-local-reviewer-track) | Azure Local on-prem reviewer / RAG track (open-weight substitute) |
 | [ADR-0010](./ADR-0010-flux-image-model-adoption) | FLUX image models adopted alongside the MAI-Image baseline (superseded by ADR-0002 and the [model catalog](../reference/model-catalog)) |
 | [ADR-0011](./ADR-0011-multi-target-deployment-automation) | Multi-target deployment automation (Azure cloud, Windows Server Foundry Local, Azure Local) |
+| [ADR-0012](./ADR-0012-agent-mcp-gateway-governance) | Agent MCP tool governance via an APIM AI gateway (gated to the agent phase) |
