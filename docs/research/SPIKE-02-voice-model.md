@@ -140,13 +140,13 @@ The concrete voice cast, narrator tracks, and brand context this recommendation 
 ---
 
 &lt;!-- safety-scan-worked-example:start -->
-## Worked example: Gunner the Lab / Holdfast Press
+## Worked example: Brand A / Brand B
 
-This spike was first run for the initiative's two publishing brands, Gunner the Lab and Holdfast Press, whose StoryReader reader app needed a multi-voice AI listen feature. The generic recommendation above was applied as follows:
+This spike was first run for the initiative's two publishing brands, Brand A and Brand B, whose reader app needed a multi-voice AI listen feature. The generic recommendation above was applied as follows:
 
 - **Voice cast locked by the owner:** Harper (en-US, female), Lisa (en-AU, female), and Ethan (en-US, male, rendered with the `excited` style). All three are confirmed in Microsoft's prebuilt MAI-Voice-2 catalog (Finding 2) with the `excited` style each requires. Ethan is the only style-capable en-US male, which is why it was chosen as the male listen voice.
-- **Existing narrator track:** Holdfast Press's British narrator uses `en-GB-Ryan:DragonHDLatestNeural`. Because there is no en-GB MAI-Voice-2 voice (Finding 2), that brand's AI listen voices are American (en-US) and Australian (en-AU) alongside the British narrator, and read-along highlighting stays on the existing narrator track for v1.
-- **Prior resource:** the legacy `storyreader-tts` account (kind `SpeechServices`, tier F0) was the wrong kind for the shared image plus voice work, which is why a new `AIServices` S0 resource is being provisioned regardless.
+- **Existing narrator track:** Brand B's British narrator uses `en-GB-Ryan:DragonHDLatestNeural`. Because there is no en-GB MAI-Voice-2 voice (Finding 2), that brand's AI listen voices are American (en-US) and Australian (en-AU) alongside the British narrator, and read-along highlighting stays on the existing narrator track for v1.
+- **Prior resource:** the legacy narrator Speech resource (kind `SpeechServices`, tier F0) was the wrong kind for the shared image plus voice work, which is why a new `AIServices` S0 resource is being provisioned regardless.
 - **Pipeline:** the existing `tools/tts.mjs` Speech SDK path (per-block synthesis, ffmpeg stitching) drives the pre-render; MAI voices ship listen-only until spike unknown #1 (word boundaries) is measured.
 &lt;!-- safety-scan-worked-example:end -->
 

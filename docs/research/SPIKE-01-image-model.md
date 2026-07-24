@@ -203,21 +203,21 @@ Grounding documents read first: `ai/plans/source/mai-image-2-5-art-match.md` and
 ---
 
 &lt;!-- safety-scan-worked-example:start -->
-## Worked example: Gunner the Lab / Holdfast Press
+## Worked example: Brand A / Brand B
 
-This section carries the real, concrete application this spike's recommendation was first run against: the Azure AI Foundry media backbone serving the Gunner the Lab and Holdfast Press (StoryReader) children's-book brands. Everything above is model-general; the figures below are specific to that first build.
+This section carries the real, concrete application this spike's recommendation was first run against: the Azure AI Foundry media backbone serving the Brand A and Brand B reader apps, a sensitive-audience catalog. Everything above is model-general; the figures below are specific to that first build.
 
-**Environment (Q5).** The environment check cleared the This Is My Demo MVP subscription in East US, which sits at Tier 5 (10 RPM) for both MAI-Image-2.5 and 2.5-Flash. The alternative candidate, the azurelocal tenant, was only at Tier 1 (2 RPM), so the MVP subscription was preferred.
+**Environment (Q5).** The environment check cleared the MVP credit subscription (a Tier-5 / MVP-tier subscription) in East US, which sits at Tier 5 (10 RPM) for both MAI-Image-2.5 and 2.5-Flash. The alternative candidate, the Azure Local fallback tenant, was only at Tier 1 (2 RPM), so the MVP credit subscription was preferred.
 
 **Catalog and throughput (Q5).** The source plan's whole-catalog estimate is roughly 340 scenes at 2 candidates each (about 680 calls). At 10 RPM that is about 68 minutes of API time; at 12 RPM about 57 minutes, spread into per-story batches.
 
-**Canvas (Q4).** The existing covers are 1264x848 = 1,071,872 pixels, which is 23,296 pixels over the 1,048,576 cap, so MAI cannot reproduce that exact canvas. This was independently verified by reading the PNG header of the local file `d:/git/gunnerthelab/gunnerthelab.github.io/public/images/covers/story-01.png` (1264x848, 1,071,872 px). The build standardized on 1248x832 (clean 3:2, under the cap); the exact 1264x848 original cannot be a drop-in replacement.
+**Canvas (Q4).** The existing covers are 1264x848 = 1,071,872 pixels, which is 23,296 pixels over the 1,048,576 cap, so MAI cannot reproduce that exact canvas. This was independently verified by reading the PNG header of a cover image in Brand A's reader-app repo (1264x848, 1,071,872 px). The build standardized on 1248x832 (clean 3:2, under the cap); the exact 1264x848 original cannot be a drop-in replacement.
 
 **Art style (Q3, Q6).** The target look is a stylized graphite / colored-pencil, hand-drawn storybook illustration (graphite crosshatch). Every prompt keeps that style wording to hold the look and to stay clearly in the non-photorealistic lane for scenes with children present.
 
-**Trademark genericization (Q6).** A character wore branded "Dickies" overalls. To avoid trademark replication (a named MAI risk area), the character token was rewritten as "denim bib overalls with a red rectangular chest patch," which keeps the look without the brand reference.
+**Trademark genericization (Q6).** A character wore a named apparel brand's overalls. To avoid trademark replication (a named MAI risk area), the character token was rewritten as "denim bib overalls with a red rectangular chest patch," which keeps the look without the brand reference.
 
 **Pricing figures applied (Q2).** The source plan `mai-image-2-5-art-match.md` carried, for this build, `$5 / $8 / $47` per 1M tokens (text input / image input / image output) for MAI-Image-2.5 and `$1.75 / $1.75 / $33` for Flash. These remain UNVERIFIED against a rendered first-party page and must be read live in the Foundry portal at deploy time.
 
-Worked-example source (local, independently verified): `d:/git/gunnerthelab/gunnerthelab.github.io/public/images/covers/story-01.png` PNG header = 1264x848 (1,071,872 px), over the cap.
+Worked-example source (local, independently verified): a cover image in Brand A's reader-app repo, PNG header = 1264x848 (1,071,872 px), over the cap.
 &lt;!-- safety-scan-worked-example:end -->

@@ -60,7 +60,7 @@ The publish pipeline (`tools/publish.mjs`, `tools/tts.mjs`, and a future image t
 The first proven build of this methodology serves scene art via MAI-Image-2.5 and neural narration via MAI-Voice-2 from a single Azure AI Foundry (AIServices) resource, feeding a publish pipeline (`tools/publish.mjs`, `tools/tts.mjs`, and a future `tools/mai-image.mjs`) that runs at publish time outside Azure.
 
 - **Image path:** Entra keyless via `DefaultAzureCredential`, scope `https://cognitiveservices.azure.com/.default`, for the MAI image REST generations and edits. No stored secret.
-- **Speech path:** the MAI-Voice-2 / Speech key is stored in the tenant platform vault `kv-hcs-vault-01` as the named secret `studio-foundry-speech-key` (name only; the value lives only in the vault), read at build time, and injected as `MAI_SPEECH_KEY` through a gitignored `.dev.vars`, with `MAI_SPEECH_REGION` alongside it (region is not a secret).
+- **Speech path:** the MAI-Voice-2 / Speech key is stored in the tenant platform vault `kv-<workload>-<env>-01` as the named secret `<workload>-speech-key` (name only; the value lives only in the vault), read at build time, and injected as `MAI_SPEECH_KEY` through a gitignored `.dev.vars`, with `MAI_SPEECH_REGION` alongside it (region is not a secret).
 - **Tenant risk:** in the fallback tenant recorded in ADR-0001, a management-group "disable local authentication" Deny would break this Speech key path; it is a fallback-tenant-only risk in this build.
 - Endpoint and region for both surfaces live in each brand's `brand.json` or the vault for one-stop retrieval; the consuming repos' `.dev.vars` is already gitignored.
 &lt;!-- safety-scan-worked-example:end -->

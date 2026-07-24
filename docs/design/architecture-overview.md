@@ -153,46 +153,46 @@ Both modalities ride the single `AIServices` account. This is the load-bearing t
 
 &lt;!-- safety-scan-worked-example:start -->
 
-## Worked example: Gunner the Lab / Holdfast Press
+## Worked example: Brand A / Brand B
 
-This methodology is deployed and running in production today for two publishing brands, Gunner the Lab and Holdfast Press, proving the pattern above holds up outside the abstract.
+This methodology is deployed and running in production today for two publishing brands, Brand A and Brand B, proving the pattern above holds up outside the abstract.
 
 **Azure estate (new):**
 
-- Resource group: `rg-studioai-prod-eus-01` (East US)
-- Foundry account: `aif-studioai-prod-eus-01`, kind `AIServices`, SKU S0
+- Resource group: `rg-<workload>-<env>-<region>-01` (East US)
+- Foundry account: `aif-<workload>-<env>-<region>-01`, kind `AIServices`, SKU S0
 - Model deployment: `mai-image-25` (MAI-Image-2.5, Preview, GlobalStandard, capacity 1; re-queried 2026-06-02)
-- Foundry project: `proj-studioai-media-01`
-- Budget: `budget-studioai-prod-eus-01`, 100 USD monthly, resource-group scope
+- Foundry project: `proj-<workload>-media-01`
+- Budget: `budget-<workload>-<env>-<region>-01`, 100 USD monthly, resource-group scope
 
 **Azure estate (existing, reused or untouched):**
 
-- Key Vault: `kv-hcs-vault-01` (reused, holds `studio-foundry-speech-key`)
-- Existing Speech account: `storyreader-tts` (kind SpeechServices, F0, resource group `rg-storyreader`), untouched, keeps serving both brands' narrator and read-along track
-- Subscription: This Is My Demo - MVP Subscription (This Is My Demo tenant), spending limit ON
+- Key Vault: `kv-<workload>-<env>-01` (reused, holds `<workload>-speech-key`)
+- Existing Speech account: the legacy narrator Speech resource (kind SpeechServices, F0, its own resource group), untouched, keeps serving both brands' narrator and read-along track
+- Subscription: the MVP credit subscription, spending limit ON
 
 **Endpoints:**
 
-- Image: `https://aif-studioai-prod-eus-01.services.ai.azure.com/mai/v1/images/generations` and `.../mai/v1/images/edits`
+- Image: `https://aif-<workload>-<env>-<region>-01.services.ai.azure.com/mai/v1/images/generations` and `.../mai/v1/images/edits`
 - Voice: `https://eastus.tts.speech.microsoft.com/cognitiveservices/v1`
 
 **Voice set (owner-locked, listen-only in v1, identical for both brands):** Harper (en-US), Lisa (en-AU, exact identifier confirmed at spike time), Ethan (en-US, rendered with the `excited` style via `mstts:express-as`).
 
-**Narrators (unchanged, on `storyreader-tts`):** Gunner uses `en-US-AndrewMultilingualNeural`; Holdfast uses `en-GB-Ryan:DragonHDLatestNeural`. The pipeline carries a deliberate two-resource key split: `AZURE_SPEECH_*` (narrator, old resource) and `MAI_SPEECH_*` (variants, new resource).
+**Narrators (unchanged, on the legacy narrator Speech resource):** Brand A uses `en-US-AndrewMultilingualNeural`; Brand B uses `en-GB-Ryan:DragonHDLatestNeural`. The pipeline carries a deliberate two-resource key split: `AZURE_SPEECH_*` (narrator, old resource) and `MAI_SPEECH_*` (variants, new resource).
 
 **Non-Azure estate:**
 
-- Publish pipeline: `tools/publish.mjs`, `tools/tts.mjs`, `tools/stitch.mjs`, `tools/r2-upload.mjs` in `storyreader-holdfast` and `storyreader-gunner`
-- Image tool: `gunnerthelab.github.io/tools/mai-image.mjs`
-- Prompt library: `gunner-studio/resources` (`Illustration_Prompts_All_Stories.md`, `Branding_Illustration_Prompts.md`, `Character_Bible.md`)
-- Content storage: Cloudflare R2, per-brand buckets `storyreader-<brand>-content`
-- Reader apps: StoryReader PWAs at app.gunnerthelab.com and app.holdfastpress.com
-- Marketing sites: gunnerthelab.com (hosts scene art hotlinked by chapter JSON) and the Holdfast Press site
+- Publish pipeline: `tools/publish.mjs`, `tools/tts.mjs`, `tools/stitch.mjs`, `tools/r2-upload.mjs` in Brand B's publish pipeline and Brand A's publish pipeline
+- Image tool: Brand A's reader-app repo's `tools/mai-image.mjs`
+- Prompt library: the studio prompt repo (`Illustration_Prompts_All_Stories.md`, `Branding_Illustration_Prompts.md`, `Character_Bible.md`)
+- Content storage: Cloudflare R2, per-brand buckets `<brand>-content`
+- Reader apps: the reader apps at Brand A's reader app and Brand B's reader app
+- Marketing sites: Brand A's site (hosts scene art hotlinked by chapter JSON) and Brand B's site
 
-**Pilot scope:** Image generation (Flow B) pilots on Gunner the Lab first, per ADR-0002.
+**Pilot scope:** Image generation (Flow B) pilots on Brand A first, per ADR-0002.
 
-**Secrets:** the one stored secret, `studio-foundry-speech-key`, lives in `kv-hcs-vault-01` and is injected as `MAI_SPEECH_KEY` via gitignored `.dev.vars`. No value appears in this repo.
+**Secrets:** the one stored secret, `<workload>-speech-key`, lives in `kv-<workload>-<env>-01` and is injected as `MAI_SPEECH_KEY` via gitignored `.dev.vars`. No value appears in this repo.
 
-**Tags applied:** `initiative=studio-foundry`, `env=prod`, plus `owner` and `costCenter`.
+**Tags applied:** `initiative=<workload>`, `env=prod`, plus `owner` and `costCenter`.
 
 &lt;!-- safety-scan-worked-example:end -->

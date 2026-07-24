@@ -192,20 +192,21 @@ Access and deployment discipline carries over unchanged from ADR-0002:
 ## Worked example: the first proven build
 
 This ADR was first written and decided for this repo's first proven build, which
-serves the Gunner the Lab (gunnerthelab.com) and Holdfast Press StoryReader
-brands. The concrete instantiation of the decision above:
+serves two publishing brands, Brand A and Brand B, through their reader apps.
+The concrete instantiation of the decision above:
 
 - **Target resource.** The three FLUX models plus the retained MAI baseline are
-  deployed on the East US AIServices account `aif-studioai-prod-eus-01` (resource
-  group `rg-studioai-prod-eus-01`, subscription "This Is My Demo - MVP
-  Subscription"), the same shared resource that serves MAI-Voice-2 (ADR-0003).
+  deployed on the East US AIServices account `aif-<workload>-<env>-<region>-01`
+  (resource group `rg-<workload>-<env>-<region>-01`, subscription "This Is My
+  Demo - MVP Subscription"), the same shared resource that serves MAI-Voice-2
+  (ADR-0003).
 - **Deployment names.** `flux-2-pro` (FLUX.2-pro, primary), `flux-1-kontext-pro`
   (FLUX.1-Kontext-pro, single-reference edits), `flux-1-1-pro` (FLUX-1.1-pro,
   fast exploration), with `mai-image-25` (MAI-Image-2.5) kept as the first-party
   fallback and A-B baseline. All GlobalStandard.
 - **Why the switch.** MAI-Image-2.5, driven text-only in the generation path,
   failed on the two axes that mattered: it did not hold the graphite crosshatch,
-  colored-pencil, single-spot-color children's-book house style, and characters
+  colored-pencil, single-spot-color storybook house style, and characters
   drifted (a locked character rendered as the wrong species, an invented extra
   character, and object-count / anatomy errors). Feeding locked character sheets
   plus a graphite style anchor into FLUX.2-pro's multi-reference conditioning
@@ -213,14 +214,14 @@ brands. The concrete instantiation of the decision above:
 - **Source research.** The original stay-or-switch recommendation (pilot
   FLUX.2-pro with FLUX.1-Kontext-pro for single-reference edits, keep
   MAI-Image-2.5 as a cheap fallback) came from the character-and-illustration
-  research in the `gunnerthelab/gunner-studio/characters/` studio repo and is
-  generalized, brand-neutral, in `docs/research/SPIKE-12-image-video-alternatives.md`.
-- **Consuming pipeline.** The operational generator lives in the
-  `gunnerthelab/gunnerthelab.github.io/tools/` reader-app repo (a `mai-image.mjs`
-  style tool that calls the FLUX `images/generations` and `images/edits`
-  endpoints and passes archived gold-standard frames as reference images). Its
-  FLUX endpoint secret is the tenant Key Vault secret named
-  `studio-foundry-flux-image-key`; the value is never printed or committed.
+  research in the studio prompt repo and is generalized, brand-neutral, in
+  `docs/research/SPIKE-12-image-video-alternatives.md`.
+- **Consuming pipeline.** The operational generator lives in Brand A's
+  reader-app repo, in its `tools/` directory (a `mai-image.mjs` style tool that
+  calls the FLUX `images/generations` and `images/edits` endpoints and passes
+  archived gold-standard frames as reference images). Its FLUX endpoint secret
+  is the tenant Key Vault secret named `<workload>-flux-image-key`; the value is
+  never printed or committed.
 &lt;!-- safety-scan-worked-example:end -->
 
 ## Sources

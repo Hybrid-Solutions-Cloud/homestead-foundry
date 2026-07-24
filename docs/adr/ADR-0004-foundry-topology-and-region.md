@@ -49,7 +49,7 @@ On that resource:
 
 **Negative:**
 - A new resource must be created (the existing F0 Speech account is deliberately not upgraded or reused), so there are now two Speech-capable resources in the subscription (the old narrator F0 and the new S0), and the pipeline carries a two-resource key split.
-- Global Standard means transient image processing may leave the chosen region even though at-rest data stays in the customer-designated geography; acceptable for benign hand-drawn children's content but recorded for the record.
+- Global Standard means transient image processing may leave the chosen region even though at-rest data stays in the customer-designated geography; acceptable for benign hand-drawn illustrated content but recorded for the record.
 - One shared resource means Azure meters aggregate all consumers; per-consumer cost attribution comes from the pipeline ledger, not Azure tags (ADR-0006).
 - Both models are preview; retention and residency findings are the documented steady state and should be re-verified at GA.
 
@@ -68,21 +68,21 @@ On that resource:
 
 &lt;!-- safety-scan-worked-example:start -->
 
-## Worked example: the Gunner the Lab and Holdfast Press media backbone
+## Worked example: the Brand A and Brand B media backbone
 
 > Everything in this section is what was actually built with the reusable
 > decision above, on the first proven build of this platform. It is historical
 > fact, not part of the general methodology.
 
-The first proven build stood up one shared media backbone for two StoryReader
-publishing brands (Gunner the Lab and Holdfast Press), served by a single
+The first proven build stood up one shared media backbone for two publishing
+brands (Brand A and Brand B), each with its own reader app, served by a single
 AIServices resource.
 
-- **Shared resource:** `aif-studioai-prod-eus-01` (AIServices, S0) in resource group `rg-studioai-prod-eus-01`, region East US. It hosts the MAI-Image-2.5 deployment (`mai-image-25`, Global Standard) and serves MAI-Voice-2 through its Speech endpoint. No deployment step exists for the voice path.
-- **Legacy narrator account, left untouched:** `storyreader-tts` (resource group `rg-storyreader`), kind `SpeechServices`, tier F0. It keeps serving the existing narrator and read-along track (`AZURE_SPEECH_*`), while the new resource serves only the MAI listen voices and image calls (`MAI_SPEECH_*`, `MAI_IMAGE_*`). The new resource is additive; it does not replace `storyreader-tts`.
+- **Shared resource:** `aif-<workload>-<env>-<region>-01` (AIServices, S0) in resource group `rg-<workload>-<env>-<region>-01`, region East US. It hosts the MAI-Image-2.5 deployment (`mai-image-25`, Global Standard) and serves MAI-Voice-2 through its Speech endpoint. No deployment step exists for the voice path.
+- **Legacy narrator account, left untouched:** the legacy narrator Speech resource (in its own resource group), kind `SpeechServices`, tier F0. It keeps serving the existing narrator and read-along track (`AZURE_SPEECH_*`), while the new resource serves only the MAI listen voices and image calls (`MAI_SPEECH_*`, `MAI_IMAGE_*`). The new resource is additive; it does not replace that legacy account.
 - **Region:** East US was the one region satisfying all three constraints (on the MAI-Image-2.5 Global Standard list, marked for MAI voices, and carrying the preview-styles flag). `eastus2` did not offer MAI-Image-2.5, which is why it was rejected in ADR-0001. East US also co-located with the existing Key Vault and the legacy Speech resource.
 - **Voice and style picks:** the listen-voice set was Harper (en-US), Lisa (en-AU), and Ethan (en-US, rendered with the `excited` style); the SSML `<voice>` example above resolves to, for example, `en-US-Harper:MAI-Voice-2`.
-- **Naming:** the CAF names `rg-studioai-prod-eus-01` and `aif-studioai-prod-eus-01` are neutral to both brands, because the one resource is shared across both brands and both modalities.
+- **Naming:** the CAF names `rg-<workload>-<env>-<region>-01` and `aif-<workload>-<env>-<region>-01` are neutral to both brands, because the one resource is shared across both brands and both modalities.
 
 &lt;!-- safety-scan-worked-example:end -->
 

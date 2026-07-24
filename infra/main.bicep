@@ -30,12 +30,12 @@ import { registryEntry, modelCatalogMap } from 'types.bicep'
 // The naming-lint script (D-04) covers the character-class check.
 // ---------------------------------------------------------------------------
 
-@description('Short, lowercase, undelimited workload token (the CAF initiative segment), for example studioai.')
+@description('Short, lowercase, undelimited workload token (the CAF initiative segment), for example myai.')
 @minLength(3)
 @maxLength(12)
 param workload string
 
-@description('Full initiative name, for example studio-foundry. Used for the initiative tag and as the Key Vault secret-name prefix.')
+@description('Full initiative name, for example my-initiative. Used for the initiative tag and as the Key Vault secret-name prefix.')
 @minLength(3)
 @maxLength(30)
 param initiative string
@@ -122,9 +122,9 @@ param keyVaultName string
 
 // -------------------------------- budget -----------------------------------
 
-@description('Monthly budget cap in USD on the resource group scope (ADR-0006; the owner cap is 100).')
+@description('Monthly budget cap in USD on the resource-group scope (ADR-0006). Deployer-chosen and REQUIRED: set it to your own monthly cap. No default, so no deployment silently inherits another deployer\'s figure or triggers an unintended spend ceiling.')
 @minValue(1)
-param budgetAmountUsd int = 100
+param budgetAmountUsd int
 
 @description('Email recipients for the budget alerts. The as-built uses contactEmails directly; no action group.')
 @minLength(1)

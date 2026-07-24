@@ -15,8 +15,8 @@ The claude.ai Artifact board mirrors this file's original scope only.
 
 ## Phase 0 - Scaffold  ✅
 
-- ✅ Create `studio-foundry` private repo in the thisismydemo org
-- ✅ Clone to `d:\git\thisismydemo\studio-foundry`
+- ✅ Create the initiative's private repo
+- ✅ Clone the initiative repo to the local working directory
 - ✅ Add the folder to the VS Code workspace
 - ✅ Move the two source plans out of the public repo into `ai/plans/source/`
 - ✅ Scaffold `.claude/` (8 foundry agents, settings.json, .mcp.json) and repo meta (README, CLAUDE, AGENTS, .gitignore)
@@ -26,12 +26,12 @@ The claude.ai Artifact board mirrors this file's original scope only.
 
 ## Phase 1 - Environment check  ✅  (foundry-env-verifier, Sonnet)
 
-- ✅ Enumerate subscriptions in the candidate tenants (credit sub, azlmgmt)
+- ✅ Enumerate subscriptions in the candidate tenants (credit sub, fallback tenant)
 - ✅ Verify Azure AI Foundry + MAI-Image-2.5 + MAI-Voice-2 availability, region, quota
 - ✅ Recommend primary and fallback, with a go or no-go
 - ✅ Write `ai/verification/environment-readiness.md`
 
-**Decision (GO):** primary = This Is My Demo - MVP Subscription, region East US (MAI-Image-2.5 confirmed live in the catalog, Tier 5 quota, AIServices S0 offerable). Fallback = azlz-cmp-lz-core-001 (azurelocal.cloud, 2 RPM). A new AIServices/S0 resource is needed; the existing legacy narrator Speech account is SpeechServices F0 and cannot host the deployments.
+**Decision (GO):** primary = the MVP credit subscription, region East US (MAI-Image-2.5 confirmed live in the catalog, Tier 5 quota, AIServices S0 offerable). Fallback = the Azure Local tenant's management group (2 RPM). A new AIServices/S0 resource is needed; the existing legacy narrator Speech account is SpeechServices F0 and cannot host the deployments.
 
 ## Phase 2 - Research spikes  ✅  (foundry-researcher, Opus) - all committed + pushed (c0af45c)
 
@@ -86,17 +86,17 @@ The claude.ai Artifact board mirrors this file's original scope only.
 
 **OWNER AUTHORIZATION (2026-07-11, live session):** The repo owner explicitly approved Phase 8 and made these decisions. This gate is now OPEN.
 
-1. **Resource name follows CAF** = `aif-studioai-prod-eus-01` (the current Learn abbreviation for the AIServices/Foundry kind), not `ais-`. Owner directive: "if not [deployed] then follow caf like I told you to."
-2. **Tags:** add `project=studio-foundry`; full set = initiative=studio-foundry, env=prod, owner="<owner alias>", project=studio-foundry.
-3. **RBAC via Entra security groups (AMENDS ADR-0005):** create `sg-studioai-image-users-prod-eus-01` (role Cognitive Services User) and `sg-studioai-speech-users-prod-eus-01` (role Cognitive Services Speech User) on the account scope, owner as a member. Same least-privilege data-plane roles ADR-0005 decided, assigned to groups instead of directly for maintainability. Owner directive: "create security groups. naming needs to match caf/waf and describe what it is for."
+1. **Resource name follows CAF** = `aif-<workload>-<env>-<region>-01` (the current Learn abbreviation for the AIServices/Foundry kind), not `ais-`. Owner directive: "if not [deployed] then follow caf like I told you to."
+2. **Tags:** add `project=<workload>`; full set = initiative=`<workload>`, env=prod, owner="<owner alias>", project=`<workload>`.
+3. **RBAC via Entra security groups (AMENDS ADR-0005):** create `sg-<workload>-image-users-prod-eus-01` (role Cognitive Services User) and `sg-<workload>-speech-users-prod-eus-01` (role Cognitive Services Speech User) on the account scope, owner as a member. Same least-privilege data-plane roles ADR-0005 decided, assigned to groups instead of directly for maintainability. Owner directive: "create security groups. naming needs to match caf/waf and describe what it is for."
 4. **Budget stays 100 USD/month** (the MVP credit is about 1000/month, but this project is capped at 100 for round one).
 5. **Network:** public access + Entra + RBAC.
 
-- ✅ Create resource group (`rg-studioai-prod-eus-01`)
-- ✅ Create the AI Services / Foundry resource (`aif-studioai-prod-eus-01`)
+- ✅ Create resource group (`rg-<workload>-<env>-<region>-01`)
+- ✅ Create the AI Services / Foundry resource (`aif-<workload>-<env>-<region>-01`)
 - ✅ Create the model deployment(s) (`mai-image-25`)
 - ✅ Assign identity and least-privilege role (two security groups)
-- ✅ Store secrets in the tenant Key Vault (names only in repo) (`studio-foundry-speech-key`)
+- ✅ Store secrets in the tenant Key Vault (names only in repo) (`<workload>-speech-key`)
 - ✅ Set the budget alert and cap (100 US dollars per month)
 - ✅ Write `docs/implementation/as-built.md`
 

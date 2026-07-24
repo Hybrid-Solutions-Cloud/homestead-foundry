@@ -180,7 +180,7 @@ The Site Repo has no `tools/` directory today; this creates it. The tool lives h
 | Pacing | Paces to the deployed tier: 10 requests per minute (Tier 5 on the primary subscription), configurable, and backs off honoring Retry-After on 429 |
 | Cost guard | A state sidecar `tools/.state/mai-image.json` in the Site Repo, `{ [month]: { images, estTokens, estUsd } }`, mirroring the publish pipeline's state pattern; `--budget-usd` refuses a call pre-spend. Uses the conservative 4,200 tokens-per-image assumption until the smoke-test probe writes the measured value (see `cost-and-governance.md` section 7). The tool logs any usage field found on live responses |
 | Output | PNGs into `public/images/stories/` (scene art) or `public/images/covers/` (covers). Candidates write as `<scene>.cand-<n>.png` for human review; selection is a human step because the API has no seed and output is not reproducible (ADR-0002). A prune step removes losing candidates and their provenance records together, keeping directory and index in sync |
-| Prompt hygiene | Warns if a known trademark token (for example "Dickies") survives in a prompt, and requires the hand-drawn storybook framing wording to be present (ADR-0007 via `identity-and-security.md` section 6) |
+| Prompt hygiene | Warns if a known trademark token (for example, a named apparel brand) survives in a prompt, and requires the hand-drawn storybook framing wording to be present (ADR-0007 via `identity-and-security.md` section 6) |
 
 ### 3.2 Prompt source: the Prompt-Source Repo
 
@@ -288,41 +288,41 @@ Image tooling for the brand without a Site Repo is explicitly out of scope for t
 
 &lt;!-- safety-scan-worked-example:start -->
 
-## Worked example: Gunner the Lab / Holdfast Press
+## Worked example: Brand A / Brand B
 
-This methodology is deployed and running in production today for two real publishing brands, Gunner the Lab and Holdfast Press. This section maps the generic roles and placeholder names above onto the concrete instance, as proof the pattern works, not as the primary design.
+This methodology is deployed and running in production today for two real publishing brands, Brand A and Brand B. This section maps the generic roles and placeholder names above onto the concrete instance, as proof the pattern works, not as the primary design.
 
 **Repo role mapping:**
 
 | Generic role | Concrete repo |
 | --- | --- |
-| Consumer Repo A | `storyreader-holdfast` |
-| Consumer Repo B | `storyreader-gunner` |
-| Site Repo | `gunnerthelab.github.io` |
-| Prompt-Source Repo | `gunner-studio` |
+| Consumer Repo A | Brand B's publish pipeline |
+| Consumer Repo B | Brand A's publish pipeline |
+| Site Repo | Brand A's reader-app repo |
+| Prompt-Source Repo | the studio prompt repo |
 
 **Concrete Azure names** (canonical for this instance, cross-referenced by the other `docs/design/` docs before their own genericization passes):
 
 | Item | Concrete name |
 | --- | --- |
-| Resource group | `rg-studioai-prod-eus-01` |
-| Azure AI Foundry (AIServices) account | `aif-studioai-prod-eus-01` |
-| Foundry project | `proj-studioai-media-01` |
+| Resource group | `rg-<workload>-<env>-<region>-01` |
+| Azure AI Foundry (AIServices) account | `aif-<workload>-<env>-<region>-01` |
+| Foundry project | `proj-<workload>-media-01` |
 | MAI-Image-2.5 deployment | `mai-image-25` |
-| Monthly budget | `budget-studioai-prod-eus-01` |
-| Key Vault (existing platform vault, reused) | `kv-hcs-vault-01` |
+| Monthly budget | `budget-<workload>-<env>-<region>-01` |
+| Key Vault (existing platform vault, reused) | `kv-<workload>-<env>-01` |
 | Region | East US (`eastus`) |
-| Tags | `initiative=studio-foundry` (predates the repo rename to homestead-foundry; an Azure resource tag, not a repo reference), `env=prod`, `owner=<alias>`, `costCenter=<value>` |
+| Tags | `initiative=<workload>` (an Azure resource tag, not a repo reference), `env=prod`, `owner=<alias>`, `costCenter=<value>` |
 
 **Concrete facts folded into the generic design above:**
 
-- Consumer Repo B (Gunner) is the 42-story catalog and the bulk of the voice backfill.
-- The three listen voices are Harper (`en-US-Harper:MAI-Voice-2`), an Australian voice (`en-AU-<confirm-at-spike>:MAI-Voice-2`, Lisa), and Ethan (`en-US-Ethan:MAI-Voice-2`, `excited` style). Same set for both Gunner the Lab and Holdfast Press.
-- Holdfast Press's narrator voice stays `en-GB-Ryan:DragonHDLatestNeural`, unchanged by this design.
-- The image endpoint is `https://aif-studioai-prod-eus-01.services.ai.azure.com/mai/v1/images/generations` (and `/mai/v1/images/edits`), deployment name `mai-image-25`.
-- The Foundry playground for voice-spike confirmation is `proj-studioai-media-01`.
-- The first pilot batch is Gunner's Story #1 (about 3 scenes, hard cap 10 USD).
-- Line-verified code (current as of 2026-07-11): `storyreader-holdfast/tools/publish.mjs` (lines 14, 83, 158 to 171), `storyreader-gunner/tools/publish.mjs` (lines 82, 155 to 167, 233), `tools/tts.mjs` both repos (lines 19, 45, 52, 59), `tools/r2-upload.mjs` both repos (retry-loop drift), `app/src/lib/player.ts` (lines 84, 136 to 137, 157), `tools/lib/md.mjs` (lines 59 to 63, 201), both repos' `package.json` (`publish:gunner`, `publish:holdfast`), `gunnerthelab.github.io/public/images/` layout, `gunner-studio/resources/` contents.
-- Holdfast Press's covers live in `brands/holdfast/assets/covers/` in the consumer repos and are untouched by the image-generation work, which is scoped to the Gunner site repo only.
+- Consumer Repo B (Brand A) is the 42-story catalog and the bulk of the voice backfill.
+- The three listen voices are Harper (`en-US-Harper:MAI-Voice-2`), an Australian voice (`en-AU-<confirm-at-spike>:MAI-Voice-2`, Lisa), and Ethan (`en-US-Ethan:MAI-Voice-2`, `excited` style). Same set for both Brand A and Brand B.
+- Brand B's narrator voice stays `en-GB-Ryan:DragonHDLatestNeural`, unchanged by this design.
+- The image endpoint is `https://aif-<workload>-<env>-<region>-01.services.ai.azure.com/mai/v1/images/generations` (and `/mai/v1/images/edits`), deployment name `mai-image-25`.
+- The Foundry playground for voice-spike confirmation is `proj-<workload>-media-01`.
+- The first pilot batch is Brand A's Story #1 (about 3 scenes, hard cap 10 USD).
+- Line-verified code (current as of 2026-07-11): Brand B's publish pipeline's `tools/publish.mjs` (lines 14, 83, 158 to 171), Brand A's publish pipeline's `tools/publish.mjs` (lines 82, 155 to 167, 233), `tools/tts.mjs` both repos (lines 19, 45, 52, 59), `tools/r2-upload.mjs` both repos (retry-loop drift), `app/src/lib/player.ts` (lines 84, 136 to 137, 157), `tools/lib/md.mjs` (lines 59 to 63, 201), both repos' `package.json` (per-brand publish scripts), Brand A's reader-app repo's `public/images/` layout, the studio prompt repo's `resources/` contents.
+- Brand B's covers live in `brands/<brand-b>/assets/covers/` in the consumer repos and are untouched by the image-generation work, which is scoped to Brand A's site repo only.
 
 &lt;!-- safety-scan-worked-example:end -->

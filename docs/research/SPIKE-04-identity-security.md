@@ -165,27 +165,27 @@ Proportionate middle ground if any network hardening is wanted: leave public acc
 ---
 
 &lt;!-- safety-scan-worked-example:start -->
-## Worked example: Gunner the Lab / Holdfast Press
+## Worked example: Brand A / Brand B
 
-The recommendation above was first applied to the two publishing brands this repo was originally built for, Gunner the Lab and Holdfast Press (StoryReader). The concrete names below map onto the `<workload>` / `<brand>` / placeholder wording used in the body. None of these are secret values, only names.
+The recommendation above was first applied to the two publishing brands this repo was originally built for, Brand A and Brand B (reader apps). The concrete names in the first proven build follow the `<workload>` / `<brand>` / placeholder wording used in the body, on a CAF naming pattern. None of these are secret values, only names.
 
-**Resource, vault, and secret names**
+**Resource, vault, and secret naming pattern**
 
-| Body placeholder | Real name in the first proven build |
+| Body placeholder | Naming pattern in the first proven build |
 |---|---|
-| Foundry (AIServices) resource | `aif-studioai-prod-eus-01` (East US) |
-| platform Key Vault | `kv-hcs-vault-01` |
-| `<workload>-speech-key` | `studio-foundry-speech-key` |
-| `<workload>-speech-region` | `studio-foundry-speech-region` |
-| `<workload>-image-endpoint` | `studio-foundry-image-endpoint` |
-| `<workload>-image-key` | `studio-foundry-image-key` |
-| subscription | This Is My Demo |
+| Foundry (AIServices) resource | `aif-<workload>-<env>-<region>-01` (East US) |
+| platform Key Vault | `kv-<workload>-<env>-01` |
+| Speech key secret | `<workload>-speech-key` |
+| Speech region secret | `<workload>-speech-region` |
+| Image endpoint secret | `<workload>-image-endpoint` |
+| Image key secret | `<workload>-image-key` |
+| subscription | the credit subscription that cleared the readiness check |
 
-The gitignored `.dev.vars` / CI env names are unchanged from the body: `MAI_SPEECH_KEY`, `MAI_SPEECH_REGION`, `MAI_IMAGE_ENDPOINT`, `MAI_IMAGE_KEY`. The `hcs` fragment in the vault name is the platform org token, not a secret.
+The gitignored `.dev.vars` / CI env names are unchanged from the body: `MAI_SPEECH_KEY`, `MAI_SPEECH_REGION`, `MAI_IMAGE_ENDPOINT`, `MAI_IMAGE_KEY`.
 
 **Content specifics for the two brands**
 
-- The Gunner the Lab art is hand-drawn graphite / colored-pencil illustration, which is the non-photorealistic (safer) category for the minors-photorealism filter discussed in Q4.
-- The trademark the source image plan flags is "Dickies brand overalls with a red logo patch," genericized to "denim bib overalls with a red rectangular chest patch." No visible detail of the art changes.
-- Both apps (Gunner the Lab and Holdfast Press StoryReader) are offline-first, so no key reaches the worker or the browser, which is the grounding fact for the keyless / no-secret-at-runtime posture.
+- The Brand A art is hand-drawn graphite / colored-pencil illustration, which is the non-photorealistic (safer) category for the minors-photorealism filter discussed in Q4.
+- The trademark the source image plan flags is a named apparel brand's overalls with its logo patch, genericized to "denim bib overalls with a red rectangular chest patch." No visible detail of the art changes.
+- Both apps (the Brand A and Brand B reader apps) are offline-first, so no key reaches the worker or the browser, which is the grounding fact for the keyless / no-secret-at-runtime posture.
 &lt;!-- safety-scan-worked-example:end -->

@@ -65,7 +65,7 @@ Notes on the child resources, illustrated generically:
 | `ais` | Foundry account, kind `AIServices` (placeholder example only, see below) | The current abbreviations page maps kind `AIServices` to `aif` ("Foundry account") and maps `ais` to the classic multi-service account of kind `CognitiveServices` ("Foundry Tools, multi-service account") | Illustrative deviation only; NOT adopted in this repo's real deployment, see below |
 | `budget`, model deployment names | Consumption budget, model deployment | Not present in the CAF abbreviation table | No CAF abbreviation exists; descriptive names used, which CAF permits |
 
-How to record a deviation, illustrated with `ais`: the placeholder example above fixes `ais-contosoai-prod-eus-01` to show what documenting a deviation from `aif` would look like, despite the Learn page currently mapping kind `AIServices` to `aif`. The CAF abbreviation list is explicitly a set of recommendations an organization tailors; the requirement is a documented, consistently applied convention. Any adopter choosing to deviate should record the delta the same way this section does, note whether the deviation collides with anything else in their estate, and register the chosen abbreviation as fixed for that initiative. **This repo's own real deployment does NOT make this deviation**: an `ais` deviation was considered during design/review (see `ai/REVIEW.md`'s pre-deployment HOLD item), but the owner directed following the current Learn `aif` mapping instead before the resource was created, so the real account is `aif-studioai-prod-eus-01` with no deviation - see the closing worked-example section. The design docs and diagrams had drifted from that directive (still showing `ais-`) until this correction.
+How to record a deviation, illustrated with `ais`: the placeholder example above fixes `ais-contosoai-prod-eus-01` to show what documenting a deviation from `aif` would look like, despite the Learn page currently mapping kind `AIServices` to `aif`. The CAF abbreviation list is explicitly a set of recommendations an organization tailors; the requirement is a documented, consistently applied convention. Any adopter choosing to deviate should record the delta the same way this section does, note whether the deviation collides with anything else in their estate, and register the chosen abbreviation as fixed for that initiative. **This repo's own real deployment does NOT make this deviation**: an `ais` deviation was considered during design/review (see `ai/REVIEW.md`'s pre-deployment HOLD item), but the owner directed following the current Learn `aif` mapping instead before the resource was created, so the real account is `aif-<workload>-<env>-<region>-01` with no deviation - see the closing worked-example section. The design docs and diagrams had drifted from that directive (still showing `ais-`) until this correction.
 
 ## 3. Resource topology
 
@@ -193,7 +193,7 @@ Whenever an ADR leaves an exact string or a yes/no open for the design phase, re
 
 &lt;!-- safety-scan-worked-example:start -->
 
-## Worked example: Gunner the Lab / Holdfast Press
+## Worked example: Brand A / Brand B
 
 This section restates the real, already-deployed instance of the pattern above, in full, as proof the convention resolves cleanly in production today. Every name below is real and canonical; nothing here is a placeholder.
 
@@ -201,63 +201,63 @@ This section restates the real, already-deployed instance of the pattern above, 
 
 | Resource | Provider type (kind, SKU) | Abbrev | Workload | Env | Region | Inst | Name | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Resource group | `Microsoft.Resources/resourceGroups` | `rg` | `studioai` | `prod` | `eus` | `01` | `rg-studioai-prod-eus-01` | Canonical |
-| Foundry account | `Microsoft.CognitiveServices/accounts` (kind `AIServices`, SKU `S0`) | `aif` | `studioai` | `prod` | `eus` | `01` | `aif-studioai-prod-eus-01` | Canonical |
+| Resource group | `Microsoft.Resources/resourceGroups` | `rg` | `<workload>` | `prod` | `eus` | `01` | `rg-<workload>-<env>-<region>-01` | Canonical |
+| Foundry account | `Microsoft.CognitiveServices/accounts` (kind `AIServices`, SKU `S0`) | `aif` | `<workload>` | `prod` | `eus` | `01` | `aif-<workload>-<env>-<region>-01` | Canonical |
 | Model deployment | `Microsoft.CognitiveServices/accounts/deployments` (SKU `GlobalStandard`, capacity 1) | none defined by CAF | model slug `mai-image-25` | inherited | inherited | n/a | `mai-image-25` | Canonical |
-| Foundry project | `Microsoft.CognitiveServices/accounts/projects` | `proj` | `studioai` | inherited | inherited | `01` | `proj-studioai-media-01` | Canonical |
-| Budget (workload cap) | `Microsoft.Consumption/budgets` (resource-group scope) | none defined by CAF; full word `budget` | `studioai` | `prod` | `eus` | `01` | `budget-studioai-prod-eus-01` | Canonical |
-| Key Vault | `Microsoft.KeyVault/vaults` | `kv` | pre-existing | pre-existing | pre-existing | pre-existing | `kv-hcs-vault-01` | Canonical (REUSE, do not create) |
-| Action group (budget email) | `Microsoft.Insights/actionGroups` | `ag` | `studioai` | `prod` | `eus` | `01` | `ag-studioai-prod-eus-01` | Proposed (ADR-0006 decided one owner-email action group; string not canonicalized) |
-| Budget (credit burn-down) | `Microsoft.Consumption/budgets` (subscription scope, amount = monthly credit) | none defined by CAF | `studioai` | n/a | n/a | `01` | `budget-studioai-credit-sub-01` | Proposed (ADR-0006 decided a subscription-scoped credit budget; string not canonicalized) |
+| Foundry project | `Microsoft.CognitiveServices/accounts/projects` | `proj` | `<workload>` | inherited | inherited | `01` | `proj-<workload>-media-01` | Canonical |
+| Budget (workload cap) | `Microsoft.Consumption/budgets` (resource-group scope) | none defined by CAF; full word `budget` | `<workload>` | `prod` | `eus` | `01` | `budget-<workload>-<env>-<region>-01` | Canonical |
+| Key Vault | `Microsoft.KeyVault/vaults` | `kv` | pre-existing | pre-existing | pre-existing | pre-existing | `kv-<workload>-<env>-01` | Canonical (REUSE, do not create) |
+| Action group (budget email) | `Microsoft.Insights/actionGroups` | `ag` | `<workload>` | `prod` | `eus` | `01` | `ag-<workload>-<env>-<region>-01` | Proposed (ADR-0006 decided one owner-email action group; string not canonicalized) |
+| Budget (credit burn-down) | `Microsoft.Consumption/budgets` (subscription scope, amount = monthly credit) | none defined by CAF | `<workload>` | n/a | n/a | `01` | `budget-<workload>-credit-sub-01` | Proposed (ADR-0006 decided a subscription-scoped credit budget; string not canonicalized) |
 
-Real notes: `mai-image-25` is deliberately version-free (ADR-0002: current version 2026-06-02, re-check around 2026-09-01), so preview version churn is absorbed by redeploying under the same name with no caller change. `proj-studioai-media-01` carries the purpose token `media` since it is scoped inside the account; it exists for the Foundry playground voice audition (reading the deployed narrator's voice identifier and the `excited` style token, ADR-0003 follow-up) and for the auto-applied `project` cost tag on Models-sold-by-Azure usage (ADR-0006).
+Real notes: `mai-image-25` is deliberately version-free (ADR-0002: current version 2026-06-02, re-check around 2026-09-01), so preview version churn is absorbed by redeploying under the same name with no caller change. `proj-<workload>-media-01` carries the purpose token `media` since it is scoped inside the account; it exists for the Foundry playground voice audition (reading the deployed narrator's voice identifier and the `excited` style token, ADR-0003 follow-up) and for the auto-applied `project` cost tag on Models-sold-by-Azure usage (ADR-0006).
 
-No abbreviation deviation in the real deployment: the account is `aif-studioai-prod-eus-01`, matching the current Learn mapping for kind `AIServices` exactly. An `ais` deviation was discussed during design and review (`ai/REVIEW.md`'s pre-deployment HOLD item), but the owner directed following the current `aif` mapping before the resource was created (see `docs/implementation/as-built.md`). This section previously stated the opposite - that `ais` was retained - which was a documentation error, not what was actually deployed; corrected 2026-07-23.
+No abbreviation deviation in the real deployment: the account is `aif-<workload>-<env>-<region>-01`, matching the current Learn mapping for kind `AIServices` exactly. An `ais` deviation was discussed during design and review (`ai/REVIEW.md`'s pre-deployment HOLD item), but the owner directed following the current `aif` mapping before the resource was created (see `docs/implementation/as-built.md`). This section previously stated the opposite - that `ais` was retained - which was a documentation error, not what was actually deployed; corrected 2026-07-23.
 
 ### Real scope chain
 
 ```
-This Is My Demo tenant (by name only)
-  This Is My Demo - MVP Subscription (by name only; spending limit ON)
-    rg-studioai-prod-eus-01            (eastus, tagged, budget-scoped)
-      aif-studioai-prod-eus-01         (AIServices, S0, custom subdomain)
-        mai-image-25                   (MAI-Image-2.5, GlobalStandard, capacity 1)
-        proj-studioai-media-01         (Foundry project)
-      budget-studioai-prod-eus-01      (Cost Management budget on the RG scope)
-    rg-storyreader                     (pre-existing; storyreader-tts F0 narrator account; UNTOUCHED)
-    kv-hcs-vault-01                    (pre-existing platform Key Vault; REUSED, not created)
+the MVP tenant (by name only)
+  the MVP credit subscription (by name only; spending limit ON)
+    rg-<workload>-<env>-<region>-01            (eastus, tagged, budget-scoped)
+      aif-<workload>-<env>-<region>-01         (AIServices, S0, custom subdomain)
+        mai-image-25                           (MAI-Image-2.5, GlobalStandard, capacity 1)
+        proj-<workload>-media-01               (Foundry project)
+      budget-<workload>-<env>-<region>-01      (Cost Management budget on the RG scope)
+    (adjacent resource group)                  (pre-existing; the legacy narrator Speech resource; UNTOUCHED)
+    kv-<workload>-<env>-01                     (pre-existing platform Key Vault; REUSED, not created)
 ```
 
 Subscription and tenant are recorded by display name only; no subscription IDs or tenant GUIDs appear in any committed file (hard rule; ADR-0005 secret posture).
 
-The Foundry account (`aif-studioai-prod-eus-01`): kind `AIServices` (hosts a Foundry model deployment while also serving Speech, ADR-0004); SKU `S0` (F0 eligibility for MAI voices unverified, and the image deployment needs S0 regardless; S0 also carries the 200 transactions-per-second default Speech throughput, ADR-0004); region `eastus` (the one region satisfying both models plus the preview-styles flag, ADR-0001, ADR-0004); custom subdomain enabled, matching the account name (AIServices default; prerequisite for a later Entra-for-Speech move, ADR-0004, ADR-0005); public network access enabled (the publish pipeline runs outside Azure; private endpoints would break it, ADR-0005 record); data plane endpoints `https://aif-studioai-prod-eus-01.services.ai.azure.com/mai/v1/images/generations` and `/edits`, plus the Speech key path via `https://eastus.tts.speech.microsoft.com/cognitiveservices/v1` (ADR-0004; regional Speech endpoint per ADR-0005 key decision); residency note: the image deployment is Global Standard so transient processing may leave East US, at-rest data stays in the US geography, and real-time TTS stays in-region and stores nothing (ADR-0004).
+The Foundry account (`aif-<workload>-<env>-<region>-01`): kind `AIServices` (hosts a Foundry model deployment while also serving Speech, ADR-0004); SKU `S0` (F0 eligibility for MAI voices unverified, and the image deployment needs S0 regardless; S0 also carries the 200 transactions-per-second default Speech throughput, ADR-0004); region `eastus` (the one region satisfying both models plus the preview-styles flag, ADR-0001, ADR-0004); custom subdomain enabled, matching the account name (AIServices default; prerequisite for a later Entra-for-Speech move, ADR-0004, ADR-0005); public network access enabled (the publish pipeline runs outside Azure; private endpoints would break it, ADR-0005 record); data plane endpoints `https://aif-<workload>-<env>-<region>-01.services.ai.azure.com/mai/v1/images/generations` and `/edits`, plus the Speech key path via `https://eastus.tts.speech.microsoft.com/cognitiveservices/v1` (ADR-0004; regional Speech endpoint per ADR-0005 key decision); residency note: the image deployment is Global Standard so transient processing may leave East US, at-rest data stays in the US geography, and real-time TTS stays in-region and stores nothing (ADR-0004).
 
-### Real Key Vault secrets (`kv-hcs-vault-01`, reused, not created)
+### Real Key Vault secrets (`kv-<workload>-<env>-01`, reused, not created)
 
 | Secret name | Holds | Created? |
 | --- | --- | --- |
-| `studio-foundry-speech-key` | Speech key for the new account | Yes (Speech uses key auth for now) |
-| `studio-foundry-speech-region` | `eastus` (not a secret; co-located for one-stop retrieval) | Yes |
-| `studio-foundry-image-endpoint` | `https://aif-studioai-prod-eus-01.services.ai.azure.com` (not a secret) | Yes |
-| `studio-foundry-image-key` | Image-surface key | No; the image path is Entra keyless, so per ADR-0005 this secret is simply never created |
+| `<workload>-speech-key` | Speech key for the new account | Yes (Speech uses key auth for now) |
+| `<workload>-speech-region` | `eastus` (not a secret; co-located for one-stop retrieval) | Yes |
+| `<workload>-image-endpoint` | `https://aif-<workload>-<env>-<region>-01.services.ai.azure.com` (not a secret) | Yes |
+| `<workload>-image-key` | Image-surface key | No; the image path is Entra keyless, so per ADR-0005 this secret is simply never created |
 
 ### Real adjacent estate
 
 | Item | Name | Disposition |
 | --- | --- | --- |
-| Narrator Speech account | `storyreader-tts` (SpeechServices, F0, `rg-storyreader`) | Untouched; keeps the narrator and read-along track (ADR-0004) |
-| R2 buckets | `storyreader-holdfast-content`, `storyreader-gunner-content` | Cloudflare, outside Azure and outside CAF scope; existing names kept |
+| Narrator Speech account | the legacy narrator Speech resource (SpeechServices, F0, its own resource group) | Untouched; keeps the narrator and read-along track (ADR-0004) |
+| R2 buckets | Brand B's content bucket, Brand A's content bucket | Cloudflare, outside Azure and outside CAF scope; existing names kept |
 | Pipeline env vars | `MAI_SPEECH_KEY`, `MAI_SPEECH_REGION`, `MAI_IMAGE_ENDPOINT` (and narrator `AZURE_SPEECH_*`) | Names only; values live in `.dev.vars` (gitignored) or the CI secret store (ADR-0005) |
 
 ### Real tag values
 
 | Tag key | Value |
 | --- | --- |
-| `initiative` | `studio-foundry` |
+| `initiative` | `<workload>` |
 | `env` | `prod` |
 | `owner` | Owner alias, set at deploy time |
 | `costCenter` | Set at deploy time, optional |
 
-Real deltas from the design-phase decisions in section 6: environment token `prod` was finalized over ADR-0004's illustrative `demo` because the account's output ships to both Gunner the Lab's and Holdfast Press's production apps; the Foundry project `proj-studioai-media-01` was created for the playground voice audition (reading the exact deployed voice identifier and the `excited` style token) plus the `project` cost tag; the `ais` deviation floated at review was NOT adopted, the account uses the current Learn `aif` mapping instead; `ag-studioai-prod-eus-01` and `budget-studioai-credit-sub-01` remain proposed strings pending reviewer confirmation.
+Real deltas from the design-phase decisions in section 6: environment token `prod` was finalized over ADR-0004's illustrative `demo` because the account's output ships to both Brand A's and Brand B's production apps; the Foundry project `proj-<workload>-media-01` was created for the playground voice audition (reading the exact deployed voice identifier and the `excited` style token) plus the `project` cost tag; the `ais` deviation floated at review was NOT adopted, the account uses the current Learn `aif` mapping instead; `ag-<workload>-<env>-<region>-01` and `budget-<workload>-credit-sub-01` remain proposed strings pending reviewer confirmation.
 
 &lt;!-- safety-scan-worked-example:end -->

@@ -101,7 +101,12 @@ repo's gated-write rules, a verification pass like this does not itself
 authorize bulk generation; that remains a separate, explicit owner decision.
 
 <!-- safety-scan-worked-example:start -->
-## Worked example: Gunner the Lab / Holdfast Press
+## Worked example: Brand A / Brand B
+
+This is an anonymized example verification record for the methodology's real
+worked example (two publishing brands, referred to here as Brand A and Brand
+B), with resource names genericized to the CAF placeholder pattern. It is not
+a live private inventory.
 
 Status: verification complete. No Azure resources were created, updated, or
 deleted during this check. Two bounded data-plane smoke calls were made (one
@@ -114,23 +119,23 @@ Phase: 9 (`docs/implementation/as-built.md`)
 
 | # | Check | Result |
 |---|---|---|
-| 1 | Account `aif-studioai-prod-eus-01` provisioningState | **PASS**, `Succeeded`, kind `AIServices`, SKU `S0` |
+| 1 | Account `aif-<workload>-<env>-<region>-01` provisioningState | **PASS**, `Succeeded`, kind `AIServices`, SKU `S0` |
 | 2 | Model deployment `mai-image-25` state | **PASS**, `Succeeded`, model `MAI-Image-2.5`, version `2026-06-02`, format `Microsoft`, SKU `GlobalStandard` |
-| 3 | Role assignment: `sg-studioai-image-users-prod-eus-01` -> Cognitive Services User | **PASS**, present on the account scope |
-| 4 | Role assignment: `sg-studioai-speech-users-prod-eus-01` -> Cognitive Services Speech User | **PASS**, present on the account scope |
-| 5 | Key Vault secret `studio-foundry-speech-key` exists (name only) | **PASS**, present in `kv-hcs-vault-01`, enabled, value not read for this check |
-| 6 | Budget `budget-studioai-prod-eus-01` exists | **PASS**, monthly, amount 100.0, cost category |
+| 3 | Role assignment: `sg-<workload>-image-users-<env>-<region>-01` -> Cognitive Services User | **PASS**, present on the account scope |
+| 4 | Role assignment: `sg-<workload>-speech-users-<env>-<region>-01` -> Cognitive Services Speech User | **PASS**, present on the account scope |
+| 5 | Key Vault secret `<workload>-speech-key` exists (name only) | **PASS**, present in `kv-<workload>-<env>-01`, enabled, value not read for this check |
+| 6 | Budget `budget-<workload>-<env>-<region>-01` exists | **PASS**, monthly, amount 100.0, cost category |
 | 7 | Entra auth token mint, scope `https://cognitiveservices.azure.com/.default` | **PASS**, Bearer token acquired via the signed-in identity, token value not printed or stored |
 | 8 | Smoke: one MAI-Image-2.5 generation | **PASS**, HTTP 200 on the first attempt against the primary host, no fallback host needed |
 | 9 | Smoke: one MAI-Voice-2 synthesis | **PASS**, HTTP 200, valid audio returned |
 
 No check failed. No 401 or 403 was encountered on the image call, so the
-documented fallback host (`aif-studioai-prod-eus-01.cognitiveservices.azure.com`)
+documented fallback host (`aif-<workload>-<env>-<region>-01.cognitiveservices.azure.com`)
 was not needed; it was exercised in code but not triggered.
 
 ### Smoke test 1: image generation
 
-- Endpoint: `https://aif-studioai-prod-eus-01.services.ai.azure.com/mai/v1/images/generations`
+- Endpoint: `https://aif-<workload>-<env>-<region>-01.services.ai.azure.com/mai/v1/images/generations`
 - Request: model `mai-image-25`, prompt "a soft graphite-pencil drawing of a friendly labrador sitting in a sunny garden, gentle childrens-book style", width 1248, height 832
 - Response: HTTP 200, JSON body with fields `created`, `data` (base64 PNG), `model`, `size`, `usage`
 - Saved artifact: `ai/verification/smoke/image-smoke.png` (decoded from the response, verified as a genuine PNG, 1248 x 832, RGB, about 1.73 MB)

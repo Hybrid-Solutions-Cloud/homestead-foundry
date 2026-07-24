@@ -129,25 +129,25 @@ The uniform "None" column is the designed outcome of pre-render (ADR-0008) and i
 
 &lt;!-- safety-scan-worked-example:start -->
 
-## Worked example: Gunner the Lab / Holdfast Press
+## Worked example: Brand A / Brand B
 
-Everything above is the general pattern. This section restates it as the concrete, already-deployed instance that proves the pattern runs in production today, serving the two brands this initiative was first built for: Gunner the Lab and Holdfast Press.
+Everything above is the general pattern. This section restates it as the concrete, already-deployed instance that proves the pattern runs in production today, serving the two brands this initiative was first built for: Brand A and Brand B.
 
 | Placeholder in the general methodology | Real value in this deployment |
 | --- | --- |
-| `ais-<workload>-<env>-<region>-01` (the Foundry AIServices account) | `aif-studioai-prod-eus-01` |
-| `rg-<workload>-<env>-<region>-01` | `rg-studioai-prod-eus-01` |
-| `budget-<workload>-<env>-<region>-01` | `budget-studioai-prod-eus-01` |
-| The existing, proven-track narrator account | `storyreader-tts`, the account behind Holdfast Press's StoryReader read-along experience |
+| `ais-<workload>-<env>-<region>-01` (the Foundry AIServices account) | `aif-<workload>-<env>-<region>-01` |
+| `rg-<workload>-<env>-<region>-01` | `rg-<workload>-<env>-<region>-01` |
+| `budget-<workload>-<env>-<region>-01` | `budget-<workload>-<env>-<region>-01` |
+| The existing, proven-track narrator account | the legacy narrator Speech resource, the account behind Brand B's reader-app read-along experience |
 | `<image-deployment-name>` | `mai-image-25` |
 | `<voice-name>` (exact locale identifier confirmed at spike time) | Lisa (en-AU) |
 | `<style-token>` (expressive style confirmed at spike time) | `excited` |
-| Each served brand's PWA and site | Gunner the Lab and Holdfast Press, each with its own site repo |
-| "An older, non-voice-aware copy still running against an existing content catalog" | Gunner the Lab's copy of `publish.mjs`, run against its 42-story catalog, which had not yet picked up the voice-aware hashing change at the time this gap was recorded |
+| Each served brand's PWA and site | Brand A and Brand B, each with its own site repo |
+| "An older, non-voice-aware copy still running against an existing content catalog" | Brand A's copy of `publish.mjs`, run against its 42-story catalog, which had not yet picked up the voice-aware hashing change at the time this gap was recorded |
 
-Section 1's dependency graph, in concrete terms: neither Gunner the Lab's nor Holdfast Press's readers depend on `aif-studioai-prod-eus-01`, MAI-Image-2.5, or MAI-Voice-2 being available; both sites keep serving unchanged through a preview outage because every asset is pre-rendered to R2 before either brand's readers ever see it. Holdfast Press's read-along highlight depends only on `storyreader-tts` output already in R2, never on the MAI voice path (listen-only v1, ADR-0003).
+Section 1's dependency graph, in concrete terms: neither Brand A's nor Brand B's readers depend on `aif-<workload>-<env>-<region>-01`, MAI-Image-2.5, or MAI-Voice-2 being available; both sites keep serving unchanged through a preview outage because every asset is pre-rendered to R2 before either brand's readers ever see it. Brand B's read-along highlight depends only on the legacy narrator Speech resource's output already in R2, never on the MAI voice path (listen-only v1, ADR-0003).
 
-Section 5's monitoring surface is live today as `budget-studioai-prod-eus-01` scoped to `rg-studioai-prod-eus-01`, with the pipeline's own `maiLedger` in `publish.mjs` as the pre-spend guard.
+Section 5's monitoring surface is live today as `budget-<workload>-<env>-<region>-01` scoped to `rg-<workload>-<env>-<region>-01`, with the pipeline's own `maiLedger` in `publish.mjs` as the pre-spend guard.
 
 &lt;!-- safety-scan-worked-example:end -->
 

@@ -1,4 +1,4 @@
-# Repository intent: studio-foundry (open-source candidate)
+# Repository intent: the initiative (open-source candidate)
 
 ## What this repository is
 
@@ -46,13 +46,13 @@ behind every box below; re-run it before trusting this checklist on a later read
 - [x] **Subscription identity.** No subscription/tenant GUIDs found outside the private planning workspace as of
       the 2026-07-23 scan (only public Azure built-in role IDs in `infra/modules/rbac.bicep`
       and bare Lucid/Artifact document IDs with no invitation tokens - both confirmed safe).
-- [ ] **Resource names.** Placeholders everywhere the scanner enforces it, with one
-      known, deliberate exception: `ai/REVIEW.md` and `ai/TASKS.md` keep real CAF-shaped
-      names (for example `aif-studioai-prod-eus-01`, `rg-studioai-prod-eus-01`) as a
-      historical record (light-touch treatment, not restructured into an appendix). The
-      scanner flags these as non-blocking `caf-shaped-non-placeholder` warnings - each
-      needs an explicit owner confirm-safe-to-publish decision before flip, not a
-      silent pass.
+- [ ] **Resource names.** Placeholders everywhere the scanner enforces it. A prior
+      deliberate exception let `ai/REVIEW.md` and `ai/TASKS.md` keep real CAF-shaped
+      names (for example `aif-<workload>-<env>-<region>-01`,
+      `rg-<workload>-<env>-<region>-01`) as a historical record (light-touch
+      treatment, not restructured into an appendix); both files have since been
+      anonymized to the same generic pattern used everywhere else. Re-run
+      `scripts/scan-public-safety.mjs --full` to confirm before flip.
 - [x] **People.** Real owner email and full name removed from `ai/TASKS.md` and
       `docs/implementation/as-built.md` (full pre-public scrub, 2026-07-23).
 - [~] **Brand content.** Not removed - confined instead to marked worked-example

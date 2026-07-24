@@ -662,40 +662,40 @@ If all three pre-checks pass and the target region is permitted, re-run this run
 
 &lt;!-- safety-scan-worked-example:start -->
 
-## Worked example: Gunner the Lab / Holdfast Press
+## Worked example: Brand A / Brand B
 
-This section restates the real, already-deployed instance of the runbook above, in full, as proof it was actually followed to build and hold this repo's own production deployment. Every name and value below is real; nothing here is a placeholder.
+This section restates the real, already-deployed instance of the runbook above, in full, as proof it was actually followed to build and hold this repo's own production deployment. Every name and value below is real (anonymized to the generic CAF pattern for this public writeup); nothing here is a placeholder in the sense of being made up.
 
-**Real subscription and tenant:** deployed in **This Is My Demo - MVP Subscription** (This Is My Demo tenant, by name only), region **East US** (`eastus`), fixed by ADR-0001.
+**Real subscription and tenant:** deployed in **the MVP credit subscription** (by name only), region **East US** (`eastus`), fixed by ADR-0001.
 
 **Real canonical names (section 0.2, resolved):**
 
 | Item | Real name |
 | --- | --- |
-| Resource group | `rg-studioai-prod-eus-01` |
-| Foundry account (kind `AIServices`, SKU `S0`) | `aif-studioai-prod-eus-01` |
+| Resource group | `rg-<workload>-<env>-<region>-01` |
+| Foundry account (kind `AIServices`, SKU `S0`) | `aif-<workload>-<env>-<region>-01` |
 | Model deployment (MAI-Image-2.5, GlobalStandard) | `mai-image-25` |
-| Foundry project | `proj-studioai-media-01` |
-| Monthly budget (RG scope) | `budget-studioai-prod-eus-01` |
-| Action group (budget email) | `ag-studioai-prod-eus-01` |
-| Credit budget (subscription scope, optional) | `budget-studioai-credit-sub-01` |
-| Key Vault (REUSE, never created) | `kv-hcs-vault-01` |
-| Tags | `initiative=studio-foundry`, `env=prod`, `owner=<alias>`, `costCenter=<value>` |
+| Foundry project | `proj-<workload>-media-01` |
+| Monthly budget (RG scope) | `budget-<workload>-<env>-<region>-01` |
+| Action group (budget email) | `ag-<workload>-<env>-<region>-01` |
+| Credit budget (subscription scope, optional) | `budget-<workload>-credit-sub-01` |
+| Key Vault (REUSE, never created) | `kv-<workload>-<env>-01` |
+| Tags | `initiative=<workload>`, `env=prod`, `owner=<alias>`, `costCenter=<value>` |
 
-**Real owner-input answers (section 0.4):** O8 (monthly budget cap) was set to **100 USD**, the real spending cap enforced across all three governance layers (the pipeline's own `--mai-budget-usd` guard, `budget-studioai-prod-eus-01`, and the subscription spending limit kept ON). The action-group short name used at W7 was `studioai01`.
+**Real owner-input answers (section 0.4):** O8 (monthly budget cap) was set to **100 USD**, the real spending cap enforced across all three governance layers (the pipeline's own `--mai-budget-usd` guard, `budget-<workload>-<env>-<region>-01`, and the subscription spending limit kept ON). The action-group short name used at W7 was `<workload>01`.
 
 **Real preconditions and model facts (section 1):** the primary model is **MAI-Image-2.5**; at authoring time its catalog version was `2026-06-02`, carrying an inference-deprecation date of `2026-09-01` read as a version-churn signal, with a follow-up catalog re-check diaried around and after that date. The two retiring sibling models explicitly never substituted are **MAI-Image-2** and **MAI-Image-2e**, both retiring 2026-08-15. The deployed tier is Global Standard Tier 5 (10 requests per minute).
 
-**Real endpoints (sections 3, 6, 8):** image at `https://aif-studioai-prod-eus-01.services.ai.azure.com/mai/v1/images/generations` (and `.../edits`); Speech (key path) at the regional `https://eastus.tts.speech.microsoft.com/cognitiveservices/v1`.
+**Real endpoints (sections 3, 6, 8):** image at `https://aif-<workload>-<env>-<region>-01.services.ai.azure.com/mai/v1/images/generations` (and `.../edits`); Speech (key path) at the regional `https://eastus.tts.speech.microsoft.com/cognitiveservices/v1`.
 
-**Real secrets (section 6):** the one stored secret is `studio-foundry-speech-key` in `kv-hcs-vault-01`; the two convenience entries `studio-foundry-speech-region` (`eastus`) and `studio-foundry-image-endpoint` were also created; `studio-foundry-image-key` was never created (the image path is Entra keyless). On the publish machine, the key is pulled into the gitignored `.dev.vars` as `MAI_SPEECH_KEY` with `MAI_SPEECH_REGION=eastus` (both consuming StoryReader repos gitignore `.dev.vars`).
+**Real secrets (section 6):** the one stored secret is `<workload>-speech-key` in `kv-<workload>-<env>-01`; the two convenience entries `<workload>-speech-region` (`eastus`) and `<workload>-image-endpoint` were also created; `<workload>-image-key` was never created (the image path is Entra keyless). On the publish machine, the key is pulled into the gitignored `.dev.vars` as `MAI_SPEECH_KEY` with `MAI_SPEECH_REGION=eastus` (both consuming reader-app repos gitignore `.dev.vars`).
 
-**Real smoke test (section 8.2):** W10 used the standardized 1248x832 canvas with a hand-drawn, graphite-and-colored-pencil framed prompt describing a single acorn resting on plain paper (no trademarked tokens, per ADR-0007). W11 used the confirmed published voice **Harper** (`en-US-Harper:MAI-Voice-2`) with the line "Studio Foundry smoke test, one short line only." The exact Lisa (en-AU) voice identifier and the `excited` expressive-style spelling were deliberately left to the later voice spike, not tested in this smoke test.
+**Real smoke test (section 8.2):** W10 used the standardized 1248x832 canvas with a hand-drawn, graphite-and-colored-pencil framed prompt describing a single acorn resting on plain paper (no trademarked tokens, per ADR-0007). W11 used the confirmed published voice **Harper** (`en-US-Harper:MAI-Voice-2`) with the line "smoke test, one short line only." The exact Lisa (en-AU) voice identifier and the `excited` expressive-style spelling were deliberately left to the later voice spike, not tested in this smoke test.
 
-**Real adjacent estate, never touched by this runbook (sections 0.2, 9):** the existing narrator Speech account `storyreader-tts` (kind SpeechServices, F0) in its own resource group `rg-storyreader`; the Cloudflare R2 buckets `storyreader-holdfast-content` and `storyreader-gunner-content`; both StoryReader site repos' already-published assets.
+**Real adjacent estate, never touched by this runbook (sections 0.2, 9):** the existing narrator Speech account (the legacy narrator Speech resource, kind SpeechServices, F0) in its own resource group; the Cloudflare R2 content buckets for Brand A and Brand B; both reader apps' site repos' already-published assets.
 
-**Real fallback tenant (section 10, not activated):** the recorded fallback is the `azurelocal.cloud` tenant, subscription `azlz-cmp-lz-core-001`, gated on the three read-only pre-checks and never used to date. The regional-availability caveat applies exactly as generalized above: a management-group policy forcing `eastus2` in that tenant would be a hard blocker for the MAI-Image-2.5 deployment, since Global Standard is not offered there.
+**Real fallback tenant (section 10, not activated):** the recorded fallback is a secondary Azure Local tenant, gated on the three read-only pre-checks and never used to date. The regional-availability caveat applies exactly as generalized above: a management-group policy forcing `eastus2` in that tenant would be a hard blocker for the MAI-Image-2.5 deployment, since Global Standard is not offered there.
 
-**Real outcome:** this runbook was executed in full through Gate 8 for both Gunner the Lab and Holdfast Press; `docs/implementation/as-built.md` records the completed run, and the deployment has been held per Gate 8 pending owner-authorized bulk generation.
+**Real outcome:** this runbook was executed in full through Gate 8 for both Brand A and Brand B; `docs/implementation/as-built.md` records the completed run, and the deployment has been held per Gate 8 pending owner-authorized bulk generation.
 
 &lt;!-- safety-scan-worked-example:end -->

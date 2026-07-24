@@ -14,8 +14,8 @@ Lucid document to change a diagram, then keep this table in step.
   blue = external brand or actor, purple = pipeline tool, orange = Azure account or
   service, yellow = model or decision, green = safety control or consumer, steel =
   storage, red = cost stop or hard block.
-- Names are canonical throughout: `rg-studioai-prod-eus-01`, `aif-studioai-prod-eus-01`,
-  deployment `mai-image-25`, `budget-studioai-prod-eus-01`, reused platform Key Vault.
+- Names are canonical throughout: `rg-<workload>-<env>-<region>-01`, `aif-<workload>-<env>-<region>-01`,
+  deployment `mai-image-25`, `budget-<workload>-<env>-<region>-01`, reused platform Key Vault.
   No secrets, subscription IDs, or tenant GUIDs appear in any diagram.
 - QA: every diagram was exported to PNG and visually checked. No text runs into other
   text and no box covers another box. See the QA note at the foot of this file.

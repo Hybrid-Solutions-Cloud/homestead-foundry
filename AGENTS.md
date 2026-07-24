@@ -48,6 +48,6 @@ Sonnet for everything else. See `CLAUDE.md`'s "Model policy for this repo."
 |---|---|
 | GitHub org | Hybrid-Solutions-Cloud (private repo) |
 | Local path | `D:/git/hybrid-solutions-cloud/homestead-foundry` |
-| Primary tenant | Decided by the environment check (credit sub preferred; azurelocal.cloud is the fallback) |
+| Primary tenant | Decided by the environment check (credit sub preferred; a secondary tenant is the fallback) |
 | Key Vault | The chosen tenant's platform vault (named in `docs/design/*` worked-example appendices) |
 | Worked example | Two publishing brands (proves the methodology in production; see `docs/design/*` appendices) |

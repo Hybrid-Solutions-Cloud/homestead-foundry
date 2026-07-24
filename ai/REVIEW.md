@@ -1,4 +1,4 @@
-# Phase 7 review: studio-foundry ai/ doc set
+# Phase 7 review: the initiative's ai/ doc set
 
 Reviewer: foundry-reviewer (Sonnet). Date: 2026-07-11. Status: review complete.
 
@@ -46,7 +46,7 @@ None of the Should-fix items below block the Phase 8 infrastructure runbook itse
 
 3. **Minor procedural risk: the Foundry project may be more than optional at deploy time.**
 
-   Microsoft Learn's MAI image how-to (`use-foundry-models-mai`) lists "A Microsoft Foundry project" as a deployment prerequisite, worded more strongly than this doc set's treatment of `proj-studioai-media-01` as fully optional and deferrable past the model-deployment step (`implementation-guide.md` step 4, C2: "may be deferred to the audition session without blocking the hold gate"). The same Learn page's own CLI deployment example, which `implementation-guide.md` W3 mirrors exactly, targets the account directly and never references a project, so the practical risk looks low. Recommend the deploy operator watch Gate 4 closely: if `az cognitiveservices account deployment create` or the Foundry portal path errors without a project present, create `proj-studioai-media-01` first (moving C2 ahead of W3) and note the reordering in `as-built.md`. Not a blocker; the runbook is already gated and reversible at this step.
+   Microsoft Learn's MAI image how-to (`use-foundry-models-mai`) lists "A Microsoft Foundry project" as a deployment prerequisite, worded more strongly than this doc set's treatment of `proj-<workload>-media-01` as fully optional and deferrable past the model-deployment step (`implementation-guide.md` step 4, C2: "may be deferred to the audition session without blocking the hold gate"). The same Learn page's own CLI deployment example, which `implementation-guide.md` W3 mirrors exactly, targets the account directly and never references a project, so the practical risk looks low. Recommend the deploy operator watch Gate 4 closely: if `az cognitiveservices account deployment create` or the Foundry portal path errors without a project present, create `proj-<workload>-media-01` first (moving C2 ahead of W3) and note the reordering in `as-built.md`. Not a blocker; the runbook is already gated and reversible at this step.
 
 4. **r2-upload.mjs reconciliation scope: correctly captured in the design doc, not yet reflected back into ADR-0008.**
 
@@ -78,16 +78,16 @@ Other checks:
 
 Per the review agenda, plus the owner-input register `implementation-guide.md` section 0.4 already stages (O1 through O7):
 
-1. **`ais` vs `aif`.** Confirm at the HOLD whether to keep `ais-studioai-prod-eus-01` (this initiative's documented, consistently-applied deviation, used in every design doc and all 11 diagrams) or switch to the current Learn-mapped `aif-studioai-prod-eus-01` before the resource is created. Trivial to change now (the resource does not exist yet; Azure names are immutable only after creation), expensive to change later.
+1. **`ais` vs `aif`.** Confirm at the HOLD whether to keep `aif-<workload>-<env>-<region>-01` under the `ais-` prefix (this initiative's documented, consistently-applied deviation, used in every design doc and all 11 diagrams) or switch to the current Learn-mapped `aif-<workload>-<env>-<region>-01` before the resource is created. Trivial to change now (the resource does not exist yet; Azure names are immutable only after creation), expensive to change later.
 2. **Catalog size.** Confirm the real scene count in the brand-specific `resources` prompt library (about 170 vs SPIKE-01's mis-cited "340 scenes") before authorizing the image backfill, and confirm the 100 USD cap still fits if the count is higher than 340 total images (see Should-fix 1 for the arithmetic).
 3. **`owner` tag value (O1)** and **`costCenter` tag value (O2)**, an alias and an optional chargeback value, both name-only, required before step W1 (resource group create).
 4. **Owner alert email (O3)** for the budget action group, required before step W7.
-5. **MVP monthly credit amount (O5).** Not recorded in any ADR; needed only to size the optional subscription-scoped credit-burn-down budget (`budget-studioai-credit-sub-01`, proposed name, see below); that step is skipped until supplied.
+5. **MVP monthly credit amount (O5).** Not recorded in any ADR; needed only to size the optional subscription-scoped credit-burn-down budget (`budget-<workload>-credit-sub-01`, proposed name, see below); that step is skipped until supplied.
 6. **Speech-key rotation cadence (O6).** Design default is rotate-on-suspicion of exposure plus retire-at-Entra-migration, with no fixed calendar cadence (ADR-0005 requires rotation but sets no schedule). Confirm this default or supply a cadence.
 7. **Lisa's en-AU voice id and the exact `excited` style token.** Already answered by SPIKE-02's citation and independently reconfirmed by me today (`en-AU-Lisa:MAI-Voice-2`; adjective form `excited` per the prebuilt-voice table). Recommend treating these as the working defaults, with the live Foundry-playground check at the voice spike kept as a drift guard rather than a from-scratch lookup, before either string is committed to `brand.json` (see Should-fix 2).
 8. **Service IP-allowlist opt-in (O7).** Default off. Confirm or opt in.
 9. **Pipeline identity UPN (O4).** Normally auto-resolves to the signed-in owner; still an explicit confirm-before-write per the runbook (steps W4/W5).
-10. **Proposed names for owner confirmation:** `ag-studioai-prod-eus-01` (budget action group) and `budget-studioai-credit-sub-01` (subscription-scoped credit-burn-down budget, gated on item 5 above). Both are marked "Proposed" rather than "Canonical" in `resource-topology-and-caf-naming.md` and `implementation-guide.md` because ADR-0006 decided the resources but not their exact strings; everything else in the canonical naming table is fixed.
+10. **Proposed names for owner confirmation:** `ag-<workload>-<env>-<region>-01` (budget action group) and `budget-<workload>-credit-sub-01` (subscription-scoped credit-burn-down budget, gated on item 5 above). Both are marked "Proposed" rather than "Canonical" in `resource-topology-and-caf-naming.md` and `implementation-guide.md` because ADR-0006 decided the resources but not their exact strings; everything else in the canonical naming table is fixed.
 
 ## Verdict
 

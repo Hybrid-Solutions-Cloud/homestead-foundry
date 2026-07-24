@@ -149,31 +149,31 @@ Pipeline-enforced habits (these become acceptance checks on the image-generation
 
 &lt;!-- safety-scan-worked-example:start -->
 
-## Worked example: Gunner the Lab / Holdfast Press
+## Worked example: Brand A / Brand B
 
-This methodology is deployed today for two live public brands, Gunner the Lab and Holdfast Press (the StoryReader apps), proving the pattern above in production. Every section above (RBAC table, network posture, residency findings, content-safety habits) applies to this instance without modification; only the concrete names differ from the placeholders.
+This methodology is deployed today for two live public brands, Brand A and Brand B (the reader apps), proving the pattern above in production. Every section above (RBAC table, network posture, residency findings, content-safety habits) applies to this instance without modification; only the concrete names differ from the placeholders.
 
 | Placeholder | Worked-example value |
 | --- | --- |
-| `<workload>` | `studioai` |
+| `<workload>` | `<workload>` |
 | `<env>` | `prod` |
 | `<region>` | East US (`eastus`) |
 | `<instance>` | `01` |
-| Resource group | `rg-studioai-prod-eus-01` |
-| `<foundry-account>` | `aif-studioai-prod-eus-01` |
-| `<foundry-project>` | `proj-studioai-media-01` |
+| Resource group | `rg-<workload>-<env>-<region>-01` |
+| `<foundry-account>` | `aif-<workload>-<env>-<region>-01` |
+| `<foundry-project>` | `proj-<workload>-media-01` |
 | Image model deployment | `mai-image-25` |
-| Monthly budget | `budget-studioai-prod-eus-01` |
-| `<vault>` | `kv-hcs-vault-01` (existing platform vault, reused) |
-| `<initiative>` tag | `studio-foundry` (the repo's former name, kept so cost rollups still match historical records) |
-| Speech secret name | `studio-foundry-speech-key` |
-| Legacy per-brand Speech resource (StoryReader narrator/read-along track, untouched) | `storyreader-tts` (kind SpeechServices, F0), resource group `rg-storyreader` |
-| Prompt sources | `gunner-studio/resources`, edited to genericize trademarked terms (for example, rewriting a named clothing brand as "denim bib overalls with a red rectangular chest patch") |
-| Consuming app repos | Both StoryReader repos; `.dev.vars` confirmed gitignored at line 4 in each |
+| Monthly budget | `budget-<workload>-<env>-<region>-01` |
+| `<vault>` | `kv-<workload>-<env>-01` (existing platform vault, reused) |
+| `<initiative>` tag | `<workload>` (the initiative's tag token, kept so cost rollups still match historical records) |
+| Speech secret name | `<workload>-speech-key` |
+| Legacy per-brand Speech resource (the reader apps' narrator/read-along track, untouched) | the legacy narrator Speech resource (kind SpeechServices, F0), its own resource group |
+| Prompt sources | the studio prompt repo, edited to genericize trademarked terms (for example, rewriting a named clothing brand as "denim bib overalls with a red rectangular chest patch") |
+| Consuming app repos | Both reader-app repos; `.dev.vars` confirmed gitignored at line 4 in each |
 | Art style guardrail | "hand-drawn storybook illustration" plus a graphite or colored-pencil descriptor, holding this child-directed content clear of the photorealistic-minors gate |
 | Audience disclosure | Each app ships a parent-facing note (for example "illustrations and some narration are AI-generated") |
 | Pipeline tools | `tools/publish.mjs`, `tools/tts.mjs`, `tools/mai-image.mjs` |
-| Code verification performed this phase | `.gitignore` line 4 (`.dev.vars`) in both StoryReader repos; `tools/tts.mjs` key auth via `fromSubscription` (both repos, identical content) |
+| Code verification performed this phase | `.gitignore` line 4 (`.dev.vars`) in both reader-app repos; `tools/tts.mjs` key auth via `fromSubscription` (both repos, identical content) |
 
 &lt;!-- safety-scan-worked-example:end -->
 

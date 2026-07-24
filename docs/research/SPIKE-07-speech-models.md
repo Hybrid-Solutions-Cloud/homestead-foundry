@@ -164,12 +164,12 @@ Note on sourcing quality: Rime, Piper, XTTS, and F5-TTS claims lean on integrato
 ---
 
 &lt;!-- safety-scan-worked-example:start -->
-## Worked example: Gunner the Lab / Holdfast Press StoryReader
+## Worked example: Brand A / Brand B
 
-This spike was run for the StoryReader reader app serving the Gunner the Lab and Holdfast Press children's-book brands, where the concrete trigger was the read-along feature.
+This spike was run for the reader app serving the Brand A and Brand B brands (a sensitive-audience catalog), where the concrete trigger was the read-along feature.
 
 - **Current state.** Per SPIKE-02 and the voice decisions, MAI-Voice-2 ships listen-only, and read-along word-highlighting stays on the pre-existing narrator track (`en-US-AndrewMultilingualNeural`), an Azure neural voice that does emit `WordBoundary` events. The AI voices (Harper en-US, Lisa en-AU, Ethan en-US with the excited style) cannot drive highlighting because MAI-Voice-2's REST path emits no word boundaries.
 - **Applied recommendation (word-sync).** Keep read-along on the narrator track for v1; if a later version wants the AI voices to drive the highlight, retrofit word timing with self-hosted forced alignment (WhisperX or Montreal Forced Aligner) over the already-rendered AI-voice audio, since the block text is known at publish time. Do not add an external speech vendor solely for word timestamps: the narrator track already supplies them and the pipeline already stitches per-block audio.
-- **Applied recommendation (lip-sync).** No avatar/video work is on the StoryReader roadmap yet. When it starts, keep lip-sync as audio-to-viseme post-processing (Rhubarb, or a phoneme-to-viseme map) so it works over whichever voice a chapter used, including the British narrator (`en-GB-Ryan:DragonHDLatestNeural`), which Azure's native `redlips_front` visemes would not cover (en-US only).
+- **Applied recommendation (lip-sync).** No avatar/video work is on the reader app roadmap yet. When it starts, keep lip-sync as audio-to-viseme post-processing (Rhubarb, or a phoneme-to-viseme map) so it works over whichever voice a chapter used, including the British narrator (`en-GB-Ryan:DragonHDLatestNeural`), which Azure's native `redlips_front` visemes would not cover (en-US only).
 - **Pipeline touchpoint.** Any adopted companion tool runs as a post-synthesis step in the existing `tools/tts.mjs` -> stitch -> publish flow; ask the operator for the current path of that consumer repo rather than assuming one, since it lives outside this repo.
 &lt;!-- safety-scan-worked-example:end -->

@@ -187,7 +187,7 @@ Also owner-facing at the same milestone: confirm the credit offer type and reset
 
 &lt;!-- safety-scan-worked-example:start -->
 
-## Worked example: Gunner the Lab / Holdfast Press
+## Worked example: Brand A / Brand B
 
 This is the pattern above as deployed in this repo's own production instance, proof it works, not a template to copy verbatim.
 
@@ -195,18 +195,18 @@ This is the pattern above as deployed in this repo's own production instance, pr
 
 | Item | Canonical name |
 | --- | --- |
-| Resource group | `rg-studioai-prod-eus-01` |
-| Azure AI Foundry (AIServices) account | `aif-studioai-prod-eus-01` |
-| Foundry project | `proj-studioai-media-01` |
+| Resource group | `rg-<workload>-<env>-<region>-01` |
+| Azure AI Foundry (AIServices) account | `aif-<workload>-<env>-<region>-01` |
+| Foundry project | `proj-<workload>-media-01` |
 | MAI-Image-2.5 deployment | `mai-image-25` |
-| Monthly budget | `budget-studioai-prod-eus-01` |
-| Key Vault (existing platform vault, REUSED, never recreated) | `kv-hcs-vault-01` |
+| Monthly budget | `budget-<workload>-<env>-<region>-01` |
+| Key Vault (existing platform vault, REUSED, never recreated) | `kv-<workload>-<env>-01` |
 | Region | East US (`eastus`) |
-| Tags | `initiative=studio-foundry`, `env=prod`, `owner=<alias>`, `costCenter=<value>` |
+| Tags | `initiative=<workload>`, `env=prod`, `owner=<alias>`, `costCenter=<value>` |
 
-**The real cap: 100 USD per month**, enforced by the same three layers described above (`--mai-budget-usd`, `budget-studioai-prod-eus-01`, and the subscription spending limit kept ON).
+**This deployer's chosen cap: 100 USD per month**, enforced by the same three layers described above (`--mai-budget-usd`, `budget-<workload>-<env>-<region>-01`, and the subscription spending limit kept ON).
 
-**Real voice backfill split (SPIKE-05):** a three-voice backfill across both brands costs about 32 USD one time (Gunner the Lab about 29.70 USD, Holdfast Press about 2.09 USD, reflecting each brand's back-catalog size); ongoing steady state is about 1 to 2 USD per month.
+**Real voice backfill split (SPIKE-05):** a three-voice backfill across both brands costs about 32 USD one time (Brand A about 29.70 USD, Brand B about 2.09 USD, reflecting each brand's back-catalog size); ongoing steady state is about 1 to 2 USD per month.
 
 **Real spend forecast against the 100 USD cap:**
 
@@ -219,10 +219,10 @@ This is the pattern above as deployed in this repo's own production instance, pr
 
 The cap is well sized: it absorbs the entire one-shot build-out for both brands yet still stops a runaway loop (ADR-0006 context).
 
-**Real Flash-for-bulk saving:** expected saving on Gunner the Lab's 340-image catalog backfill is roughly 5 to 20 USD, modest, so MAI-Image-2.5 (not Flash) is used for the pilot and all final published or hero art; Flash is reserved for after a Flash arm proves style parity, or for large throwaway candidate sweeps.
+**Real Flash-for-bulk saving:** expected saving on Brand A's 340-image catalog backfill is roughly 5 to 20 USD, modest, so MAI-Image-2.5 (not Flash) is used for the pilot and all final published or hero art; Flash is reserved for after a Flash arm proves style parity, or for large throwaway candidate sweeps.
 
 **Real `env` tag value:** `prod`, consistent with these resource names, chosen over ADR-0006's illustrative `demo` example because this account produces production-serving assets for both live brands (ADR gap 2 above).
 
-**Real attribution split:** Azure cannot separate Gunner the Lab from Holdfast Press on the shared account (one account, no per-request tag); the pipeline `maiLedger` is the only place that knows the brand, voice, and model behind each call, and is reconciled against the Group-by-Meter Cost Analysis view after each backfill run.
+**Real attribution split:** Azure cannot separate Brand A from Brand B on the shared account (one account, no per-request tag); the pipeline `maiLedger` is the only place that knows the brand, voice, and model behind each call, and is reconciled against the Group-by-Meter Cost Analysis view after each backfill run.
 
 &lt;!-- safety-scan-worked-example:end -->

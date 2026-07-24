@@ -19,7 +19,7 @@ You've come across Azure AI Foundry and you want to actually *do* something with
 
 <!-- safety-scan-worked-example:start -->
 
-Homestead Foundry runs a real, published production deployment - the Azure AI Foundry backbone generating scene art and voice narration for two live brands, Gunner the Lab and Holdfast Press. That's not a demo; it's the system this whole platform is being generalized from, and it keeps running here as the platform grows around it.
+Homestead Foundry runs a real, published production deployment - the Azure AI Foundry backbone generating scene art and voice narration for two live brands, Brand A and Brand B. That's not a demo; it's the system this whole platform is being generalized from, and it keeps running here as the platform grows around it.
 
 <!-- safety-scan-worked-example:end -->
 

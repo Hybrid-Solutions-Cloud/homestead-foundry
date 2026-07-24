@@ -108,9 +108,9 @@ Grounding read first: the model roster (the deployed image/video roster and the 
 ---
 
 &lt;!-- safety-scan-worked-example:start -->
-## Worked example: Gunner the Lab / Holdfast Press
+## Worked example: Brand A / Brand B
 
-This section carries the concrete application this spike was first run against: the East US Foundry account `aif-studioai-prod-eus-01` (RG `rg-studioai-prod-eus-01`, "This Is My Demo - MVP Subscription") serving the Gunner the Lab and Holdfast Press (StoryReader) children's-book brands. Everything above is model-general.
+This section carries the concrete application this spike was first run against: the East US Foundry account `aif-<workload>-<env>-<region>-01` (RG `rg-<workload>-<env>-<region>-01`, the MVP credit subscription) serving the Brand A and Brand B reader apps (a sensitive-audience catalog). Everything above is model-general.
 
 **Roster confirmed (Q1, Q3).** The deployed stills roster (`flux-2-pro`, `flux-1-kontext-pro`, `flux-1-1-pro`, with `mai-image-25` as first-party fallback) remains the best available for the graphite hand-drawn house style. GPT-image-2 is realism-biased and, critically for this account, not deployable in East US (eastus2 / westus3 only), so it would require a second resource outside the primary account. No change to the deployed roster is required.
 

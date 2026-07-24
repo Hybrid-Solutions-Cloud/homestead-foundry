@@ -7,8 +7,8 @@ This ADR records a general, reusable methodology for integrating an Azure AI
 Foundry build (neural voice plus image generation) with an external,
 publish-time asset pipeline owned by a separate consumer repo. It was first
 proven on a real build serving two publishing brands; the concrete detail from
-that build is preserved under **Worked example** callouts so the decision reads
-as reusable while the historical record stays intact.
+that build is preserved under a single anonymized **Worked example** callout so
+the decision reads as reusable while the historical lessons stay intact.
 
 Throughout, "the consumer repo" is the repo that owns the publish pipeline and
 the rendered site, "the publish pipeline" is its set of publish-time Node tools
@@ -44,28 +44,6 @@ The forces this decision must reconcile:
   often lives in a separate studio/resources repo, not the site repo.
 - **Canvas.** Foundry image generation has a default landscape size chosen to
   fit the pixel cap (ADR-0002).
-
-&lt;!-- safety-scan-worked-example:start -->
-
-> **Worked example (Gunner the Lab and Holdfast Press).**
-> SPIKE-06 inspected the live pipelines in `storyreader-holdfast` and
-> `storyreader-gunner` plus the Gunner site image locations.
-> - Chapters exceed the 10-minute-per-request audio cap; Cloudflare Workers
->   cannot run ffmpeg or ffprobe, and object storage is Cloudflare R2.
-> - The two `publish.mjs` copies drifted both ways: Holdfast's had the
->   voice-aware audio hash and the `--force` flag; Gunner's had the `timeframe`
->   manifest field but ran the older, non-voice-aware code. Gunner is the
->   42-story catalog and the bulk of the MAI voice backfill, so it published
->   without the voice-aware hash.
-> - Scene art was produced manually (generator unrecorded), hotlinked to a
->   `gunnerthelab.com` URL inside the chapter JSON (only covers were copied into
->   R2), and prompts lived in the separate `gunner-studio/resources` repo
->   (`Illustration_Prompts_All_Stories.md`, `Branding_Illustration_Prompts.md`,
->   `Character_Bible.md`); the site repo had no `resources/` directory.
-> - MAI image generation requires 1248x832 as the default landscape size to fit
->   the 1,048,576-pixel cap (ADR-0002).
-
-&lt;!-- safety-scan-worked-example:end -->
 
 ## Decision
 
@@ -103,30 +81,46 @@ reconciliation as an explicit first step.
    itself a frontmatter field (for example a cover). Body-referenced assets live
    in the index only.
 
-&lt;!-- safety-scan-worked-example:start -->
+<!-- safety-scan-worked-example:start -->
 
-> **Worked example (Gunner the Lab and Holdfast Press).**
-> 1. Port Holdfast's voice-aware audio hash and `--force` flag into Gunner, and
->    port Gunner's `timeframe` manifest field into Holdfast.
-> 2. Add an `audioVariants` array to each chapter entry (schemaVersion stays 1);
->    the existing `audio`, `timings`, `hasAudio`, and `audioDurationMs` fields
->    keep meaning the narrator track. Key variants by `variantHash`; upload to R2
->    keys `books/<bookId>/audio/<chapterId>.<slug>.<variantHash>.mp3`. Add a
->    `maiLedger` plus a `--mai-budget-usd` hard stop mirroring the existing
->    450,000-character F0 stop (owner default 100 USD per month once the Azure
->    credit resets, uncapped until then). The `tts.mjs` change is adding the
->    `mstts` namespace and an `mstts:express-as` wrapper for Ethan's excited
->    style.
-> 3. `gunnerthelab.github.io/tools/mai-image.mjs`, 1248x832 default, writes PNGs
->    into `public/images/stories/` (or `covers/`).
-> 4. Read prompts from `gunner-studio/resources`, genericize trademarked terms
->    per ADR-0007.
-> 5. `gunnerthelab.github.io/public/images/provenance.json`, plus an optional
->    `artProvenance` echo in story frontmatter for the cover (the one asset that
->    is a frontmatter field); scene art stays in the index only because it is
->    body-referenced.
+> **Worked example (anonymized first proven build).** A shared Foundry backbone
+> served two publishing brands, Brand A and Brand B, each with its own consumer
+> repo and publish pipeline.
+>
+> *As-found (SPIKE-06).* Chapters exceeded the 10-minute-per-request audio cap;
+> the edge-worker runtime could not run ffmpeg or ffprobe, and object storage was
+> the platform's bucket service. The two `publish.mjs` copies had drifted both
+> ways: Brand B's had the voice-aware audio hash and the `--force` flag; Brand
+> A's had the `timeframe` manifest field but ran the older, non-voice-aware code.
+> Brand A is the 42-story catalog and the bulk of the MAI voice backfill, so it
+> had published without the voice-aware hash. Scene art was produced manually
+> (generator unrecorded), hotlinked to Brand A's marketing origin inside the
+> chapter JSON (only covers were copied into the bucket), and prompts lived in a
+> separate studio prompt repo (`Illustration_Prompts_All_Stories.md`,
+> `Branding_Illustration_Prompts.md`, `Character_Bible.md`); the site repo had no
+> `resources/` directory. MAI image generation requires 1248x832 as the default
+> landscape size to fit the 1,048,576-pixel cap (ADR-0002).
+>
+> *Applied.* (1) Port Brand B's voice-aware audio hash and `--force` flag into
+> Brand A, and port Brand A's `timeframe` manifest field into Brand B. (2) Add an
+> `audioVariants` array to each chapter entry (schemaVersion stays 1); the
+> existing `audio`, `timings`, `hasAudio`, and `audioDurationMs` fields keep
+> meaning the narrator track. Key variants by `variantHash`; upload to bucket keys
+> `books/<bookId>/audio/<chapterId>.<slug>.<variantHash>.mp3`. Add a `maiLedger`
+> plus a `--mai-budget-usd` hard stop mirroring the existing 450,000-character F0
+> stop (owner default 100 USD per month once the Azure credit resets, uncapped
+> until then). The `tts.mjs` change is adding the `mstts` namespace and an
+> `mstts:express-as` wrapper for the styled voice (Ethan's excited style). (3) The
+> reader-app repo gains `tools/mai-image.mjs`, 1248x832 default, writing PNGs into
+> `public/images/stories/` (or `covers/`). (4) Read prompts from the studio prompt
+> repo, genericizing trademarked terms per ADR-0007. (5) Write the reader-app
+> repo's `public/images/provenance.json`, plus an optional `artProvenance` echo in
+> story frontmatter for the cover (the one asset that is a frontmatter field);
+> scene art stays in the index only because it is body-referenced. Outright
+> backfill (the rejected Option C alternative) would have cost about 10 USD per
+> voice.
 
-&lt;!-- safety-scan-worked-example:end -->
+<!-- safety-scan-worked-example:end -->
 
 ## Consequences
 
@@ -182,18 +176,6 @@ reconciliation as an explicit first step.
 - **Bumping the manifest schema version for the variants array.** Rejected: an
   additive optional field keeps the schema version unchanged and leaves old
   clients working.
-
-&lt;!-- safety-scan-worked-example:start -->
-
-> **Worked example (Gunner the Lab and Holdfast Press).** Option C's outright
-> backfill costs about 10 USD per voice. The two-way port is Holdfast's
-> voice-aware hash and `--force` into Gunner, and Gunner's `timeframe` field into
-> Holdfast. The image tool, images, story markdown, and covers all live in the
-> Gunner site repo; prompts live in `gunner-studio/resources`. Scene art is
-> hotlinked to `gunnerthelab.com`; only covers are copied into R2. The variants
-> array is `audioVariants` and the schema version is 1.
-
-&lt;!-- safety-scan-worked-example:end -->
 
 ## Sources
 

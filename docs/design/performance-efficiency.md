@@ -126,11 +126,11 @@ The bulk (Flash-class) variant of the image model is the designed bulk arm, stri
 
 &lt;!-- safety-scan-worked-example:start -->
 
-## Worked example: Gunner the Lab / Holdfast Press
+## Worked example: Brand A / Brand B
 
 Everything above is the general methodology. This section restates the one real, deployed instance it was built and measured against, as proof the pattern works in production.
 
-- **Real resources:** the image deployment `mai-image-25` runs on the shared AI Services account `aif-studioai-prod-eus-01` (resource group `rg-studioai-prod-eus-01`, region East US), matching the CAF pattern in section 2 exactly.
+- **Real resources:** the image deployment `mai-image-25` runs on the shared AI Services account `aif-<workload>-<env>-<region>-01` (resource group `rg-<workload>-<env>-<region>-01`, region East US), matching the CAF pattern in section 2 exactly.
 - **Real capacity envelope:** the primary account observed Tier 5 (10 RPM) live; the fallback subscription default is Tier 1 (2 RPM), which is why keeping the primary subscription's Tier 5 mattered concretely (ADR-0002 consequence).
 - **Real full-catalog backfill:** the ADR-0006 cost basis is about 170 scenes x 2 candidates = 340 images. At Tier 5, that is 340 calls x 6 seconds = 34 minutes of API floor; at Tier 6, about 28 minutes (6 minutes saved, not worth a quota request); at the fallback Tier 1, about 170 minutes, which is the concrete reason Tier 5 mattered.
 - **The catalog-discrepancy gap, as it actually occurred:** SPIKE-01 phrased the same backfill as "roughly 340 scenes at 2 candidates each (about 680 calls)," while SPIKE-05 and the ADR-0006 cost bands use about 170 scenes x 2 candidates = 340 images. This design carried 340 images, the basis of the decided 17 to 68 USD cost band. If the catalog truly held 340 scenes, time and cost would double (68 minutes, 34 to 136 USD), which is why section 5.1's reconciliation practice exists as a named methodology step, not just a footnote.
@@ -139,14 +139,14 @@ Everything above is the general methodology. This section restates the one real,
 
   | Work item | Characters | Cost at 22 USD per 1M |
   | --- | --- | --- |
-  | Gunner catalog, per voice (42 stories) | about 450,000 | about 9.90 USD |
-  | Holdfast catalog, per voice (prologue plus chapter one) | about 31,630 | about 0.70 USD |
+  | Brand A catalog, per voice (42 stories) | about 450,000 | about 9.90 USD |
+  | Brand B catalog, per voice (prologue plus chapter one) | about 31,630 | about 0.70 USD |
   | Locked three-voice backfill, both brands (Harper, Lisa, Ethan) | about 1,444,890 | about 32 USD one-time |
-  | Ongoing: new Gunner story, three voices | about 33,000 | about 0.73 USD |
-  | Ongoing: new Keepers chapter, three voices | about 48,000 | about 1.06 USD |
+  | Ongoing: new Brand A story, three voices | about 33,000 | about 0.73 USD |
+  | Ongoing: new Brand B chapter, three voices | about 48,000 | about 1.06 USD |
   | Typical month (one story plus one chapter) | about 81,000 | about 1.78 USD |
-- **Real pacing win:** dropping the 3.1-second F0 spacing for MAI calls on the S0 account removed fixed dead time per block across the whole 42-story Gunner catalog.
-- **Real storage fit:** the full three-voice build (Gunner plus Holdfast, all three voices) stays inside R2's free tier with free egress (SPIKE-05 grounding).
+- **Real pacing win:** dropping the 3.1-second F0 spacing for MAI calls on the S0 account removed fixed dead time per block across the whole 42-story Brand A catalog.
+- **Real storage fit:** the full three-voice build (Brand A plus Brand B, all three voices) stays inside R2's free tier with free egress (SPIKE-05 grounding).
 - **Real legacy-voice detail:** the 3.1-second inter-request spacing applied to the narrator's F0 account (20 transactions per 60 seconds); MAI variant calls on the S0 account relax this via the per-voice options bag, while the narrator path keeps its own F0 spacing.
 
 &lt;!-- safety-scan-worked-example:end -->

@@ -129,26 +129,26 @@ No Foundry deployment step is required; voices are selected by the SSML
 
 &lt;!-- safety-scan-worked-example:start -->
 
-## Worked example: the Gunner the Lab and Holdfast Press media backbone
+## Worked example: the Brand A and Brand B media backbone
 
 > Everything in this section is what was actually built with the reusable
 > decision above, on the first proven build of this platform. It is historical
 > fact, not part of the general methodology.
 
-Feature A2 added multi-voice AI Listen to both StoryReader apps
-(app.gunnerthelab.com and app.holdfastpress.com), served by the shared
-AIServices resource `aif-studioai-prod-eus-01` in East US, tier S0.
+Feature A2 added multi-voice AI Listen to both brands' reader apps
+(Brand A's reader app and Brand B's reader app), served by the shared
+AIServices resource `aif-<workload>-<env>-<region>-01` in East US, tier S0.
 
-- **Default (narrator) voices, kept as read-along and default listen:** Gunner
-  `en-US-AndrewMultilingualNeural`; Holdfast `en-GB-Ryan:DragonHDLatestNeural`.
-  Holdfast kept its British narrator as the default.
+- **Default (narrator) voices, kept as read-along and default listen:** Brand A
+  `en-US-AndrewMultilingualNeural`; Brand B `en-GB-Ryan:DragonHDLatestNeural`.
+  Brand B kept its British narrator as the default.
 - **Listen-only voices added, the same set for both brands:** **Harper**
   (en-US, female), **Lisa** (en-AU, female), and **Ethan** (en-US, male,
   rendered with the `excited` style because his natural register reads flat).
   SPIKE-02 confirmed all three are published prebuilt voices, that every one of
   them supports the `excited` style, and that Ethan is the only style-capable
   en-US male.
-- **The accent gap:** there is no en-GB MAI-Voice-2 voice today, so Holdfast's
+- **The accent gap:** there is no en-GB MAI-Voice-2 voice today, so Brand B's
   listen options are American and Australian next to a British narrator. The
   owner accepted this.
 - **The two token forms to confirm at spike time:** the exact en-AU identifier

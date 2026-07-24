@@ -85,15 +85,15 @@ Full roster in [`../AGENTS.md`](../AGENTS.md).
 When the board shows infrastructure deployed and verified, the plan holds. The owner reviews everything, then begins generation as separate, budgeted work.
 
 <!-- safety-scan-worked-example:start -->
-## Worked example: Gunner the Lab / Holdfast Press
+## Worked example: Brand A / Brand B
 
-This methodology is deployed and verified in production today. The first real build served two consumer brands, **Gunner the Lab** and **Holdfast Press**, sharing one Azure AI Foundry resource and a common StoryReader publish pipeline.
+This methodology is deployed and verified in production today. The first real build served two consumer brands, **Brand A** and **Brand B**, sharing one Azure AI Foundry resource and a common publish pipeline for the reader apps.
 
 - **Model workstreams:**
-  - **G11 image** - MAI-Image-2.5 (preview), Azure AI Foundry deployment, Global Standard; generations and edits endpoints. Gunner the Lab first, both brands later.
+  - **G11 image** - MAI-Image-2.5 (preview), Azure AI Foundry deployment, Global Standard; generations and edits endpoints. Brand A first, both brands later.
   - **A2 voice** - MAI-Voice-2 (preview), Azure Speech in Foundry Tools; SSML voice name, regional endpoint. Both brands from the start.
 - **Architecture:** one Foundry resource in East US, one resource group, secrets in the tenant platform Key Vault, publish-time pre-render (`tools/tts.mjs`, `tools/stitch.mjs`, `tools/publish.mjs`) to each brand's Cloudflare R2 bucket, never runtime synthesis.
-- **Locked owner decisions:** spend approved; each brand keeps its current narrator as the default; added listen-only voices are Harper (en-US), Lisa (en-AU), and Ethan (en-US, excited style); Holdfast Press keeps its British narrator as default; preview risk accepted; budget cap of 100 US dollars per month.
+- **Locked owner decisions:** spend approved; each brand keeps its current narrator as the default; added listen-only voices are Harper (en-US), Lisa (en-AU), and Ethan (en-US, excited style); Brand B keeps its British narrator as default; preview risk accepted; budget cap of 100 US dollars per month.
 - **Status:** infrastructure deployed and verified ready to generate. Bulk image and audio generation is held for the owner as a separate, budgeted step that follows this plan.
 
 See the decision log for the full decision history behind this build, and the source plans for the two original source plans this build's workstreams were drawn from.

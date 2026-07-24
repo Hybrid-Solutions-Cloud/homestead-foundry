@@ -57,10 +57,10 @@ Adopt **MAI-Image-2.5** (Preview), deployed as **Global Standard** on the shared
 &lt;!-- safety-scan-worked-example:start -->
 ## Worked example: the first proven build
 
-This ADR was first written and decided for this repo's first proven build, which serves the Gunner the Lab (gunnerthelab.com) and Holdfast Press StoryReader brands. The concrete instantiation of the methodology above:
+This ADR was first written and decided for this repo's first proven build, which serves two publishing brands, Brand A and Brand B, through their reader apps. The concrete instantiation of the methodology above:
 
-- **Trigger.** Feature G11 needed new Story #1 scene art for gunnerthelab.com plus a repeatable path to future story art matching the existing hand-drawn graphite and colored-pencil illustration style (graphite crosshatch children's-book art).
-- **Target subscription.** MAI-Image-2.5 was confirmed live in the East US catalog of the primary subscription, "This Is My Demo - MVP Subscription", lifecycle Preview, version 2026-06-02, Global Standard, Tier 5 (10 RPM).
+- **Trigger.** An early feature needed new scene art for Brand A's reader app plus a repeatable path to future story art matching the existing hand-drawn graphite and colored-pencil illustration style (graphite crosshatch storybook art).
+- **Target subscription.** MAI-Image-2.5 was confirmed live in the East US catalog of the primary subscription (the MVP credit subscription, a Tier-5 / MVP-tier subscription), lifecycle Preview, version 2026-06-02, Global Standard, Tier 5 (10 RPM).
 - **Canvas.** The existing covers are 1264x848, which is 1,071,872 pixels, 23,296 pixels over the 1,048,576 cap, so they cannot be reproduced at their exact dimensions. The scene-art canvas was standardized on 1248x832 (1,038,336 pixels, a clean 3:2), about a 1 to 2 percent scale difference from the originals (whose ratio is 1.491, not 1.500).
 - **Style prompts.** The build's existing self-contained prompts (style vocabulary plus character tokens) were fed verbatim to the generations endpoint as arm one; an existing illustration was passed as the edits `image` input as arm two.
 - **Shared resource.** The model deploys onto the same AIServices resource that serves MAI-Voice-2 (ADR-0003).

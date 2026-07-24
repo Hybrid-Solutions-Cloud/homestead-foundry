@@ -44,6 +44,8 @@ param speechUsersGroupObjectId = '00000000-0000-0000-0000-000000000002'
 // Pre-existing platform Key Vault: reused by name only, never created here.
 param keyVaultName = 'kv-example-vault-01'
 
-// ADR-0006: owner-locked monthly cap, alerts straight to the owner email.
+// ADR-0006: EXAMPLE monthly cap and alert email. Both are deployer-chosen:
+// replace them with your own values before you deploy. main.bicep requires
+// budgetAmountUsd (no default), so set it here or override at deploy time.
 param budgetAmountUsd = 100
 param budgetContactEmails = ['owner@example.com']

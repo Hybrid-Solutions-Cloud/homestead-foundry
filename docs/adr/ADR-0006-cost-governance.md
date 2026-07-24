@@ -6,7 +6,7 @@
 
 ## Context
 
-The initiative runs a shared Azure AI Foundry (AIServices) resource that meters generation and synthesis calls per token or per character. The owner locks a fixed monthly budget cap for that shared resource (see MASTER-PLAN and the A2 voice-plan decisions). SPIKE-05 (`docs/research/SPIKE-05-cost-governance.md`) turns a build's pricing into a decision-grade rollup and specifies how that cap is really enforced; SPIKE-03 (`docs/research/SPIKE-03-tenant-readiness.md`) supplies the MVP credit mechanics. The forces:
+The initiative runs a shared Azure AI Foundry (AIServices) resource that meters generation and synthesis calls per token or per character. Whoever deploys this build sets a fixed monthly budget cap for that shared resource (the concrete figure for the first proven build is in the Worked example). SPIKE-05 (`docs/research/SPIKE-05-cost-governance.md`) turns a build's pricing into a decision-grade rollup and specifies how that cap is really enforced; SPIKE-03 (`docs/research/SPIKE-03-tenant-readiness.md`) supplies the MVP credit mechanics. The forces:
 
 - **The cap should be sized to absorb a one-shot build-out.** Steady state after backfill is a few dollars a month. The biggest realistic single month is the initial content backfill (voice narration plus the first image-catalog generation), so the cap should be set high enough to absorb that one-time build-out yet low enough to stop a runaway loop.
 - **An Azure budget alert is a notification, not a hard cap.** This is the central governance fact and it is first-party: Foundry and Azure OpenAI provide no hard spending limit. Budgets are evaluated against the threshold roughly once per day, and the notification fires after the spend, so a budget is a rear-view detector, not a valve.
@@ -19,9 +19,9 @@ The initiative runs a shared Azure AI Foundry (AIServices) resource that meters 
 
 **Enforce the monthly budget cap in three independent layers, and treat the pipeline guard, not the Azure budget, as the real cap:**
 
-1. **Real cap (synchronous, pre-spend): the pipeline budget-guard flag and per-month ledger in the publish pipeline.** This is the authoritative stop because it refuses a call before the money is spent. Set the default to match the cap. Honor the owner decision to keep the guard effectively lifted during the credit-burn window (to front-load spend before the credit resets), then set it to the cap once the credit resets. Voice is enforced exactly; for images use a deliberately conservative (high) tokens-per-image assumption so the guard trips early rather than late, then switch to the measured value after the smoke test.
+1. **Real cap (synchronous, pre-spend): the pipeline budget-guard flag and per-month ledger in the publish pipeline.** This is the authoritative stop because it refuses a call before the money is spent. Set the default to match the cap. Honor the deployer's decision to keep the guard effectively lifted during the credit-burn window (to front-load spend before the credit resets), then set it to the cap once the credit resets. Voice is enforced exactly; for images use a deliberately conservative (high) tokens-per-image assumption so the guard trips early rather than late, then switch to the measured value after the smoke test.
 2. **Backstop (reactive, notify-only): a resource-group-scoped Azure budget.** Create a monthly budget at the cap on the shared Foundry resource's resource group (RG scope aggregates every consuming workload and every model and isolates the initiative from unrelated subscription cost). Configure actual-cost alert thresholds at 50, 75, 90, and 100 percent, plus a forecasted alert at 100 percent, wired to one action group that emails the owner. This detects and notifies about once a day after the spend; it does not prevent it.
-3. **Credit backstop: keep the Azure spending limit ON.** For a credit subscription the spending limit's auto-disable at the credit ceiling is the only hard stop that keeps spend from becoming a real invoice. Do not remove it unless the owner deliberately elects pay-as-you-go for a spend that must exceed the monthly credit.
+3. **Credit backstop: keep the Azure spending limit ON.** For a credit subscription the spending limit's auto-disable at the credit ceiling is the only hard stop that keeps spend from becoming a real invoice. Do not remove it unless whoever deploys this deliberately elects pay-as-you-go for a spend that must exceed the monthly credit.
 
 **Tag scheme (CAF-aligned), applied to the resource group and the Foundry resource before the backfill runs (tags are not retroactive), with tag inheritance enabled:**
 
@@ -70,12 +70,12 @@ Lean on the auto-applied Foundry `project` tag for per-project image cost, and a
 &lt;!-- safety-scan-worked-example:start -->
 ## Worked example
 
-This methodology was first proven on this repo's initial build: a shared Azure AI Foundry (AIServices) resource hosting two Microsoft first-party models, MAI-Image-2.5 (scene art) and MAI-Voice-2 (neural narration), serving the Gunner the Lab and Holdfast Press StoryReader brands. The concrete figures that instantiated the decision above:
+This methodology was first proven on this repo's initial build: a shared Azure AI Foundry (AIServices) resource hosting two Microsoft first-party models, MAI-Image-2.5 (scene art) and MAI-Voice-2 (neural narration), serving two publishing brands, Brand A and Brand B, through their reader apps. The concrete figures that instantiated the decision above:
 
 - **Cap value: 100 US dollars per month.** SPIKE-05's rollup showed the biggest realistic single month (the full three-voice backfill across both brands at about 32 USD, plus a full image-catalog backfill on the premium model at about 17 to 68 USD) lands right at 100 USD, so the cap absorbed a one-shot build-out yet still stopped a runaway loop.
 - **Pipeline guard implementation:** in `publish.mjs`, `state.maiLedger[month] = { chars, estUsd }` with `estUsd = chars * 22 / 1,000,000`, plus a `--mai-budget-usd` flag defaulting to 100. Voice was deterministic (characters known before the call); the 22 USD per 1M characters rate came from the MAI-Voice-2 model page.
-- **Tag values used:** `initiative = studio-foundry` (the initiative name at the time; the repo has since been renamed), `env = demo`.
-- **Per-brand split:** Azure tags could not separate Gunner the Lab from Holdfast Press on the one shared resource, so the `maiLedger` was the authoritative per-brand and per-model ledger, reconciled against the RG meters.
+- **Tag values used:** `initiative = <workload>` (the initiative's brand-neutral token), `env = demo`.
+- **Per-brand split:** Azure tags could not separate Brand A from Brand B on the one shared resource, so the `maiLedger` was the authoritative per-brand and per-model ledger, reconciled against the RG meters.
 - **Preview caveat:** the whole MAI family was preview, so the rate card was a preview-window snapshot.
 &lt;!-- safety-scan-worked-example:end -->
 

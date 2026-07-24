@@ -192,42 +192,42 @@ Decisions needed for any build (short list):
 - Foundry model catalog entry: <https://ai.azure.com/catalog/models/MAI-Voice-2>
 
 <!-- safety-scan-worked-example:start -->
-## Worked example: Gunner the Lab / Holdfast Press
+## Worked example: Brand A / Brand B
 
 This is the concrete first build this plan was written for (planning session 2026-07-11). It carries the real brands, apps, resource names, catalog figures, and the owner's locked decisions. Everything above is the reusable methodology; everything here is the instance.
 
 ### Brands and reader apps
 
-- **Gunner the Lab**: app.gunnerthelab.com, repo `storyreader-gunner`.
-- **Holdfast Press**: app.holdfastpress.com, repo `storyreader-holdfast`.
+- **Brand A**: Brand A's reader app, Brand A's publish pipeline.
+- **Brand B**: Brand B's reader app, Brand B's publish pipeline.
 
-Both are StoryReader PWAs on the shared Vite + Preact / Cloudflare Worker (Hono + D1 + R2) / `tools/` pipeline architecture described in section 1.
+Both are the reader apps on the shared Vite + Preact / Cloudflare Worker (Hono + D1 + R2) / `tools/` pipeline architecture described in section 1.
 
 ### Real current state
 
 | Piece | Real value |
 |---|---|
-| Narrator voice | Gunner: `en-US-AndrewMultilingualNeural`. Holdfast: `en-GB-Ryan:DragonHDLatestNeural` (switched in commit `820a05f`, which also added the `--force` republish flag and voice-aware audio hashing). Configured in `brands/<brand>/brand.json` under `tts.voice`. |
+| Narrator voice | Brand A: `en-US-AndrewMultilingualNeural`. Brand B: `en-GB-Ryan:DragonHDLatestNeural` (switched in commit `820a05f`, which also added the `--force` republish flag and voice-aware audio hashing). Configured in `brands/<brand>/brand.json` under `tts.voice`. |
 | Output format | `Audio48Khz96KBitRateMonoMp3`. |
-| Speech resource | One shared Azure Speech key (region `eastus`, F0 tier) used by both brands (verified: both repos' `.dev.vars` carry the identical key). July 2026 ledger: holdfast 95,085 + gunner 27,503 = 122,588 chars of the shared 500k. |
-| Content origin | R2 bucket `storyreader-<brand>-content`, served behind `content.<brand>.com`. |
-| Catalog size (from publish state) | Gunner: 42 stories, all with audio, about 463 minutes total (roughly 450k characters extrapolated from story 01's 976 chars/min). Holdfast: 2 chapters (prologue + chapter one), about 31 minutes, 31,630 characters. |
+| Speech resource | One shared Azure Speech key (region `eastus`, F0 tier) used by both brands (verified: both repos' `.dev.vars` carry the identical key). July 2026 ledger: Brand B 95,085 + Brand A 27,503 = 122,588 chars of the shared 500k. |
+| Content origin | An R2 bucket per brand, served behind each brand's content domain (no url). |
+| Catalog size (from publish state) | Brand A: 42 stories, all with audio, about 463 minutes total (roughly 450k characters extrapolated from story 01's 976 chars/min). Brand B: 2 chapters (prologue + chapter one), about 31 minutes, 31,630 characters. |
 
-Grounding note (the section 1 grounding note, with real figures): the July 6 holdfast publish with the Dragon HD voice produced real per-word timings (78 of 84 prologue blocks carry word tuples), so the current read-along pipeline is healthy with an HD-class voice.
+Grounding note (the section 1 grounding note, with real figures): the July 6 Brand B publish with the Dragon HD voice produced real per-word timings (78 of 84 prologue blocks carry word tuples), so the current read-along pipeline is healthy with an HD-class voice.
 
 ### Real provisioning targets
 
-- **Tenant/subscription**: thisismydemo / hybridcloudsolutions tenant (same place as kv-hcs-vault-01).
-- **Resource group**: `rg-storyreader-voice-01` (or fold into an existing shared workload RG).
-- **Resource**: Azure AI Foundry resource (kind `AIServices`) named `aif-storyreader-voice-01`, or plain Speech resource `spch-storyreader-voice-01`. Region `eastus`, tier S0.
-- **Foundry project**: `storyreader-voice`.
-- **Secrets**: `storyreader-mai-speech-key` and `storyreader-mai-speech-region` in Key Vault `kv-hcs-vault-01`, then into each repo's `.dev.vars` as `MAI_SPEECH_KEY` / `MAI_SPEECH_REGION`.
-- Section 6 pipeline note: the voice-aware hash + `--force` port targets gunner first (holdfast already carries them from commit `820a05f`).
+- **Tenant/subscription**: the target tenant/subscription (same place as the platform Key Vault).
+- **Resource group**: `rg-<workload>-voice-01` (or fold into an existing shared workload RG).
+- **Resource**: Azure AI Foundry resource (kind `AIServices`) named `aif-<workload>-voice-01`, or plain Speech resource `spch-<workload>-voice-01`. Region `eastus`, tier S0.
+- **Foundry project**: `<workload>-voice`.
+- **Secrets**: `<workload>-mai-speech-key` and `<workload>-mai-speech-region` in the platform Key Vault, then into each repo's `.dev.vars` as `MAI_SPEECH_KEY` / `MAI_SPEECH_REGION`.
+- Section 6 pipeline note: the voice-aware hash + `--force` port targets Brand A first (Brand B already carries them from commit `820a05f`).
 
 ### Real architecture-option figures
 
-- Option A storage: gunner about 334 MB per extra voice, holdfast about 22 MB (at 96 kbps mono). Two extra voices for both brands is under 0.8 GB against R2's 10 GB free tier.
-- Option B disqualifier: chapters exceed the 10-minutes-per-request cap (gunner story 01 is 28 minutes; Keepers chapter one is 21.6 minutes).
+- Option A storage: Brand A about 334 MB per extra voice, Brand B about 22 MB (at 96 kbps mono). Two extra voices for both brands is under 0.8 GB against R2's 10 GB free tier.
+- Option B disqualifier: chapters exceed the 10-minutes-per-request cap (Brand A story 01 is 28 minutes; Brand B's longest chapter is 21.6 minutes).
 - Option C: the catalog costs about $10 per voice to backfill outright.
 
 ### Real cost estimate
@@ -236,31 +236,31 @@ Assumes $22 per 1M characters, two listen voices per brand, current catalog size
 
 | Item | Characters | One-time cost | Storage added |
 |---|---|---|---|
-| Gunner backfill, per voice | ~450,000 | ~$9.90 | ~334 MB |
-| Gunner backfill, 2 voices | ~900,000 | ~$19.80 | ~668 MB |
-| Holdfast backfill (2 chapters), per voice | 31,630 | ~$0.70 | ~22 MB |
-| Holdfast backfill, 2 voices | 63,260 | ~$1.40 | ~44 MB |
+| Brand A backfill, per voice | ~450,000 | ~$9.90 | ~334 MB |
+| Brand A backfill, 2 voices | ~900,000 | ~$19.80 | ~668 MB |
+| Brand B backfill (2 chapters), per voice | 31,630 | ~$0.70 | ~22 MB |
+| Brand B backfill, 2 voices | 63,260 | ~$1.40 | ~44 MB |
 | **Total initial (both brands, 2 voices each)** | ~963,000 | **~$21** | ~0.7 GB |
 
 | Ongoing | Characters | Cost per voice | Cost at 2 voices |
 |---|---|---|---|
-| New gunner story (~11 min) | ~11,000 | ~$0.24 | ~$0.48 |
-| New Keepers chapter (~15 min) | ~16,000 | ~$0.35 | ~$0.70 |
+| New Brand A story (~11 min) | ~11,000 | ~$0.24 | ~$0.48 |
+| New Brand B chapter (~15 min) | ~16,000 | ~$0.35 | ~$0.70 |
 | Typical month (1 story + 1 chapter) | ~27,000 | ~$0.59 | ~$1.19 |
-| Full Keepers novel eventually (~400k chars) | ~400,000 | ~$8.80 | ~$17.60 |
+| Brand B's full novel eventually (~400k chars) | ~400,000 | ~$8.80 | ~$17.60 |
 
 A third voice later adds roughly $10.60 (both catalogs) plus ~356 MB. R2 usage stays inside the 10 GB free tier (about 7% consumed by the full two-voice build-out).
 
 ### Real rollout specifics
 
-- **Holdfast pilot**: `node tools/publish.mjs --brand holdfast --voices all`. Two chapters, about $1.40 for two voices, about 30 minutes at F0 pacing.
-- **Gunner backfill**: 42 stories x 2 voices (about $20, roughly 2 hours per voice at F0 pacing, faster if the MAI resource is S0 and spacing is reduced). Run overnight; publish state makes it resumable.
+- **Brand B pilot**: `node tools/publish.mjs --brand brand-b --voices all`. Two chapters, about $1.40 for two voices, about 30 minutes at F0 pacing.
+- **Brand A backfill**: 42 stories x 2 voices (about $20, roughly 2 hours per voice at F0 pacing, faster if the MAI resource is S0 and spacing is reduced). Run overnight; publish state makes it resumable.
 
 ### Owner decisions (2026-07-11)
 
 1. **Spend: APPROVED.** Owner has substantial Azure credit in the target subscription that resets soon; burn what is needed ASAP ("the sooner the better").
-2. **Voices (same set for BOTH brands):** keep each brand's current narrator as the default listen track AND the read-along voice (Gunner `en-US-AndrewMultilingualNeural`, Holdfast `en-GB-Ryan:DragonHDLatestNeural`). Add listen-only options: **Harper** (F, en-US, owner's pick over Olivia: "more upbeat"), **Lisa** (F, en-AU; owner said "Isla," corrected to the actual en-AU voice name), **Ethan** (M, en-US, rendered with the `excited` style since his natural register reads flat; Ethan is the only style-capable male). Olivia: skipped for v1, may revisit with styles.
-3. **Holdfast accent:** accepted. British narrator stays default; en-US/en-AU listen options ship alongside.
+2. **Voices (same set for BOTH brands):** keep each brand's current narrator as the default listen track AND the read-along voice (Brand A `en-US-AndrewMultilingualNeural`, Brand B `en-GB-Ryan:DragonHDLatestNeural`). Add listen-only options: **Harper** (F, en-US, owner's pick over Olivia: "more upbeat"), **Lisa** (F, en-AU; owner said "Isla," corrected to the actual en-AU voice name), **Ethan** (M, en-US, rendered with the `excited` style since his natural register reads flat; Ethan is the only style-capable male). Olivia: skipped for v1, may revisit with styles.
+3. **Brand B accent:** accepted. British narrator stays default; en-US/en-AU listen options ship alongside.
 4. **Preview risk: ACCEPTED** (owner: "number 4, option a").
 5. **Budget:** no per-run cap until the owner's subscription credit resets (move fast now); thereafter **$100/month** cap (supersedes the $15 proposal; set `--mai-budget-usd` default and the Azure budget alert to 100).
 6. **Future wish:** a custom Celtic voice via MAI-Voice-2 voice prompting; gated behind the Custom Neural Voice limited-access review. Apply later; not v1.

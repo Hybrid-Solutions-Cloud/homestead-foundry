@@ -156,9 +156,9 @@ Net cost picture: steady state is a few dollars a month; the entire one-time bui
 
 &lt;!-- safety-scan-worked-example:start -->
 
-## Worked example: Gunner the Lab / Holdfast Press
+## Worked example: Brand A / Brand B
 
-This is the concrete build the methodology above was first applied to: two publishing brands (Gunner the Lab and Holdfast Press StoryReader) sharing one East US Azure AI Foundry (AIServices) resource, against an owner cap of 100 US dollars per month. Grounding: `ai/plans/source/mai-image-2-5-art-match.md` (image pricing table, pilot and backfill scope), `ai/plans/source/ai-voice-mai-voice-2.md` (voice pricing, catalog sizes, ledger and `--mai-budget-usd` guard, owner decisions), `ai/verification/environment-readiness.md` (primary subscription, East US, Tier 5 quota).
+This is the concrete build the methodology above was first applied to: two publishing brands (the Brand A and Brand B reader apps) sharing one East US Azure AI Foundry (AIServices) resource, against an owner cap of 100 US dollars per month. Grounding: `ai/plans/source/mai-image-2-5-art-match.md` (image pricing table, pilot and backfill scope), `ai/plans/source/ai-voice-mai-voice-2.md` (voice pricing, catalog sizes, ledger and `--mai-budget-usd` guard, owner decisions), `ai/verification/environment-readiness.md` (primary subscription, East US, Tier 5 quota).
 
 ### Image rollups
 
@@ -183,14 +183,14 @@ Every figure scales linearly off the unmeasured tokens-per-image; the smoke test
 
 ### Voice rollups
 
-Catalog sizes (from publish state, voice plan sections 1 and 9): Gunner about 450,000 characters (42 stories, all with audio); Holdfast about 31,630 characters (prologue plus chapter one). Per single extra voice: Gunner ~9.90 USD, Holdfast ~0.70 USD.
+Catalog sizes (from publish state, voice plan sections 1 and 9): Brand A about 450,000 characters (42 stories, all with audio); Brand B about 31,630 characters (prologue plus chapter one). Per single extra voice: Brand A ~9.90 USD, Brand B ~0.70 USD.
 
 Locked owner decision (MASTER-PLAN; A2 in the voice plan): **three listen-only voices, the same set for both brands** (Harper en-US, Lisa en-AU, Ethan en-US with the excited style), with each brand's existing narrator kept as the default track.
 
 | Item | Characters | One-time cost |
 |---|---|---|
-| Gunner, 3 voices | ~1,350,000 | ~29.70 USD |
-| Holdfast, 3 voices | ~94,890 | ~2.09 USD |
+| Brand A, 3 voices | ~1,350,000 | ~29.70 USD |
+| Brand B, 3 voices | ~94,890 | ~2.09 USD |
 | **Total initial backfill (both brands, 3 voices)** | ~1,444,890 | **~32 USD** |
 
 The voice plan's section 9 table showed about 21 USD because it modeled two voices; the locked three-voice set lands at about 32 USD, and that is the figure carried into the credit-burn plan.
@@ -199,8 +199,8 @@ Ongoing monthly (new content only, x3 voices):
 
 | Cadence | Characters (x3 voices) | Cost |
 |---|---|---|
-| New Gunner story (~11k chars each) | ~33,000 | ~0.73 USD |
-| New Keepers chapter (~16k chars each) | ~48,000 | ~1.06 USD |
+| New Brand A story (~11k chars each) | ~33,000 | ~0.73 USD |
+| New Brand B chapter (~16k chars each) | ~48,000 | ~1.06 USD |
 | Typical month (1 story + 1 chapter) | ~81,000 | ~1.78 USD |
 
 Storage and egress stay inside Cloudflare R2's 10 GB free tier with free egress.
@@ -222,7 +222,7 @@ The voice plan adds `state.maiLedger[month] = { chars, estUsd }` (estUsd = chars
 
 ### Tags and subscription
 
-Applied tags: `initiative=studio-foundry`, `env=demo`, `owner=<owner alias>`, optional `costCenter`. The credit subscription ("This Is My Demo - MVP Subscription") is unlikely to be an EA Prepayment, so the plan relies on a budget plus scheduled cost emails rather than automated credit alerts. Both the image (Models sold by Azure) and voice (first-party Speech) spend draw down that subscription's Azure Prepayment credit.
+Applied tags: `initiative=<workload>`, `env=demo`, `owner=<owner alias>`, optional `costCenter`. The credit subscription (the MVP credit subscription, a Tier-5 / MVP-tier subscription) is unlikely to be an EA Prepayment, so the plan relies on a budget plus scheduled cost emails rather than automated credit alerts. Both the image (Models sold by Azure) and voice (first-party Speech) spend draw down that subscription's Azure Prepayment credit.
 
 &lt;!-- safety-scan-worked-example:end -->
 
