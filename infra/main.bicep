@@ -113,6 +113,9 @@ param imageUsersGroupObjectId string
 @maxLength(36)
 param speechUsersGroupObjectId string
 
+@description('Create the two data-plane role assignments. Set false when reconciling an existing account whose groups already hold these roles, so the deployment does not fail on RoleAssignmentExists. Greenfield deploys leave this true.')
+param manageRoleAssignments bool = true
+
 // ------------------------------- Key Vault ---------------------------------
 
 @description('Name of the pre-existing platform Key Vault (REUSE, never created here). This template records secret names only and never reads or writes a secret value (ADR-0005).')
@@ -199,6 +202,7 @@ module rbac 'modules/rbac.bicep' = {
     accountName: names.account
     imageUsersGroupObjectId: imageUsersGroupObjectId
     speechUsersGroupObjectId: speechUsersGroupObjectId
+    manageRoleAssignments: manageRoleAssignments
   }
 }
 

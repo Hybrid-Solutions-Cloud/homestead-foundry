@@ -8,6 +8,9 @@ param accountName string
 param imageUsersGroupObjectId string
 param speechUsersGroupObjectId string
 
+@description('Create the two data-plane role assignments. Set false when reconciling an account whose groups already hold these roles (a manual assignment for the same principal, role, and scope makes an idempotent create fail with RoleAssignmentExists). Greenfield deploys leave this true.')
+param manageRoleAssignments bool = true
+
 // Built-in role definition ids, verified against Microsoft Learn 2026-07-23.
 var cognitiveServicesUserRoleId = 'a97b65f3-24c7-4388-baec-2e87135dc908'
 var cognitiveServicesSpeechUserRoleId = 'f2dc8367-1007-4938-bd23-fe263f013447'
@@ -18,7 +21,7 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-06-01' existing = {
 
 // principalType Group skips the Graph principal lookup that hit an Entra
 // replication delay (PrincipalNotFound) on the Phase 8 manual deploy.
-resource imageUsers 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource imageUsers 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (manageRoleAssignments) {
   name: guid(account.id, cognitiveServicesUserRoleId, imageUsersGroupObjectId)
   scope: account
   properties: {
@@ -28,7 +31,7 @@ resource imageUsers 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
-resource speechUsers 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource speechUsers 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (manageRoleAssignments) {
   name: guid(account.id, cognitiveServicesSpeechUserRoleId, speechUsersGroupObjectId)
   scope: account
   properties: {
@@ -38,5 +41,5 @@ resource speechUsers 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
-output imageUsersRoleAssignmentId string = imageUsers.id
-output speechUsersRoleAssignmentId string = speechUsers.id
+output imageUsersRoleAssignmentId string = manageRoleAssignments ? imageUsers.id : ''
+output speechUsersRoleAssignmentId string = manageRoleAssignments ? speechUsers.id : ''
