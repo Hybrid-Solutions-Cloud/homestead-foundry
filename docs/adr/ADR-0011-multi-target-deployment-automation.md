@@ -2,6 +2,7 @@
 
 - Status: Proposed
 - Date: 2026-07-23
+- Revised 2026-07-23: identity pass (managed identity over service principal). Adds a "Deployment principal and runtime identity" subsection so each track's deploy-time and runtime credentials are managed-identity-first, per ADR-0005 as the governing identity ADR.
 
 This ADR locks the deployment-automation approach for each of the three targets
 the owner directed this methodology to cover (owner directive, 2026-07-23): the
@@ -295,6 +296,53 @@ measured against; it is not re-decided.
 | 2 | Windows Server Foundry Local (on-device) | Imperative | Arc run-command / Arc SSH; optional `runCommands` Bicep packaging | Azure Arc over a non-Azure server (RBAC-gated execution, audit, no inbound ports) | Arc-enablement prereq; SPIKE-08 UNKNOWNs (Windows Server support, CPU throughput) |
 | 3 | Azure Local Foundry (cluster-scale, Arc) | Declarative (plus a Kubernetes layer) | Bicep for RG + AKS Arc + `Microsoft.Foundry` extension; `kubectl`/Helm for `ModelDeployment` CRDs | Full Azure via Arc (RBAC, Policy, Monitor, Cost, Entra token auth) | ADR-0009's three preconditions, inherited unchanged |
 
+### Deployment principal and runtime identity (managed identity over service principal)
+
+ADR-0005 is the governing identity ADR for this initiative; this subsection applies
+its managed-identity-first stance to each track's deployment automation. The CAF/WAF
+rule is that managed identity is the default and stored credentials are avoided, so a
+service principal (app registration) is used only where a managed identity genuinely
+cannot reach. Two distinct identities matter per track: the **deploy-time principal**
+that runs the automation, and the **runtime identity** the deployed workload uses to
+reach Azure resources such as Key Vault.
+
+1. **Track 1 (Azure cloud Bicep).** The deploy-time principal is a **user-assigned
+   managed identity with a GitHub Actions OIDC federated identity credential** when the
+   deploy runs from CI, so no stored service-principal secret exists; the `az login`
+   user token when it runs from a developer workstation; or the compute's managed
+   identity if the deploy is ever run from Azure compute. User-assigned managed identity
+   is Microsoft's recommended type and supports federated identity credentials for
+   GitHub OIDC directly, which is what makes the keyless CI path a managed identity
+   rather than an app-registration service principal. The deployed account's own runtime
+   identity is the system-assigned managed identity the Bicep already sets on the
+   AIServices account and project (`infra/modules/foundry-account.bicep`), and the
+   data-plane roles are group-assigned (`infra/modules/rbac.bicep`) to members that are
+   themselves managed identities per ADR-0005.
+2. **Tracks 2 and 3 (Arc-enabled Windows Server, and Azure Local).** The operator or
+   automation that **invokes** the Arc run-command / Arc SSH (track 2) or deploys the
+   AKS Arc cluster and the `Microsoft.Foundry` extension (track 3) authenticates as a
+   **user-assigned managed identity via GitHub Actions OIDC federation** from CI, or as
+   the `az login` user from a workstation; no stored service-principal secret is used
+   for the deploy. The **in-guest / on-cluster runtime identity** that reaches Azure
+   resources (Key Vault for any secret, Storage, and so on) is the Arc-enabled machine's
+   **system-assigned managed identity**, issued through the Arc HIMDS endpoint. This is a
+   hard platform constraint, not a preference: Azure Arc-enabled servers support
+   **system-assigned managed identity only, and user-assigned managed identity is not
+   supported on Arc machines**, so least-privilege scoping is done by assigning Azure
+   RBAC roles to that system-assigned identity. The one accepted service-principal use is
+   **Arc onboarding** (the Azure Connected Machine onboarding principal used to register
+   the box), which is a separate, documented one-time enrollment concern and is not the
+   runtime identity. For track 3, any Foundry extension API key remains a Key Vault
+   secret referenced by name only (the documented Key Vault path for the extension's own
+   secrets is still an open item in SPIKE-09 and ADR-0009), and the cluster reaches that
+   vault with the Arc system-assigned managed identity.
+3. **Net.** No track stores a service-principal secret for its runtime or its deploy.
+   Managed identity covers the runtime identity on every target and the deploy-time
+   principal on every target except a workstation-run deploy (which uses the `az login`
+   user token, still not a service principal). A service principal remains only for Arc
+   onboarding and as a last-resort fallback where a managed identity cannot reach, both
+   consistent with ADR-0005.
+
 ## Consequences
 
 **Positive.**
@@ -405,6 +453,10 @@ notes an earlier date. In-repo sources are cited by path.
   model decision and its three preconditions that track 3 inherits)
 - `docs/adr/ADR-0010-flux-image-model-adoption.md` (ADR house style matched here;
   the cloud generation roster this ADR does not move on-prem)
+- `docs/adr/ADR-0005-identity-and-secrets.md` (the governing identity ADR: managed
+  identity over service principal, `DefaultAzureCredential`, least-privilege data-plane
+  RBAC, secret names only; this ADR's deployment-identity subsection applies that stance
+  per track)
 - `infra/main.bicep`, `infra/types.bicep`, `infra/modules/resource-group.bicep`,
   `infra/modules/foundry-account.bicep`, `infra/modules/rbac.bicep`,
   `infra/modules/keyvault-secret-refs.bicep`, `infra/modules/budget.bicep`,
@@ -438,3 +490,20 @@ notes an earlier date. In-repo sources are cited by path.
   `Model` and `ModelDeployment` custom resources, OpenAI-compatible API, supported
   workloads, preview by request):
   <https://learn.microsoft.com/azure/azure-sovereign-clouds/private/foundry-local/overview>
+- What is managed identities for Azure resources? (user-assigned is the recommended
+  managed identity type; system-assigned versus user-assigned differences):
+  <https://learn.microsoft.com/entra/identity/managed-identities-azure-resources/overview>
+- Configure a federated identity credential on a user-assigned managed identity
+  (GitHub Actions OIDC onto a user-assigned managed identity, keyless CI deploy with no
+  stored service-principal secret):
+  <https://learn.microsoft.com/entra/workload-id/workload-identity-federation-create-trust-user-assigned-managed-identity>
+- Access Azure resources by using managed identity on Azure Arc-enabled servers (the
+  in-guest runtime identity is system-assigned; user-assigned is not supported on Arc;
+  token via the HIMDS endpoint):
+  <https://learn.microsoft.com/azure/azure-arc/servers/managed-identity-authentication>
+- Identity and access management for Azure Arc-enabled servers (system-assigned managed
+  identity, least-privilege Azure RBAC on Arc machines):
+  <https://learn.microsoft.com/azure/cloud-adoption-framework/scenarios/hybrid/arc-enabled-servers/eslz-identity-and-access-management>
+- Connect hybrid machines to Azure at scale using a service principal (the separate,
+  accepted Arc onboarding-principal use, distinct from the runtime managed identity):
+  <https://learn.microsoft.com/azure/azure-arc/servers/onboard-service-principal>

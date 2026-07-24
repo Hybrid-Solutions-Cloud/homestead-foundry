@@ -2,6 +2,7 @@
 
 - Status: Proposed
 - Date: 2026-07-22
+- Revised 2026-07-23: identity pass (managed identity over service principal). Notes that the Arc-connected Azure Local cluster uses its system-assigned managed identity for Azure resource access, consistent with ADR-0005 (governing identity ADR) and ADR-0011.
 
 This ADR records the decision to open a narrowly scoped, on-premises track for
 an open-weight reviewer / RAG capability on the owner's existing **Azure Local**
@@ -112,7 +113,14 @@ generation backbone, and not a replacement for the planned cloud reviewers.**
    passes a five-pillar WAF review before it is considered reviewable, and gets a
    Bicep parameter entry once Phase D's registry-driven deployment exists.
    Governance uses Entra ID token auth, Azure RBAC, Azure Policy, Azure Monitor,
-   and Cost Management, all of which reach the Arc-managed endpoint.
+   and Cost Management, all of which reach the Arc-managed endpoint. Consistent
+   with ADR-0005 (the governing identity ADR) and ADR-0011, the Arc-connected
+   Azure Local servers and cluster use their **system-assigned managed identity**
+   for Azure resource access (for example reaching Key Vault), issued through the
+   Arc HIMDS endpoint and scoped by least-privilege Azure RBAC. Managed identity is
+   the default here; user-assigned managed identity is not supported as the on-box
+   runtime identity on Arc machines (system-assigned only), and a service principal
+   is used only for Arc onboarding, not as the runtime identity.
 6. **Standard gate, no live deploy from this ADR.** If pursued, a follow-up
    design doc and a separately gated deployment are required. This ADR is a
    decision record only; it authorizes no provisioning, no preview enrollment,
@@ -221,3 +229,10 @@ generation backbone, and not a replacement for the planned cloud reviewers.**
   consumption cost baseline this on-prem cost model is contrasted against)
 - `docs/adr/ADR-0008-publish-pipeline-integration.md` (the cloud generation
   pipeline this track explicitly does not replace)
+- `docs/adr/ADR-0005-identity-and-secrets.md` (the governing identity ADR: managed
+  identity over service principal) and
+  `docs/adr/ADR-0011-multi-target-deployment-automation.md` (the deployment-identity
+  decision this track's system-assigned managed identity note aligns with)
+- Access Azure resources by using managed identity on Azure Arc-enabled servers (the
+  Arc runtime identity is system-assigned only; token via the HIMDS endpoint):
+  <https://learn.microsoft.com/azure/azure-arc/servers/managed-identity-authentication>
