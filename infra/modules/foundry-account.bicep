@@ -23,6 +23,13 @@ param modelCatalog modelCatalogMap
 @minValue(1)
 param capacity int
 
+@description('RAI (content safety) policy applied to every model deployment. Defaults to the Azure-managed Microsoft.DefaultV2 so a reconcile of an existing account preserves the content-safety policy instead of stripping it (ADR-0007).')
+param raiPolicyName string = 'Microsoft.DefaultV2'
+
+@description('Version-upgrade behavior for every model deployment. Defaults to the Azure default so a reconcile of an existing account preserves it instead of clearing it.')
+@allowed(['OnceNewDefaultVersionAvailable', 'OnceCurrentVersionExpired', 'NoAutoUpgrade'])
+param versionUpgradeOption string = 'OnceNewDefaultVersionAvailable'
+
 resource account 'Microsoft.CognitiveServices/accounts@2025-06-01' = {
   name: accountName
   location: location
@@ -42,6 +49,9 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-06-01' = {
       customSubDomainName: accountName
       publicNetworkAccess: publicNetworkAccess
       disableLocalAuth: disableLocalAuth
+      // Keep project management on so the account can host a Foundry project and
+      // a reconcile does not drop this flag on an existing account.
+      allowProjectManagement: true
     },
     restoreSoftDeleted ? { restore: true } : {}
   )
@@ -58,6 +68,8 @@ resource modelDeployments 'Microsoft.CognitiveServices/accounts/deployments@2025
       capacity: capacity
     }
     properties: {
+      raiPolicyName: raiPolicyName
+      versionUpgradeOption: versionUpgradeOption
       model: {
         format: modelCatalog[m.id].?format ?? m.provider
         name: modelCatalog[m.id].name
