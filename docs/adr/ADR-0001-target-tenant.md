@@ -1,6 +1,6 @@
 # ADR-0001: Target tenant, subscription, and region
 
-- Status: Proposed
+- Status: Accepted (owner approved 2026-07-24)
 - Date: 2026-07-11
 
 ## Context

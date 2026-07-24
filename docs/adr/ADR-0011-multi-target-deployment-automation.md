@@ -1,6 +1,6 @@
 # ADR-0011: Multi-target Foundry deployment automation
 
-- Status: Proposed
+- Status: Accepted (owner approved 2026-07-24)
 - Date: 2026-07-23
 - Revised 2026-07-23: identity pass (managed identity over service principal). Adds a "Deployment principal and runtime identity" subsection so each track's deploy-time and runtime credentials are managed-identity-first, per ADR-0005 as the governing identity ADR.
 

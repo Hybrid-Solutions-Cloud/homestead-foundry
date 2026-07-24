@@ -1,6 +1,6 @@
 # ADR-0005: Identity, roles, and secret handling
 
-- Status: Proposed
+- Status: Accepted (owner approved 2026-07-24)
 - Date: 2026-07-11
 - Revised 2026-07-23: identity pass (managed identity over service principal). The identity model is reframed to be managed-identity-first per the CAF/WAF default of "managed identity is the default; avoid stored credentials; use a service principal only where managed identity genuinely cannot reach." The Entra keyless image path and the Speech key fallback are unchanged in substance; the credential type behind them is now stated as a managed identity wherever the workload runs on Azure or Arc compute.
 

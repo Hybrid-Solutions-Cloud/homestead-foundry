@@ -1,6 +1,6 @@
 # ADR-0008: Publish-pipeline integration for Foundry voice and image generation
 
-- Status: Proposed
+- Status: Accepted (owner approved 2026-07-24)
 - Date: 2026-07-11
 
 This ADR records a general, reusable methodology for integrating an Azure AI

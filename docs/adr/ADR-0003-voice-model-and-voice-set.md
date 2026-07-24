@@ -1,6 +1,6 @@
 # ADR-0003: Voice-model selection methodology and voice set for Azure AI Foundry builds
 
-- Status: Proposed
+- Status: Accepted (owner approved 2026-07-24)
 - Date: 2026-07-11
 - Revised 2026-07-24: generalized from a single-model pick into a selection methodology; the voice list now lives in the model catalog (`docs/reference/model-catalog.md`).
 - Decider: Owner

@@ -1,6 +1,6 @@
 # ADR-0007: Content safety and responsible AI for generated images and narration
 
-- Status: Proposed
+- Status: Accepted (owner approved 2026-07-24)
 - Date: 2026-07-11
 
 ## Context

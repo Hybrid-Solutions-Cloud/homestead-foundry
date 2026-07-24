@@ -1,6 +1,6 @@
 # ADR-0006: Cost governance and the monthly budget cap
 
-- Status: Proposed
+- Status: Accepted (owner approved 2026-07-24)
 - Date: 2026-07-11
 - Decider: repo owner
 

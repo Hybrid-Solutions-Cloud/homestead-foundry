@@ -1,6 +1,6 @@
 # ADR-0009: Azure Local on-prem reviewer / RAG track (open-weight substitute)
 
-- Status: Proposed
+- Status: Accepted (owner approved 2026-07-24)
 - Date: 2026-07-22
 - Revised 2026-07-23: identity pass (managed identity over service principal). Notes that the Arc-connected Azure Local cluster uses its system-assigned managed identity for Azure resource access, consistent with ADR-0005 (governing identity ADR) and ADR-0011.
 

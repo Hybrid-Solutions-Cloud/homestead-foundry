@@ -1,6 +1,6 @@
 # ADR-0002: Image-model selection methodology and access for Azure AI Foundry builds
 
-- Status: Proposed
+- Status: Accepted (owner approved 2026-07-24)
 - Date: 2026-07-11
 - Revised 2026-07-24: generalized from a single-model pick into a selection methodology; the model list now lives in the model catalog (`docs/reference/model-catalog.md`).
 - Decider: repo owner

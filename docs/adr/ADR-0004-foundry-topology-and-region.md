@@ -1,6 +1,6 @@
 # ADR-0004: Foundry resource topology and region
 
-- Status: Proposed
+- Status: Accepted (owner approved 2026-07-24)
 - Date: 2026-07-11
 
 > This ADR records a reusable topology-and-region decision for Azure AI Foundry
