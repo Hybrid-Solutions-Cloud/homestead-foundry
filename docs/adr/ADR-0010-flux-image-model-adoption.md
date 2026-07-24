@@ -1,6 +1,8 @@
 # ADR-0010: FLUX image models adopted alongside the MAI-Image baseline
 
-- Status: Accepted (retroactive)
+> Superseded 2026-07-24 by ADR-0002 (general image-model selection) plus the model catalog (`docs/reference/model-catalog.md`), which is now the living list of image models. Retained as the historical record of the FLUX adoption decision (2026-07-12). The FLUX adoption rationale it captures (the MAI reference-image / consistency limitation that drove adding FLUX) is now reflected in ADR-0002's selection criteria and in the catalog's FLUX and MAI rows.
+
+- Status: Superseded
 - Date: 2026-07-12 (the deployment date this ADR records)
 - Authored: 2026-07-23 (this ADR was written after the fact to close a
   documentation gap: the FLUX models were deployed and in production before
@@ -197,8 +199,8 @@ The concrete instantiation of the decision above:
 
 - **Target resource.** The three FLUX models plus the retained MAI baseline are
   deployed on the East US AIServices account `aif-<workload>-<env>-<region>-01`
-  (resource group `rg-<workload>-<env>-<region>-01`, subscription "This Is My
-  Demo - MVP Subscription"), the same shared resource that serves MAI-Voice-2
+  (resource group `rg-<workload>-<env>-<region>-01`, the primary MVP-tier
+  credit subscription), the same shared resource that serves MAI-Voice-2
   (ADR-0003).
 - **Deployment names.** `flux-2-pro` (FLUX.2-pro, primary), `flux-1-kontext-pro`
   (FLUX.1-Kontext-pro, single-reference edits), `flux-1-1-pro` (FLUX-1.1-pro,
