@@ -31,6 +31,14 @@ export default defineConfig({
             { text: "Deployment", link: "/guide/deployment" },
           ],
         },
+        {
+          text: "Using what you deployed",
+          items: [
+            { text: "Using your deployment", link: "/guide/using-your-deployment" },
+            { text: "Connect your tools", link: "/guide/connect-your-tools" },
+            { text: "Building agents", link: "/guide/building-agents" },
+          ],
+        },
       ],
       "/design/": [
         {

@@ -182,3 +182,11 @@ To bring an environment someone built by hand under this template, deploy with p
 ## Everything is gated
 
 Every resource-creating call in this runbook is one a human runs deliberately. The automation in this repository validates freely (`az bicep build`, `what-if`) and deploys only on an explicit instruction. Keep that split when you automate on top of it.
+
+## Now use it
+
+Deployment is only half the job. To get from "resources exist" to your first working inference call:
+
+- **[Using your deployment](./using-your-deployment.md)** for endpoints, authentication, copy-paste calls in curl, Python, PowerShell, JavaScript and C#, and a troubleshooting table.
+- **[Connect your tools](./connect-your-tools.md)** to use these models from VS Code, Cursor, and other OpenAI-compatible clients.
+- **[Building agents](./building-agents.md)** to build agents on top of them.
