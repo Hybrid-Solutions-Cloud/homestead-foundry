@@ -39,3 +39,6 @@ pmo/
 
 # Local MCP server config (private endpoints); copy .mcp.json.example and edit
 .mcp.json
+
+# Generated per-subscription model catalog (regenerate with scripts/build-model-catalog.mjs)
+infra/params/model-catalog.json

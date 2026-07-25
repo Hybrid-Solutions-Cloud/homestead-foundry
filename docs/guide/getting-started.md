@@ -20,6 +20,17 @@ Anyone evaluating or building an Azure AI Foundry project who wants a worked, pr
 
 This repo's own build process is itself driven by a roster of specialized Claude Code agents (research, architecture, diagramming, review, environment verification, and Bicep implementation), each scoped to one phase of the methodology. See `AGENTS.md` in the repository root for the full roster if you have repo access; the methodology guide above explains what each phase produces without assuming you do.
 
+## Deploy it yourself
+
+The [deployment guide](./deployment) is a working runbook, not a description. It takes you from an empty subscription to a running Foundry account with your chosen models, in six steps:
+
+1. Copy `models/registry.starter.json` and delete the models you do not want.
+2. Create the two Entra security groups that hold data-plane access.
+3. Generate the model catalog against your own subscription, so no model version is ever hardcoded.
+4. Fill in `infra/params/starter.bicepparam` and compile it.
+5. Preview with `what-if`, read the output, then deploy.
+6. Verify the deployments and make one real call.
+
 ## Current status
 
-As of the last publish of this site, the research spikes, ADRs, and design docs are complete, the model registry schema is in place, and the parameterized Bicep is authored and validated (not yet deployed). See the [roadmap](../roadmap) page for the current status.
+All nine phases are complete. The repository is public, this site is live, and the Azure environment recorded in [as-built](../implementation/as-built) was deployed from the Bicep in `infra/`. See the [roadmap](../roadmap) for what is next.
