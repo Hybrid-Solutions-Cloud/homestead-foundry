@@ -1,5 +1,5 @@
 // homestead-foundry: parameterized, registry-driven Azure AI Foundry stack.
-// Reproduces the Phase 8/9 as-built shape (docs/implementation/as-built.md) in any
+// Reproduces the environment recorded in docs/implementation/as-built.md in any
 // subscription: resource group, AIServices (Foundry) account, registry-driven
 // model deployments, two-security-group RBAC (ADR-0005 as amended by the
 // as-built), Key Vault secret-name references (names only), and the RG budget
