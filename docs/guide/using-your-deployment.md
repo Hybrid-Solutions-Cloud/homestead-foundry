@@ -4,6 +4,10 @@ You ran the [deployment runbook](./deployment.md) and it succeeded. Resources ex
 
 Everything here is copy-paste. Replace the placeholders and it runs.
 
+::: info These samples were run, not just written
+The chat samples, both authentication methods, both hostnames, the `404` and `429` behaviours, and the image hostname difference on this page were all executed against a real deployment and their responses checked. Where something failed, the page says so rather than describing what should have happened.
+:::
+
 ::: tip Read this first if nothing else
 Azure exposes an **OpenAI-compatible v1 API**. Your base URL is `https://<account>.services.ai.azure.com/openai/v1/`, the `model` field is your **deployment name** (not the vendor's model id), and the API key works in a plain `Authorization: Bearer` header. That combination is what makes almost every OpenAI-compatible tool work against your deployment. See [Connect your tools](./connect-your-tools.md).
 :::
@@ -206,10 +210,10 @@ Console.WriteLine(result.Value.Content[0].Text);
 
 ### Image models
 
-Same v1 base, different route. Image generation currently wants an explicit `api-version=preview`.
+Same v1 base, different route, and **one difference that will cost you an hour if you miss it**: image generation is served on the `openai.azure.com` hostname, not `services.ai.azure.com`. It also wants an explicit `api-version=preview`.
 
 ```bash
-curl "https://<account>.services.ai.azure.com/openai/v1/images/generations?api-version=preview" \
+curl "https://<account>.openai.azure.com/openai/v1/images/generations?api-version=preview" \
   -H "Content-Type: application/json" \
   -H "api-key: $KEY" \
   -d '{
@@ -219,6 +223,17 @@ curl "https://<account>.services.ai.azure.com/openai/v1/images/generations?api-v
   }'
 ```
 
+::: warning Use the openai.azure.com hostname for images
+The two hostnames are interchangeable for **chat**, but not for images. Calling
+`https://<account>.services.ai.azure.com/openai/v1/images/generations` returns:
+
+```json
+{"error":{"code":"not_found","message":"Requested path is not found"}}
+```
+
+That is a `404` on the **path**, not on your deployment, so it is easy to misread as a wrong deployment name. If you get "Requested path is not found" from an image call, check the hostname first.
+:::
+
 The response carries base64 image data in `data[0].b64_json`. Decode it to a file:
 
 ```python
@@ -226,7 +241,7 @@ import base64, os
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://<account>.services.ai.azure.com/openai/v1/",
+    base_url="https://<account>.openai.azure.com/openai/v1/",   # note the hostname
     api_key=os.environ["AZURE_AI_KEY"],
 )
 
@@ -275,6 +290,7 @@ Work down this table before anything else. Nearly every first-call failure is on
 | `404` on the URL itself | Wrong hostname or a stray `/openai/deployments/...` path | With the v1 API the deployment belongs in the body, not the path. |
 | `429 Too Many Requests` | Capacity, not a bug | Deployments here default to capacity 1. Raise capacity in the registry and redeploy, or back off and retry. |
 | Model works in the portal, fails in your tool | Tool is sending an OpenAI-shaped path your endpoint does not serve | See [Connect your tools](./connect-your-tools.md). |
+| Image call returns `"Requested path is not found"` | Wrong hostname for images | Use `<account>.openai.azure.com`, not `services.ai.azure.com`. Chat accepts both; images do not. |
 | Image call times out | Client timeout shorter than generation time | Raise the client timeout to 60 seconds or more. |
 | Voice deployment "missing" | It is not a deployment | Expected. Use the Speech endpoint and SSML, above. |
 
