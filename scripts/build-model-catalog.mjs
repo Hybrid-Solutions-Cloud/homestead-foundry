@@ -34,15 +34,40 @@ if (!location) {
 
 const registry = JSON.parse(readFileSync(resolve(registryPath), 'utf8'))
 
+// On Windows the Azure CLI is a batch shim (az.cmd). Node refuses to execute a
+// .cmd through execFileSync without a shell, so Windows takes the shell path.
+// Because that path goes through a shell, location is validated first: it is
+// the only value from the command line that reaches it.
+if (!/^[a-z0-9]+$/i.test(location)) {
+  console.error(`error: invalid --location "${location}". Expected a region name like eastus.`)
+  process.exit(2)
+}
+
+const isWindows = process.platform === 'win32'
+const azBin = isWindows ? 'az.cmd' : 'az'
+
+const azArgs = ['cognitiveservices', 'model', 'list', '--location', location, '-o', 'json']
+
 let available
 try {
-  const raw = execFileSync(
-    'az',
-    ['cognitiveservices', 'model', 'list', '--location', location, '-o', 'json'],
-    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }
-  )
+  // On Windows the whole invocation is passed as one pre-built string, because
+  // Node warns when it concatenates an argument array into a shell command
+  // itself. Every part of this string is either a literal or the validated
+  // location above, so there is nothing unescaped reaching the shell.
+  const raw = isWindows
+    ? execFileSync(`${azBin} ${azArgs.join(' ')}`, {
+        encoding: 'utf8',
+        maxBuffer: 64 * 1024 * 1024,
+        shell: true,
+      })
+    : execFileSync(azBin, azArgs, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
   available = JSON.parse(raw)
 } catch (err) {
+  if (err.code === 'ENOENT') {
+    console.error(`error: could not find the Azure CLI (${azBin}) on PATH.`)
+    console.error('Install it from https://aka.ms/azure-cli, then run `az login`.')
+    process.exit(1)
+  }
   console.error('error: the Azure CLI query failed. Are you logged in with `az login`?')
   console.error(err.stderr?.toString?.() ?? err.message)
   process.exit(1)
@@ -68,17 +93,43 @@ const normalize = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
 const liveByNormalized = new Map()
 for (const [, v] of live) liveByNormalized.set(normalize(v.name), v)
 
+// Vendors publish long catalog names (Llama-4-Maverick-17B-128E-Instruct-FP8)
+// while deployment names are usually shortened (llama-4-maverick-17b). Fall
+// back to a prefix match, but only when exactly one live model matches, so an
+// ambiguous shortening is reported rather than silently resolved to whichever
+// model happened to sort first.
+function resolveModel(candidate) {
+  const key = normalize(candidate)
+  const exact = liveByNormalized.get(key)
+  if (exact) return { match: exact }
+
+  const prefixed = [...liveByNormalized.entries()].filter(([k]) => k.startsWith(key))
+  if (prefixed.length === 1) return { match: prefixed[0][1] }
+  if (prefixed.length > 1) {
+    return { ambiguous: prefixed.map(([, v]) => v.name) }
+  }
+  return {}
+}
+
 const catalog = {}
 const missing = []
+const ambiguous = []
 
 for (const entry of registry) {
   if (entry.status !== 'deployed') continue
   if (skip.has(entry.id)) continue
 
-  const match =
-    liveByNormalized.get(normalize(entry.deploymentName)) ??
-    liveByNormalized.get(normalize(entry.id))
+  const byDeploymentName = resolveModel(entry.deploymentName)
+  const result = byDeploymentName.match || byDeploymentName.ambiguous
+    ? byDeploymentName
+    : resolveModel(entry.id)
 
+  if (result.ambiguous) {
+    ambiguous.push({ id: entry.id, candidates: result.ambiguous })
+    continue
+  }
+
+  const match = result.match
   if (!match) {
     missing.push(entry.id)
     continue
@@ -95,6 +146,16 @@ writeFileSync(resolve(outPath), `${JSON.stringify(catalog, null, 2)}\n`, 'utf8')
 
 console.log(`wrote ${Object.keys(catalog).length} catalog entries to ${outPath} (region ${location})`)
 
+if (ambiguous.length) {
+  console.log('')
+  console.log('The following registry entries matched more than one catalog model:')
+  for (const a of ambiguous) {
+    console.log(`  - ${a.id} matches: ${a.candidates.join(', ')}`)
+  }
+  console.log('')
+  console.log('Set that entry\'s deploymentName to the exact catalog name you want.')
+}
+
 if (missing.length) {
   console.log('')
   console.log('The following deployed registry entries are NOT available in this region:')
@@ -105,5 +166,6 @@ if (missing.length) {
   console.log('(a voice model selected by SSML voice name, for example), or deploy to a')
   console.log('region that offers them. The deployment fails fast on a deployable entry')
   console.log('with no catalog entry, by design.')
-  process.exit(1)
 }
+
+if (missing.length || ambiguous.length) process.exit(1)
