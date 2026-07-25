@@ -3,6 +3,7 @@
 - Status: Accepted (owner approved 2026-07-24)
 - Date: 2026-07-22
 - Revised 2026-07-23: identity pass (managed identity over service principal). Notes that the Arc-connected Azure Local cluster uses its system-assigned managed identity for Azure resource access, consistent with ADR-0005 (governing identity ADR) and ADR-0011.
+- **Amended 2026-07-25 by ADR-0014: precondition (a) is no longer a blanket GPU gate.** Current first-party documentation supports CPU-backed deployments as a first-class path, and a GPU node pool is required only for `*-cuda-gpu` catalog variants, the vLLM runtime, and Agentic Retrieval with GPT-OSS-20B. Read precondition (a) below as scoped per workload, not as a precondition on the track as a whole. Preconditions (b) and (c) stand, with (b) amended only in that the user node pool need not be GPU-enabled for the first increment, and a minimum Kubernetes version of 1.29 added. See `ADR-0014` decision 3 and `docs/research/SPIKE-19-foundry-local-azure-local-deployment.md` Q3.
 
 This ADR records the decision to open a narrowly scoped, on-premises track for
 an open-weight reviewer / RAG capability on the owner's existing **Azure Local**

@@ -16,3 +16,5 @@ Every Architecture Decision Record this project has locked, in decision order. E
 | [ADR-0010](./ADR-0010-flux-image-model-adoption) | FLUX image models adopted alongside the MAI-Image baseline (superseded by ADR-0002 and the [model catalog](../reference/model-catalog)) |
 | [ADR-0011](./ADR-0011-multi-target-deployment-automation) | Multi-target deployment automation (Azure cloud, Windows Server Foundry Local, Azure Local) |
 | [ADR-0012](./ADR-0012-agent-mcp-gateway-governance) | Agent MCP tool governance via an APIM AI gateway (gated to the agent phase) |
+| [ADR-0013](./ADR-0013-foundry-local-windows-server-install) | Track 2 install mechanism, identity exception, and governance scope (supersedes part of ADR-0011) |
+| [ADR-0014](./ADR-0014-foundry-local-azure-local-deployment-layers) | Track 3 deployment layers, GPU scope, and authentication (supersedes part of ADR-0011, amends ADR-0009) |

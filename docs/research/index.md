@@ -21,3 +21,5 @@ Every research spike behind the architecture decisions, in order. Each grounds i
 | [SPIKE-15](./SPIKE-15-niche-reviewer-models) | Niche and emerging reviewer models for code and document review |
 | [SPIKE-16](./SPIKE-16-virtual-trainer-avatar) | Photorealistic virtual-trainer avatar |
 | [SPIKE-17](./SPIKE-17-agent-mcp-gateway-governance) | Governing agent MCP tools with an APIM AI gateway |
+| [SPIKE-18](./SPIKE-18-foundry-local-windows-server) | Foundry Local on Windows Server, and whether the Arc run-command can install it (track 2) |
+| [SPIKE-19](./SPIKE-19-foundry-local-azure-local-deployment) | Where the ARM and Kubernetes seam sits for Foundry Local on Azure Local (track 3) |

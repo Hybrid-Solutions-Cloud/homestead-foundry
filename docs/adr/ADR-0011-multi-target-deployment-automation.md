@@ -3,6 +3,9 @@
 - Status: Accepted (owner approved 2026-07-24)
 - Date: 2026-07-23
 - Revised 2026-07-23: identity pass (managed identity over service principal). Adds a "Deployment principal and runtime identity" subsection so each track's deploy-time and runtime credentials are managed-identity-first, per ADR-0005 as the governing identity ADR.
+- **Partly superseded 2026-07-25.** Track 1 is unaffected. Two corrections, each with its own ADR:
+  - **Track 2 decision 2 is superseded by `ADR-0013` on the install command.** `winget install Microsoft.FoundryLocal` cannot produce a machine-wide install, because Microsoft documents that winget blocks MSIX machine-scope installs. The install step is `Add-AppxProvisionedPackage -Online`. ADR-0013 also records a scoped exception to ADR-0005 (Arc run-command does not support managed identity for blob access) and narrows the governance claim in the three-track table below: Arc governs installing and managing the host, not the running inference endpoint. See `docs/research/SPIKE-18-foundry-local-windows-server.md`.
+  - **Track 3 decision 2 is superseded by `ADR-0014` on the layer boundary.** The seam this ADR left open is not a two-layer split. Mandatory Kubernetes and Helm prerequisites (Gateway API CRDs, Gateway API Inference Extension CRDs, Istio) sit *underneath* the ARM extension and cannot be expressed in ARM. Bicep owns a middle platform layer of exactly two extensions; an ordering wrapper owns the sequence. ADR-0014 also amends ADR-0009's GPU precondition and makes this ADR's Bicep claim for the AKS Arc cluster itself provisional pending a `what-if` test. See `docs/research/SPIKE-19-foundry-local-azure-local-deployment.md`.
 
 This ADR locks the deployment-automation approach for each of the three targets
 the owner directed this methodology to cover (owner directive, 2026-07-23): the
