@@ -29,7 +29,8 @@ All nine phases are complete. The repository is public, the documentation site i
 
 Ongoing rather than phased. Current threads:
 
-- Extending the multi-target deployment automation in [ADR-0011](adr/ADR-0011-multi-target-deployment-automation.md) beyond the Azure cloud track to the Windows Server Foundry Local and Azure Local tracks.
+- **Track 2, Foundry Local on a single Windows Server.** [ADR-0011](adr/ADR-0011-multi-target-deployment-automation.md) decided the automation form (Azure Arc run command over an Arc-enabled server, with Arc SSH as the fallback) but authorized no build. It is gated on the two unknowns [SPIKE-08](research/SPIKE-08-foundry-local-on-device.md) left open: whether Foundry Local is supported on Windows Server, and whether CPU-only throughput on a GPU-less host is tolerable. A research spike resolves those and an ADR records the outcome before any automation is written.
+- **Track 3, Foundry Local at cluster scale on Azure Local.** [ADR-0011](adr/ADR-0011-multi-target-deployment-automation.md) decided the form (declarative Bicep for the Azure-projected resource group, AKS Arc cluster, and `Microsoft.Foundry` extension, with the in-cluster model deployments applied through Kubernetes-native tooling) but authorized no build. It inherits the three preconditions in [ADR-0009](adr/ADR-0009-azure-local-reviewer-track.md) unchanged, and where the ARM to Kubernetes seam sits is still an open decision.
 - Carrying the expansion research (reviewer models, video, avatar, extended text-to-speech) forward from spikes into adoption decisions where it earns its place.
 - Agent tool governance, gated to a future agent phase per [ADR-0012](adr/ADR-0012-agent-mcp-gateway-governance.md).
 
