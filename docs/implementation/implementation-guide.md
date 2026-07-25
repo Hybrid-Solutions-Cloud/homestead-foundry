@@ -1,7 +1,9 @@
 # Implementation guide: Azure AI Foundry deployment runbook
 
-- Status: draft for phase 7 review (guide only; a later phase executes it). Main body rewritten brand-neutral 2026-07-23, per D-03 and D-16 (the decision log); see the closing "Worked example" section for the real, already-deployed instance this runbook was actually followed to build.
-- Date: 2026-07-11 (original authoring)
+> **If you want to deploy, read the [deployment guide](../guide/deployment.md) instead.** That is the current, tested, Bicep-driven runbook. This document is the longer-form reference behind it: the ordered manual procedure, the reasoning for each step, and the confirmation and owner-input registers. It was followed to build the first version of the environment recorded in [as-built](./as-built.md), which has since been rebuilt from `infra/`.
+
+- Status: executed. Followed in full to stand up the environment in [as-built](./as-built.md); retained as the reference procedure and the source the Bicep automates.
+- Date: 2026-07-11 (original authoring), status corrected 2026-07-25
 - Author: foundry-implementer
 - Grounded in: the seven design docs in `docs/design/` (especially `resource-topology-and-caf-naming.md`, `identity-and-security.md`, `cost-and-governance.md`, `reliability-and-operations.md`) and ADR-0001 through ADR-0008
 - Companion diagrams (`docs/design/diagrams.md`): **#10 Deployment runbook** (this guide's steps 2 through 8 in dependency order) and **#9 Tenant selection and fallback decision** (this guide's section 10)

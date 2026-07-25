@@ -1,44 +1,134 @@
-# As-Built: Azure AI Foundry Studio (Phase 8 deploy)
+# As-built record
 
-This is an anonymized example as-built record: it documents the methodology's
-real, already-deployed worked example (two publishing brands, referred to
-here as Brand A and Brand B), with resource names genericized to the CAF
-placeholder pattern for this public writeup. It is not a live private
-inventory.
+This is an anonymized as-built record: it documents the methodology's real,
+running deployment with resource names genericized to the CAF placeholder
+pattern for this public writeup. It is not a live private inventory, and it
+contains no subscription, tenant, group, or vault identifiers.
 
-**Deployed:** 2026-07-11 by the repo owner, gated, each Azure write confirmed.
-**Subscription:** the MVP credit subscription. **Region:** East US. **Status:** deployed and healthy; smoke test pending (Phase 9).
+**Built:** 2026-07-24, net-new, from `infra/main.bicep` in this repository.
+**Region:** East US, a single region for every resource.
+**Status:** deployment `Succeeded`. Twenty model deployments live, every one reporting `Succeeded`.
 
-## What was created
+## How this environment was built
+
+The first version of this environment was stood up by hand in July 2026,
+following `implementation-guide.md` step by step. That proved the runbook, but it
+left the environment unreproducible: nothing except a written guide recorded what
+existed or why.
+
+It was then rebuilt net-new from the Bicep in `infra/`, under the same canonical
+CAF names, so that infrastructure-as-code became the source of truth rather than a
+description of what someone once typed. The resource group was deleted, the
+soft-deleted account purged, and a single `az deployment sub create` recreated
+everything.
+
+That matters more than it sounds. The environment now satisfies the
+wipe-and-redeploy contract in `docs/design/resource-topology-and-caf-naming.md` by
+demonstration rather than by assertion.
+
+## What exists
 
 | Resource | Name | Detail |
 |---|---|---|
-| Resource group | `rg-<workload>-<env>-<region>-01` | East US. Tags: `initiative=<workload>`, `env=prod`, `owner=<alias>`, `project=<workload>` (verified). |
-| AI Foundry account | `aif-<workload>-<env>-<region>-01` | kind AIServices, SKU S0, custom subdomain, system-assigned managed identity, public network + Entra + RBAC. Provisioning Succeeded. Endpoint host `aif-<workload>-<env>-<region>-01.cognitiveservices.azure.com`. |
-| Model deployment | `mai-image-25` | MAI-Image-2.5, version 2026-06-02 (live-queried, not hardcoded), format Microsoft, SKU GlobalStandard. State Succeeded. |
-| Security group | `sg-<workload>-image-users-<env>-<region>-01` | Role Cognitive Services User on the account. Member: the repo owner. For MAI-Image inference. |
-| Security group | `sg-<workload>-speech-users-<env>-<region>-01` | Role Cognitive Services Speech User on the account. Member: the repo owner. For MAI-Voice TTS. |
-| Key Vault secret | `kv-<workload>-<env>-01` / `<workload>-speech-key` | The Speech account key (enabled). Value never printed or committed. Image path uses keyless Entra, so no image key is stored. |
-| Budget | `budget-<workload>-<env>-<region>-01` | 100 USD per month, resource-group scope. Alerts at 50/75/90/100 percent actual plus a 100 percent forecast alert, email sent to the owner alias. Azure spending limit left ON. |
+| Resource group | `rg-<workload>-<env>-<region>-01` | East US. Tags: `initiative`, `env`, `owner`. |
+| AI Foundry account | `aif-<workload>-<env>-<region>-01` | Kind AIServices, SKU S0, custom subdomain, system-assigned managed identity, public network with Entra and RBAC, project management enabled. |
+| Foundry project | `proj-<workload>-<purpose>-01` | Scoped inside the account, which already fixes environment and region. |
+| Model deployments | twenty | Six image, fourteen reasoning. Each `GlobalStandard` at capacity 1, with the default content-safety policy and automatic version upgrade preserved. Generated from the model registry, not hand-written. |
+| Security group | `sg-<workload>-image-users-<env>-<region>-01` | Cognitive Services User on the account scope. |
+| Security group | `sg-<workload>-speech-users-<env>-<region>-01` | Cognitive Services Speech User on the account scope. |
+| Key Vault | pre-existing platform vault | Reused by name only. Holds the Speech key under an initiative-prefixed secret name. Never created or destroyed by this template. |
+| Budget | `budget-<workload>-<env>-<region>-01` | Resource-group scope, monthly, alerts at 50, 75, 90 and 100 percent plus a forecast alert. Alert-only, not a hard spend stop. |
 
-## Endpoints for the pipeline
+### The model roster
 
-- **Image (MAI-Image-2.5):** `https://aif-<workload>-<env>-<region>-01.services.ai.azure.com/mai/v1/images/generations` and `.../images/edits`. Auth: keyless Entra (DefaultAzureCredential, scope `https://cognitiveservices.azure.com/.default`); the signed-in identity gets access via `sg-<workload>-image-users-<env>-<region>-01`.
-- **Voice (MAI-Voice-2):** Azure Speech endpoint `https://eastus.tts.speech.microsoft.com/cognitiveservices/v1`, voice name in SSML (for example `en-US-Harper:MAI-Voice-2`). Auth: the key in `kv-<workload>-<env>-01` / `<workload>-speech-key`; membership of `sg-<workload>-speech-users-<env>-<region>-01` also grants Entra access.
+Twenty deployments spanning five vendors: six image models and fourteen reasoning
+models. The exact roster is not duplicated here, because the registry is what
+actually drives the deployments. See `models/registry.starter.json` and the
+[model registry guide](../guide/model-registry.md).
 
-## Deviations from the implementation guide (all owner-authorized)
+Every deployment was verified against the live catalog at build time and found to
+be running the current version, preview models included. Deployment names are
+deliberately version-free, so a version change is absorbed by redeploying under the
+same name instead of creating a parallel deployment.
 
-1. **Account name is `aif-` not `ais-`.** Owner directive to follow current CAF (aif is the Learn abbreviation for the AIServices/Foundry kind). The design docs and 11 diagrams still say `ais-`; a repo-wide `ais-<workload>` to `aif-<workload>` rename is a follow-up.
-2. **RBAC via Entra security groups**, amending ADR-0005 (which specified direct assignment). Same least-privilege data-plane roles, group-assigned for maintainability, owner as member. Owner-authorized.
-3. **`project=<workload>` tag added** to the RG and account, per owner.
-4. **Role assignments hit an Entra replication delay** on the first attempt (PrincipalNotFound) and were retried successfully; both are confirmed present.
-5. **No action group created.** The budget uses `contactEmails` directly for the alerts. The proposed `ag-<workload>-<env>-<region>-01` action group is an optional future add.
-6. **Optional subscription-level credit budget skipped.** The MVP credit is about 1000 USD per month; this project is capped at 100 for round one.
+The voice model is reached through the Speech endpoint by SSML voice name and is
+therefore not a deployment resource at all. Its registry id is listed in
+`skipDeploymentModelIds`, which is why the registry marks twenty-two entries
+deployed while the account shows twenty deployments.
 
-## Follow-ups (non-blocking)
+## Endpoints
 
-- Repo-wide `ais-<workload>` to `aif-<workload>` rename in `ai/` docs; update the 11 Lucid diagrams' labels in a follow-up pass.
-- Add a dedicated CI service principal to the two `sg-` groups when a CI pipeline exists.
-- Sign off Lisa en-AU voice id (`en-AU-Lisa:MAI-Voice-2`) and the exact `excited` style token at the voice smoke test.
-- Decide the Speech-key rotation cadence.
-- Reconcile the image-catalog size (SPIKE-01 ~680 vs 340) before authorizing the bulk backfill; the pipeline `--mai-budget-usd` ledger is the hard cap (the Azure budget is alert-only).
+- **Image.** The account's Foundry endpoint, authenticated keylessly through Entra
+  (`DefaultAzureCredential`, scope `https://cognitiveservices.azure.com/.default`).
+  Access comes from membership of the image-users group. No image key is stored
+  anywhere.
+- **Voice.** The regional Azure Speech endpoint, with the voice selected by name in
+  SSML. Authenticated with the key held in the platform Key Vault. Membership of the
+  speech-users group also grants Entra access to the same surface.
+
+## What the deployment preview caught
+
+The `what-if` preview earned its place during the reconcile that preceded the
+rebuild. Applying the template as written at that moment would have:
+
+- stripped the default content-safety policy from four live image deployments,
+- stripped the automatic version-upgrade setting from the same deployments, and
+- dropped project management from the account.
+
+None of that was intended, and none of it was visible without reading the preview
+output. The template was corrected to preserve all three before anything was
+applied. This is the concrete reason the deployment guide insists on reading
+`what-if` rather than treating it as a formality.
+
+The rebuild produced a second finding: role assignments cannot be created
+idempotently over hand-made ones, because Azure deduplicates on principal, role and
+scope regardless of assignment name. That is what the `manageRoleAssignments`
+parameter exists for, and why reconciling deployers set it to false.
+
+## Deviations from the design
+
+None outstanding.
+
+The account uses the `aif` CAF abbreviation, the current Microsoft Learn mapping
+for a Cognitive Services account of kind AIServices. Earlier drafts of the design
+used `ais`, which denotes a different kind; the documentation was corrected to match
+the deployment rather than the other way round.
+
+Data-plane access is granted through two Entra security groups rather than by direct
+assignment as ADR-0005 originally specified. Same roles, same least privilege,
+managed by group membership so that granting someone access does not require
+redeploying infrastructure.
+
+## Verification
+
+Both the control plane and the data plane are verified.
+
+**Control plane.** Every resource exists and every model deployment reports
+`Succeeded`.
+
+**Data plane, smoke-tested 2026-07-25 after the rebuild.** All three call paths
+were exercised with real requests:
+
+| Path | Auth | Result |
+|---|---|---|
+| Image generation | Keyless Entra, group membership | A 744 KB PNG returned from a one-line prompt |
+| Text to speech | Key sourced from the platform Key Vault | HTTP 200, a 7 KB MP3 returned, expressive voice selected by SSML name |
+| Reasoning chat completion | Keyless Entra, group membership | Correct completion returned |
+
+This is the check that matters after a rebuild, and it is the one most easily
+skipped: a control-plane query proves the resources exist, not that they serve.
+The text-to-speech call doubles as proof that the Key Vault secret was correctly
+refreshed after the rebuild rotated the account keys, which is the single most
+likely thing to be silently broken afterwards.
+
+Re-run all three after any rebuild. The commands are in the
+[deployment guide](../guide/deployment.md).
+
+## Known gaps
+
+None outstanding on this environment.
+
+## Reproducing this
+
+Follow the [deployment guide](../guide/deployment.md). It is the runbook this
+environment was built from, and the environment described above is what it produces.

@@ -123,7 +123,39 @@ az cognitiveservices account deployment list \
   -o table
 ```
 
-Every deployment should read `Succeeded`. Then make one real call against the endpoint before you trust it: a single small image generation and a short synthesis cost a fraction of a cent and prove the data plane, the RBAC, and the key path all work. A control-plane query proving the resources exist is not the same as proving they serve.
+Every deployment should read `Succeeded`.
+
+Then prove the data plane. A control-plane query showing the resources exist is not the same as showing they serve, and after a rebuild it is the difference that bites. Each of these costs a fraction of a cent:
+
+```bash
+TOKEN=$(az account get-access-token --resource https://cognitiveservices.azure.com --query accessToken -o tsv)
+ACCOUNT=aif-<workload>-<env>-<region>-01
+
+# Image, keyless through Entra. Your account must be in the image-users group.
+curl -s -X POST "https://$ACCOUNT.services.ai.azure.com/mai/v1/images/generations" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"model":"<your-image-deployment-name>","prompt":"a small blue circle","n":1}' \
+  | head -c 200
+
+# A reasoning model, same auth.
+curl -s -X POST "https://$ACCOUNT.services.ai.azure.com/openai/v1/chat/completions" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"model":"<your-reasoning-deployment-name>","messages":[{"role":"user","content":"Reply with exactly: OK"}],"max_completion_tokens":16}'
+
+# Text to speech, using the key from your vault. This also proves the vault
+# secret is current, which is exactly what a rebuild invalidates.
+KEY=$(az keyvault secret show --vault-name <your-vault> --name <initiative>-speech-key --query value -o tsv)
+curl -s -X POST "https://<region>.tts.speech.microsoft.com/cognitiveservices/v1" \
+  -H "Ocp-Apim-Subscription-Key: $KEY" \
+  -H "X-Microsoft-OutputFormat: audio-16khz-32kbitrate-mono-mp3" \
+  -H "Content-Type: application/ssml+xml" \
+  --data '<speak version="1.0" xml:lang="en-US"><voice name="<your-voice-name>">Smoke test.</voice></speak>' \
+  --output smoke.mp3 && ls -l smoke.mp3
+```
+
+Note the two different hostnames. Inference goes to `*.services.ai.azure.com`; the control plane and the account's own `properties.endpoint` use `*.cognitiveservices.azure.com`. Sending inference to the wrong one is a common and confusing failure.
+
+If the image call returns `no_model_name`, you left out the `model` field: it takes your **deployment** name, not the underlying model name.
 
 ## Wipe and redeploy
 
