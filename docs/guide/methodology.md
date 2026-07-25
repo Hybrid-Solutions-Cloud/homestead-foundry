@@ -12,13 +12,13 @@ Every capability this repo adds to an Azure AI Foundry build moves through the s
 
 ## Keeping documentation honest
 
-A phase-gated process produces a lot of documents, and documents describing a system go stale the moment the system changes. This repository treats a published page that asserts something no longer true as a defect, not as bookkeeping, and enforces that in CI:
+A phase-gated process produces a lot of documents, and documents describing a system go stale the moment the system changes. This repository treats a published page that asserts something no longer true as a defect, not as bookkeeping. The check is a script you run, deliberately, before you publish:
 
 ```bash
 node scripts/check-docs-currency.mjs
 ```
 
-It fails the build when a published page claims the project is private or undeployed, when the repository changelog and the site changelog drift apart (they are separate files, which is exactly how they drift), when the model catalog disagrees with the model registry about what is deployed, or when a guide sends deployers to the placeholder registry instead of the real one.
+It exits non-zero when a published page claims the project is private or undeployed, when the repository changelog and the site changelog drift apart (they are separate files, which is exactly how they drift), when the model catalog disagrees with the model registry about what is deployed, or when a guide sends deployers to the placeholder registry instead of the real one.
 
 Add `--live --account <name> --resource-group <rg>` to also compare the registry against the deployments that actually exist on an account. Point it at the registry you deployed from, not the starter roster.
 
