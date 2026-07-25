@@ -10,6 +10,20 @@ Every capability this repo adds to an Azure AI Foundry build moves through the s
 6. **Gated deploy.** Azure writes never happen automatically. A human confirms every resource-creating call in the moment, regardless of what a plan or roadmap says.
 7. **Verification.** A read-only smoke test confirms the deployed resources actually work as designed before the phase is considered closed.
 
+## Keeping documentation honest
+
+A phase-gated process produces a lot of documents, and documents describing a system go stale the moment the system changes. This repository treats a published page that asserts something no longer true as a defect, not as bookkeeping, and enforces that in CI:
+
+```bash
+node scripts/check-docs-currency.mjs
+```
+
+It fails the build when a published page claims the project is private or undeployed, when the repository changelog and the site changelog drift apart (they are separate files, which is exactly how they drift), when the model catalog disagrees with the model registry about what is deployed, or when a guide sends deployers to the placeholder registry instead of the real one.
+
+Add `--live --account <name> --resource-group <rg>` to also compare the registry against the deployments that actually exist on an account. Point it at the registry you deployed from, not the starter roster.
+
+This check exists because an audit found the changelog page saying there was nothing to report, the model catalog listing fourteen deployed models as merely planned, and the landing page describing the repository as private, all long after none of it was true. Nothing caught any of it, because nothing was looking.
+
 ## Why the order matters
 
 Skipping a stage (writing Bicep before the ADR that should justify its shape, for example) is exactly how undocumented, unreviewable infrastructure accumulates. Enforcing the order means every resource name, every model choice, and every cost control this repo has ever shipped has a paper trail back to the evidence that justified it.

@@ -29,3 +29,18 @@ jobs:
       - name: Scan initial push (no prior commit to diff against)
         if: github.event_name == 'push' && github.event.before == '0000000000000000000000000000000000000000'
         run: node scripts/scan-public-safety.mjs --full
+
+  check-docs-currency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Fails when a published page describes a state that is no longer true:
+      # stale assertions about being private or undeployed, the two changelogs
+      # drifting apart, or the model catalog disagreeing with the registry.
+      - name: Check published docs against current state
+        run: node scripts/check-docs-currency.mjs
