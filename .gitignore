@@ -36,3 +36,6 @@ docs/.vitepress/cache
 docs/.vitepress/dist
 docs/node_modules
 pmo/
+
+# Local MCP server config (private endpoints); copy .mcp.json.example and edit
+.mcp.json

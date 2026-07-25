@@ -20,9 +20,12 @@ Every entry in a registry file has these fields:
 | `notes` | string | Short and factual; longer rationale lives in the linked `sourceRef` document. |
 | `sourceRef` | relative path | Points at the spike, ADR, or backlog entry that backs this entry. |
 
-## Example entries
+## Which registry file to start from
 
-`models/registry.example.json` is a brand-neutral example populated with placeholder values, one entry per `kind` and one per `status`, so it demonstrates the full shape without hardcoding any project's real deployment names.
+- **`models/registry.starter.json`** is the one to copy. It is a real, working roster of 26 models taken from this repo's own research: six image models, two voice entries, fourteen reasoning models, and four `rejected` entries kept so their decisions are not re-researched. Every entry carries a `sourceRef` to the spike or ADR behind it. Delete what you do not need, adjust `region`, and point the Bicep at it.
+- **`models/registry.example.json`** is a minimal shape reference with placeholder values, one entry per `kind` and one per `status`. Use it to understand the schema, not to deploy.
+
+Model availability, versions, and regions change over time. Confirm each entry against your own subscription with `az cognitiveservices account list-models` before deploying, rather than trusting the starter file verbatim.
 
 ## How a consuming project resolves a model
 

@@ -23,6 +23,16 @@ Homestead Foundry runs a real, published production deployment - the Azure AI Fo
 
 <!-- safety-scan-worked-example:end -->
 
+## Start here
+
+- **[Getting started](docs/guide/getting-started.md)** - what Azure AI Foundry is and what you need before you deploy anything.
+- **[Deployment guide](docs/guide/deployment.md)** - stand up your own Foundry account and model deployments from the Bicep in [`infra/`](infra/).
+- **[Model registry](docs/guide/model-registry.md)** - how the registry drives which models get deployed. Copy [`models/registry.starter.json`](models/registry.starter.json) and edit it for your own roster.
+- **[Methodology](docs/guide/methodology.md)** - the research-to-decision-to-deploy process this repo runs on itself.
+- **[Roadmap](docs/roadmap.md)** - where the project stands and what is next.
+
+Full documentation site: **https://hybrid-solutions-cloud.github.io/homestead-foundry/**
+
 ## Status
 
-This repo is private while it's being generalized and scrubbed of anything owner-specific. Once that's done, it opens up as the knowledge and automation center described above. Track progress in the private planning workspace - vision, decisions, roadmap, and backlog of what's left.
+Public and actively maintained. The Azure deployment described here is live, built from the Bicep in this repo. See the [roadmap](docs/roadmap.md) for phase-by-phase status and the [changelog](CHANGELOG.md) for what has landed.
