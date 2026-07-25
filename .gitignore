@@ -28,6 +28,10 @@ __pycache__/
 local/
 *.local.bicepparam
 *.local.json
+# Compiled Bicep ARM output (build artifact, regenerate with az bicep build)
+infra/*.json
+!infra/*.parameters.json
+
 docs/.vitepress/cache
 docs/.vitepress/dist
 docs/node_modules
