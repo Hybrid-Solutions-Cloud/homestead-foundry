@@ -23,11 +23,15 @@ The forces this decision must reconcile, all from SPIKE-18:
 
 4. **Instance View output is capped at 4 KB.** A model pull that prints progress will exceed it, and the only documented way to capture more is the blob path, which re-triggers force 3.
 
-5. **Windows Server support remains unstated by Microsoft**, and the product is positioned for end-user devices, with Microsoft routing enterprise-scale server inference to Foundry Local on Azure Local (track 3) instead. But nothing in the CLI's own prerequisites blocks a GPU-less Windows Server host, and this repo's existing host is the exact configuration in question: Windows Server 2025 Datacenter Azure Edition build 26100, no GPU passthrough, .NET 9.0.316 present, winget present, 8 logical cores, 63.9 GB RAM.
+5. **Windows Server support remains unstated by Microsoft**, and the product is positioned for end-user devices, with Microsoft routing enterprise-scale server inference to Foundry Local on Azure Local (track 3) instead. But nothing in the CLI's own prerequisites blocks a GPU-less Windows Server host, and the configuration in question is already available to this project in two places: the platform VM (Windows Server 2025 Datacenter Azure Edition build 26100, no GPU passthrough, .NET 9.0.316, winget v1.29.280, 8 logical cores, 63.9 GB RAM), and a dedicated Windows Server 2025 build VM under nested virtualization, also GPU-less. No hardware purchase is needed to answer the question.
 
-6. **Arc governs the install, not the endpoint.** Foundry Local's own CLI reference states "Azure RBAC: Not applicable (runs locally)" and no Azure subscription is required. Once installed, the local inference endpoint has no Azure RBAC, no Entra authentication, no Key Vault integration, no budget, and no Azure Monitor surface. ADR-0011's three-track table invites a reader to assume more governance parity between tracks than exists.
+6. **A governing build-environment policy constrains where a test like this may run.** The operator's platform standards rank build runners by cost and isolation, reserve Windows build hosts for genuinely Windows-only work, and treat a general-purpose platform host as a host *for* build targets rather than a build target itself. An earlier draft of this ADR proposed running the install test directly on the platform host, which that policy does not permit. Deployers adopting this methodology should expect an equivalent constraint in any governed environment.
 
-7. **The GPU question was conflated with the support question and froze the track.** SPIKE-08 tied any future local-reviewer work to a GPU-capable host existing. That coupling is what kept a cheap, read-only-plus-one-install-test question unanswered for weeks.
+7. **That policy's stated rationale is a caution this track should hear.** It prefers isolated local virtualization over cloud run-command for build workloads because Azure VM run-command carries a hard execution timeout, permits only one execution at a time, can deadlock its extension, and offers no shell escape hatch when a command hangs. Arc run-command is a different service and this ADR does not assume those limits transfer verbatim, but the failure shapes are close enough to matter for a step that pulls multi-GB model files.
+
+8. **Arc governs the install, not the endpoint.** Foundry Local's own CLI reference states "Azure RBAC: Not applicable (runs locally)" and no Azure subscription is required. Once installed, the local inference endpoint has no Azure RBAC, no Entra authentication, no Key Vault integration, no budget, and no Azure Monitor surface. ADR-0011's three-track table invites a reader to assume more governance parity between tracks than exists.
+
+9. **The GPU question was conflated with the support question and froze the track.** SPIKE-08 tied any future local-reviewer work to a GPU-capable host existing. That coupling is what kept a cheap, read-only-plus-one-install-test question unanswered for weeks.
 
 ## Decision
 
@@ -83,7 +87,18 @@ Consequently track 2 is positioned as a genuine single-host capability and a pro
 In order:
 
 1. **Read-only, no authorization needed, do first.** Resolve SPIKE-18 UNKNOWN #3 (is the direct installer machine-scope and silent-capable) and UNKNOWN #4 (is there a stable first-party URL for the `.msix` and `VcLibs.appx`). The answers determine whether blob staging is needed at all, and therefore whether decision 4's exception is even required. If a stable first-party URL exists, track 2 may have no secret surface and no ADR-0005 exception in practice.
-2. **Owner-gated, one time, on existing hardware.** One throwaway install test on this repo's Windows Server 2025 host, scoped to: provision the MSIX for all users, `foundry service status`, pull `phi-4-mini`, time one fixed prompt, record tokens per second and wall-clock, then uninstall. This closes UNKNOWN #1 (does it work on Server 2025), UNKNOWN #2 (CPU throughput), and UNKNOWN #5 (does provisioning work under a run-command context) together. It requires no Azure resource, no spend, and no Arc onboarding.
+2. **Owner-gated, one time, on a dedicated disposable Windows build VM.** One throwaway install test scoped to: provision the MSIX for all users, `foundry service status`, pull `phi-4-mini`, time one fixed prompt, record tokens per second and wall-clock, then uninstall. This closes UNKNOWN #1 (does it work on Server 2025), UNKNOWN #2 (CPU throughput), and UNKNOWN #5 (does provisioning work under a non-interactive machine context) together. It requires no Azure resource, no spend, and no Arc onboarding.
+
+**The test does not run on the machine that hosts other work.** Deployers operating this methodology inside a governed environment should expect a build-environment policy that ranks runners by cost and isolation, reserves Windows hosts for genuinely Windows-only work, and treats a general-purpose workstation or platform host as a host for build targets rather than a build target itself. Foundry Local's install is genuinely Windows-only (Appx provisioning plus a Windows service), so it belongs on a dedicated Windows Server 2025 build VM, and a disposable one is the right choice on the merits: a throwaway install leaves no MSIX package, Windows service, or multi-GB model cache behind on a shared machine. Where such a VM is powered off when idle, the test should be driven by a wrapper that records the original power state, starts the VM, waits for remote management to answer, runs the script, and restores the original state.
+
+Two honest caveats follow from testing on a smaller dedicated VM:
+
+- **A build VM is typically provisioned smaller than a platform host.** A tokens-per-second figure measured on fewer cores is a *floor*, not a prediction for the production target. That is acceptable for a go or no-go on UNKNOWN #2, because a result fast enough on the smaller host is certainly fast enough on the larger one. A result that is too slow does not by itself condemn the approach, and justifies one re-measurement on a VM sized to the real target before any verdict.
+- **A nested-virtualization build VM is GPU-less**, so the GPU-less premise this track depends on holds unchanged and the `WinML` accelerated path remains correctly out of scope.
+
+If the dedicated build VM is unavailable, an ephemeral Windows Server 2025 VM deployed for the test and deleted afterward is the correct fallback. That is also the right choice when the throughput number must be measured on hardware matching the production target.
+
+This repo's own governing build-environment rules, including the specific build hosts, live in the operator's private platform standards and are deliberately not reproduced here.
 
 **This install test requires the owner's explicit authorization, because this repo gates software installation.** That is the only gate remaining on track 2. It is not blocked by hardware, by cost, by preview access, or by any external dependency.
 
@@ -111,6 +126,8 @@ The Arc machine is a pre-existing Arc registration in a CAF-named resource group
 - Track 2 depends on two preview features at once: Run command on Arc-enabled servers, and the Foundry Local CLI. Neither carries an SLA. Accepted for a single-host, non-production capability; it would not be accepted for a production dependency.
 - Windows Server supportability stays unresolved even if the install test passes. A working install proves function, not a Microsoft support statement. Track 2 therefore carries permanent "functional, not formally supported" risk unless Microsoft publishes a Server statement.
 - The 4 KB output cap means the default install path returns a compact result rather than a full log, so first-failure diagnosis may need a second, blob-enabled run.
+- Testing on a smaller dedicated build VM rather than the platform host means the throughput number is a floor, not a prediction for the real target. A slow result may need one re-measurement on a VM sized to the production host before it can be treated as a verdict on the approach.
+- Driving the test through a build-VM wrapper adds power-management and remote-management-readiness steps to what would otherwise be a single local command, and it needs vault access for the build VM's credentials. This is the correct cost of following the governing policy, not incidental overhead.
 
 **Neutral**
 
@@ -118,6 +135,8 @@ The Arc machine is a pre-existing Arc registration in a CAF-named resource group
 - Packaging the run-command in Bicep remains optional, exactly as ADR-0011 left it.
 
 ## Alternatives considered
+
+1. **Run the install test directly on the platform host.** Rejected, and it was this ADR's own earlier draft. The operator's governing build-environment policy does not treat a platform host as a build target and reserves Windows-only work for a dedicated Windows build VM. Beyond compliance, the reasoning applies squarely here: a throwaway install of an MSIX package, a Windows service, and a multi-GB model cache does not belong on the machine that hosts every other workstream. A disposable build VM is the correct target.
 
 1. **Keep `winget install Microsoft.FoundryLocal`, as ADR-0011 specified.** Rejected: Microsoft documents that the machine-scope form fails, and the per-user form does not yield a machine-wide install on a headless server. This is not a preference, it is a documented product constraint.
 2. **`winget install` with `RunAsUser` to give it a real user context.** Rejected: introduces a password where none is otherwise needed, depends on the Secondary Logon service, and still produces a per-user install scoped to a service account. Strictly worse than machine-wide provisioning on both security and operational grounds.
@@ -138,6 +157,8 @@ Every claim traces to `docs/research/SPIKE-18-foundry-local-windows-server.md`, 
 - SSH access to Azure Arc-enabled servers, for the `Microsoft.HybridConnectivity` registration prerequisite: <https://learn.microsoft.com/azure/azure-arc/servers/ssh-arc-overview>
 - Model catalog and sourcing in Foundry Local, for CPU variant sizing and execution providers: <https://learn.microsoft.com/azure/azure-sovereign-clouds/private/foundry-local/concept-model-catalog>
 
-Host measurements cited in Context force 5 were taken read-only on this repo's own host on 2026-07-25. No software was installed.
+The build-environment constraints in Context forces 6 and 7 and in decision 9 come from the operator's private platform standards, consulted 2026-07-25 via the governance MCP that governs this repo. The specific build hosts, addresses, resource groups, and vault secret names are deliberately not reproduced in this public record; only the rule and its rationale are.
+
+Platform VM measurements cited in Context force 5 were taken read-only on 2026-07-25. No software was installed.
 
 Related records: `ADR-0011` (multi-target deployment automation, whose track 2 decision 2 this supersedes on the install command and whose three-track governance table this amends), `ADR-0005` (governing identity ADR, amended with the scoped exception in decision 4), `SPIKE-08` (the original on-device assessment, whose GPU coupling decision 7 undoes), `ADR-0014` and `SPIKE-19` (the track 3 counterparts).
