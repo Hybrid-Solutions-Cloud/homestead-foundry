@@ -99,6 +99,8 @@ Track 3 uses Entra ID authentication (`entraAuth.enabled: true`, the default), w
 - **The Helm onboarding channel is disqualified** for anything but throwaway evaluation, because Entra ID authentication is unavailable on it. The Arc extension path is the deployment channel for this track.
 - **The Agentic Retrieval option is preserved.** Entra must be enabled at install to keep it possible later, and ADR-0009 contemplates RAG, so disabling it now would quietly foreclose a decision ADR-0009 wants open.
 
+**If an API key is ever used despite this decision**, for example by a client that cannot present an Entra token, this repository's no-secrets-in-git rule applies unchanged: the key is referenced **by name only**, never by value, in any committed file, and the value lives in the tenant Key Vault. Note the operator generates the key into a Kubernetes Secret (`<model>-api-keys`, field `primary-key`) and no first-party Key Vault integration is documented, so copying it into Key Vault is a manual, deliberate act with a rotation obligation attached. That obligation is a further reason to prefer Entra and is exactly what decision 5 avoids.
+
 ### 6. The model layer is registry-driven, with explicit resources and never CRD defaults
 
 `ModelDeployment` manifests are **generated** from the same model registry that drives track 1, mirroring track 1's registry-driven model deployments. Which models the cluster serves is data, not hand-edited resource blocks.
@@ -109,13 +111,34 @@ Only `ModelDeployment` is generated. `Model` custom resources are not authored f
 
 Runtime is not set manually for catalog models; the operator selects it from the catalog's framework field. `spec.runtime` is set only for BYO models.
 
-### 7. Bicep for the AKS Arc cluster itself is provisional pending a `what-if` test
+### 7. Drift detection is split, because `what-if` cannot see the Kubernetes layer
+
+Track 1 gets drift detection free: `az deployment sub what-if` compares desired against actual for every ARM resource. **Two of track 3's three layers are invisible to it.** ARM has no knowledge of whether the Gateway API CRDs are present, whether istiod is healthy, or whether a `ModelDeployment` matches the registry. This is the direct cost of the layer split in decision 1 and it has to be answered, not left implied.
+
+Each layer gets its own detection mechanism:
+
+| Layer | Detects drift with | Catches |
+|---|---|---|
+| Prerequisite (Kubernetes and Helm) | `kubectl get crd` against the pinned CRD versions, `kubectl get gatewayclass istio` for `Accepted`, and `helm list -n istio-system` against pinned chart versions | Missing or downgraded CRDs, an istiod that is unhealthy or was upgraded out from under the operator |
+| Platform (ARM) | `az deployment sub what-if`, exactly as track 1 | Extension removed, config changed, wrong release train |
+| Intent (Kubernetes) | `kubectl get modeldeployments -A -o json` diffed against the manifests generated from the registry | A model deployed by hand, a model removed, replicas or resources edited in-cluster |
+
+Four rules make this workable:
+
+1. **The generated manifests are the desired state for the intent layer**, exactly as the registry is for track 1. Drift is defined as a difference between generated output and live cluster state, so a hand-edited `ModelDeployment` shows up as drift rather than becoming the new normal.
+2. **A single read-only check script covers all three layers and returns one verdict.** Splitting detection across three tools is acceptable; making an operator run three unrelated commands and correlate the results by hand is not. This mirrors what `check-docs-currency` does for the documentation.
+3. **Pin the prerequisite versions and check the pinned value, not merely presence.** The Gateway API CRDs, the Inference Extension CRDs, and the Istio charts all have minimum versions, and "a CRD exists" is not the same claim as "the right CRD version exists."
+4. **The operator's own reconciliation is not drift detection.** The inference operator reconciles `ModelDeployment` resources against cluster state on a 30-second timer, which keeps the cluster matching its CRs. It has no knowledge of the registry, so a CR that never should have existed is reconciled just as faithfully as one that should. Detecting *that* is this check's job.
+
+`what-if` remains authoritative for the ARM layer and nothing here weakens it. What changes is the honest admission that for track 3 it covers one layer out of three.
+
+### 8. Bicep for the AKS Arc cluster itself is provisional pending a `what-if` test
 
 ADR-0011 asserted Bicep for the resource group, AKS Arc cluster, and node pools. The cluster and node pool part is **not yet proven**: every current first-party example uses `az aksarc`, and no Bicep example exists in the Foundry Local documentation set. Before the first increment is designed, a minimal Bicep template for the cluster and one node pool is authored and run through `what-if` against a real Azure Local custom location (a read-only operation).
 
 If Bicep expresses it cleanly, ADR-0011's claim stands and the platform layer grows to include the cluster. If it does not, the cluster moves into the wrapper layer alongside the CRDs, and this ADR is amended to say so. Either way the two extensions remain declarative, so this is a narrowing of scope at worst, not a reversal.
 
-### 8. The gate: submit the preview access request now
+### 9. The gate: submit the preview access request now
 
 Foundry Local on Azure Local is public preview, by request, at `aka.ms/FoundryLocalAzure_PreviewRequest`, with no SLA and no published GA date. The access request is free, reversible, commits nothing, and gates every other step in this track.
 
@@ -125,7 +148,7 @@ Preview-with-no-SLA risk is accepted for a non-production reviewer capability, o
 
 Nothing else is authorized: no cluster creation, no extension install, no spend. The `what-if` test in decision 7 and the access request in this decision are the only actions this ADR permits.
 
-### 9. CAF naming and governance, unchanged
+### 10. CAF naming and governance, unchanged
 
 Resources follow this repo's `<resource-type-abbreviation>-<workload>-<env>-<region>-<instance>` pattern, consistent with ADR-0009 and ADR-0011. Governance uses Entra ID token authentication, Azure RBAC, Azure Policy, Azure Monitor, and Cost Management, all of which reach the Arc-managed endpoint. Consistent with ADR-0005 and ADR-0011, the Arc-connected Azure Local servers and cluster use their system-assigned managed identity for Azure resource access. Unlike track 2 (see ADR-0013), track 3 requires **no** exception to ADR-0005.
 

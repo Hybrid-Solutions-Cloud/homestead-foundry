@@ -68,21 +68,56 @@ ADR-0005 remains the governing identity ADR. This is the only exception to it on
 
 The run-command payload emits a compact structured result (a single JSON object with install state, service state, resolved version, and a pass or fail per check) so that the 4 KB Instance View limit is sufficient for normal operation. Full log capture via output and error blobs is a deliberate opt-in for troubleshooting, and invoking it accepts the exception in decision 4. Default operation therefore has **no** secret surface at all, which is the point of keeping the script terse.
 
-### 6. Success is proven by service state and one inference call, never by an installer exit code
+### 6. The run-command script contract, and the idempotency requirement
+
+ADR-0011 named re-runnability as this track's weak point and did not resolve it. This decision fixes the contract.
+
+The script is a **single idempotent unit with four stages**, each of which checks before acting, so a second run against a converged host is a no-op that still returns a truthful state report:
+
+| Stage | Check first | Act only if the check fails | Idempotent because |
+|---|---|---|---|
+| 1. Install | `Get-AppxPackage` / provisioned-package list for the Foundry Local package, and `foundry --version` | Provision the MSIX for all users | Provisioning an already-provisioned package is skipped, not repeated |
+| 2. Model cache | `foundry cache list` for the target model id | `foundry model download <id>` | The on-disk cache is the state; a cached model is not re-downloaded |
+| 3. Service config | `foundry service status` | Start or restart the service | Starting a running service is a no-op |
+| 4. Validate | One inference call against the cached model | nothing, this stage only reports | Read-only |
+
+Rules that make the contract hold:
+
+1. **Check before act, always.** No stage may run its action unconditionally. This is what makes a re-run safe and cheap, and it is the difference between a run-command that can be scheduled and one that can only be run once by hand.
+2. **The on-disk model cache is the unit of state for stage 2, not a flag file.** The cache is what the runtime actually reads, so querying it cannot drift from reality the way a marker file can. Model files are multi-GB, so re-downloading on every run is the specific failure this rule prevents.
+3. **The script is re-runnable to convergence and safe to run on an already-converged host.** A second run must exit 0 having changed nothing.
+4. **Every stage reports its own state** (`already-present`, `changed`, or `failed`) in the single compact JSON result from decision 5. A caller can tell "nothing needed doing" from "we fixed something" without reading logs.
+5. **Failure is fail-fast per stage, and the result names the stage that failed.** A model-pull failure must not be reported as an install failure.
+6. **Uninstall is out of scope for this script.** Removal is a separate deliberate action, not a mode of the install path, because a script that can uninstall can uninstall by accident.
+
+### 7. Runtime identity is the Arc system-assigned managed identity
+
+Consistent with ADR-0005 as the governing identity ADR and with ADR-0011, the Arc-connected Windows Server uses its **system-assigned managed identity** for any Azure resource access from inside the guest, issued through the Arc HIMDS endpoint and scoped by least-privilege Azure RBAC. No service principal, no client secret, and no certificate is provisioned for this track.
+
+Note the two identities are distinct and should not be conflated:
+
+- **Deploy-time identity**: the operator or automation principal in Azure that holds Azure Connected Machine Resource Administrator and issues the run-command. It never enters the guest.
+- **In-guest runtime identity**: the Arc machine's system-assigned managed identity, used by anything running on the host that needs an Azure resource.
+
+The Foundry Local runtime itself needs **neither**. It requires no Azure subscription, no Azure RBAC, and no Key Vault access (decision 8), so in the base install there is nothing for the managed identity to do. It is confirmed here as the identity that any *future* in-guest component must use, so the answer is settled before something needs it and reaches for a key instead.
+
+The single exception remains the blob path in decision 4, which is a deploy-time Azure-side hop, not an in-guest one.
+
+### 8. Success is proven by service state and one inference call, never by an installer exit code
 
 Validation is `foundry service status`, which reports whether the service is running and prints its local endpoint, followed by one inference call against a pulled model. A post-install `Request to local service failed` condition is common enough that Microsoft's standing advice is `foundry service restart`, so "the installer returned 0" is not evidence the runtime works. This matches this repo's existing rule that a file existing is not evidence it does its job.
 
-### 7. GPU capability is decoupled from this track
+### 9. GPU capability is decoupled from this track
 
 Track 2 targets CPU-only inference of a quantized small model in the `phi-4-mini` class (roughly 4.8 GB, `CPUExecutionProvider`) as its first and only committed increment. The `WinML` accelerated path is out of scope on this host by its own documented requirement, since virtual machines without GPU passthrough are unsupported. Whether a 7B-to-20B frontier-substitute reviewer is viable is a **separate** decision, deferred, and it does not gate this track. SPIKE-08's coupling of the two is explicitly undone here.
 
-### 8. Track 2's governance scope is stated honestly
+### 10. Track 2's governance scope is stated honestly
 
 Azure Arc governs the act of installing, configuring, and managing the host: RBAC-gated remote execution, an audit trail, captured output, Azure Policy, and machine inventory, with no inbound ports. Arc does **not** govern the running inference endpoint. The endpoint has no Azure RBAC, no Entra authentication, no Key Vault integration, no budget, and no Azure Monitor surface, and Foundry Local requires no Azure subscription to run.
 
 Consequently track 2 is positioned as a genuine single-host capability and a proof of the Arc automation pattern, **not** as a governance-equivalent sibling of tracks 1 and 3. If a governed on-prem AI endpoint is the requirement, the answer is track 3, and Microsoft's own documentation routes enterprise-scale server inference there. ADR-0011's three-track table is amended by this paragraph.
 
-### 9. The gate: two read-only resolutions, then one authorized install test
+### 11. The gate: two read-only resolutions, then one authorized install test
 
 In order:
 
@@ -104,7 +139,7 @@ This repo's own governing build-environment rules, including the specific build 
 
 Anything beyond those two steps (Arc onboarding a target host, authoring the production run-command, a pipeline) is a later increment and is not authorized here.
 
-### 10. CAF naming and scope, unchanged
+### 12. CAF naming and scope, unchanged
 
 The Arc machine is a pre-existing Arc registration in a CAF-named resource group following this repo's `<resource-type-abbreviation>-<workload>-<env>-<region>-<instance>` pattern, and the run-command resource takes a stable descriptive name such as `install-foundrylocal`. The device runtime provisions nothing else in Azure, so there is no account, deployment, or budget resource to name for this track.
 

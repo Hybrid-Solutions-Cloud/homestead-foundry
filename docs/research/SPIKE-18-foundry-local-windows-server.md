@@ -160,6 +160,20 @@ Unknowns 1, 2, and 5 all resolve from the same short install test. Unknowns 3, 4
 
 7. **Do not defer track 2 on the GPU question.** SPIKE-08 tied a future local-reviewer decision to a GPU-capable host existing. That framing should not block this track. A GPU-less host can run a roughly 5 GB quantized model today; what it cannot do is run the 7B-to-20B frontier-substitute reviewers at interactive speed. Those are separate decisions, and conflating them is what left this track stalled.
 
+## Verdict: conditional GO
+
+Stated plainly, because the tasking asks for a go or no-go and a hedge is not an answer.
+
+**GO on authoring the track 2 automation, conditional on one install test.** The reasoning:
+
+- **No blocker was found.** Every documented prerequisite the CLI names is already satisfied on hardware this project owns. The one thing that looked like a blocker (the install command) turned out to be a wrong command with a documented replacement, not an incompatibility.
+- **The two original unknowns are not blockers, they are unmeasured.** Nothing in Microsoft's documentation says Foundry Local fails on Windows Server; it simply does not say either way. That is an absence of evidence, not evidence of absence, and it is cheap to resolve.
+- **The condition is a single owner-authorized install test** costing no Azure resource, no spend, and no Arc onboarding. If it passes, author the automation. If it fails with an explicit unsupported-OS error, that is a clean NO-GO and track 2 closes in favour of track 3, which is where Microsoft routes server-side inference anyway.
+
+**Explicit no-go triggers**, so the decision is not relitigated later on feel: an explicit unsupported-operating-system error from the provisioning step; a service that installs but will not start on Server 2025; or measured throughput so poor that even a small quantized model cannot complete a single reviewer-sized prompt in a time the intended use tolerates.
+
+**On throughput specifically, this spike records no number and does not pretend otherwise.** Microsoft publishes no CPU latency or throughput table for the device SDK, and no first-party figure exists to cite, so the tasking's "measured or first-party documented" criterion cannot be met from documentation alone. It is met by the install test, which is scoped to produce exactly that number (tokens per second and wall-clock on a fixed reviewer-sized prompt against a roughly 5 GB quantized model). Until that test runs, the throughput question is **open and explicitly not answered here**, and the GO above is conditional precisely because of it.
+
 Net: ADR-0011 picked the right automation form for track 2 and the wrong install command. The track is not blocked by anything external. Three of its six unknowns close with one authorized install test on hardware this project already owns, and two more close with reading that needs no authorization at all.
 
 ---

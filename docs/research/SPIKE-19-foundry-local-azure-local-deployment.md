@@ -137,6 +137,20 @@ Five things, in rough order of consequence:
 
 ---
 
+## The three ADR-0009 gates, stated explicitly
+
+The tasking asks for pass or fail on each. Here it is, with the honest status of each and what would settle it. **Two of the three cannot be closed from documentation and need a check against the live environment, which this spike did not perform and does not claim to have performed.**
+
+| # | ADR-0009 gate | Status | Why |
+|---|---|---|---|
+| a | GPU-validated Azure Local hardware with a supported NVIDIA card present | **PASS by amendment, not by hardware** | The gate itself is no longer required for the first increment. Current documentation makes CPU-backed deployments a first-class path and confines the GPU requirement to `*-cuda-gpu` variants, vLLM, and Agentic Retrieval. If the scope later includes any of those, this gate returns as a hard **FAIL until hardware is confirmed**, because whether a supported NVIDIA card is physically installed has not been checked. |
+| b | AKS Arc cluster with a GPU-enabled Linux node pool using DDA passthrough | **UNVERIFIED, and partly relaxed** | The GPU-enabled part is relaxed by the same amendment: the first increment needs a non-GPU worker pool at `Standard_D8s_v3` or better. The cluster itself is still required and is **not confirmed to exist**. Kubernetes 1.29 or later is now also required, which ADR-0009 predates. Settled by querying the environment for an AKS Arc cluster and its version and node sizes. |
+| c | Preview access approval for the Foundry Local Arc extension | **FAIL, not requested** | Still public preview by request at `aka.ms/FoundryLocalAzure_PreviewRequest`, with no SLA and no published GA date. No request has been submitted. This is the only gate that is unambiguously not met, and it is also the cheapest to fix: the request is free and reversible. |
+
+**Net on the gates: one is retired for the first increment, one is unverified and needs an environment check, and one is simply not requested yet.** Only gate (c) blocks unconditionally, and it blocks on an email rather than on hardware or budget. That is a materially better position than ADR-0009 implies, where all three read as hard hardware-and-approval gates in series.
+
+The two unverified items (does an AKS Arc cluster exist, and is supported GPU hardware physically present) are environment questions, not research questions. They are listed in the UNKNOWN table below rather than guessed at here.
+
 ## What is still UNKNOWN
 
 | # | Unknown | Why it is not in the docs | What resolves it |
@@ -147,6 +161,8 @@ Five things, in rough order of consequence:
 | 4 | **Whether the owner's actual Azure Local release supports the GPU SKUs in scope.** Carried from SPIKE-09 UNKNOWN #4. | GPU support is release-gated. | Check the owner's Azure Local build number against the current GPU SKU matrix at design time. Deferrable if the first increment is CPU-only, per Q3. |
 | 5 | **Whether an AKS Arc cluster plus node pools can be fully expressed in Bicep, or whether `az aksarc` is required in practice.** | ADR-0011 asserts Bicep for the cluster; the current Foundry Local docs consistently use `az aksarc` and `az k8s-extension` in every example and never show Bicep. | Author a minimal Bicep template for the AKS Arc cluster and a node pool and run `what-if` against a real Azure Local custom location. This is the one remaining piece of ADR-0011's declarative claim that is untested. |
 | 6 | **Whether the `Microsoft.CertManagement` extension conflicts with an existing cert-manager on the cluster.** | The docs give the install command but do not discuss coexistence with a pre-existing cert-manager. | Check for an existing cert-manager before installing; test on a non-production cluster, which the docs recommend generally. |
+| 6a | **Does an AKS Arc cluster actually exist in the target environment, and at what Kubernetes version and node size?** (gate b) | An environment question, not a documentation one. This spike performed no live environment check. | `az aksarc list` and `az connectedk8s list` against the target subscription, then compare the Kubernetes version against the 1.29 minimum and the worker size against `Standard_D4s_v3` minimum / `Standard_D8s_v3` recommended. Read-only. |
+| 6b | **Is supported NVIDIA GPU hardware physically present on the Azure Local nodes?** (gate a, if GPU scope returns) | Same. Hardware inventory is not discoverable from documentation. | Check the physical node inventory against the supported DDA SKU list. Only needed if the scope grows to vLLM, `*-cuda-gpu` variants, or Agentic Retrieval. Not needed for the CPU-only first increment. |
 | 7 | **Real CPU inference latency for a ~5 GB model on a `Standard_D8s_v3` worker.** | No latency or throughput table is published for CPU-backed deployments. | Measure after the first increment deploys. Shares the shape of SPIKE-18 UNKNOWN #2, and the two results are worth comparing since they are the same model class on different hosting. |
 
 ---
