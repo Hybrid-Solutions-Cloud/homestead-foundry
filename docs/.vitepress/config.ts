@@ -50,6 +50,8 @@ export default defineConfig({
             { text: "Reliability and operations", link: "/design/reliability-and-operations" },
             { text: "Performance efficiency", link: "/design/performance-efficiency" },
             { text: "Cost and governance", link: "/design/cost-and-governance" },
+            { text: "Observability foundation", link: "/design/observability-architecture" },
+            { text: "Platform observability consumption", link: "/design/platform-observability-consumption" },
             { text: "Publish-pipeline integration", link: "/design/pipeline-integration-design" },
             { text: "Diagrams (Lucid index)", link: "/design/diagrams" },
           ],

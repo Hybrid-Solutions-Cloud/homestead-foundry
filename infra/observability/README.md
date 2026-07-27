@@ -5,6 +5,12 @@ observability foundation around an existing Foundry deployment. It does not
 modify `infra/main.bicep`, the Foundry account, model deployments, or the
 resource-group budget owned by the core template.
 
+The complete reusable tenant observability package is owned by
+`D:/git/platform/observability`. This Homestead package remains the small deployed
+foundation and Foundry consumption reference. Generic tenant-wide modules, policy,
+cost reporting, and hybrid capabilities are added in Platform first and then consumed
+here through a configuration contract.
+
 ## What it provisions
 
 - A dedicated CAF-named observability resource group.
@@ -24,9 +30,8 @@ managed through the Azure Monitor Grafana experience after the resource exists.
 The public package contains no personal email address, budget amount, or alert
 threshold. A private `.local.bicepparam` file supplies the `operationsEmails`,
 `monthlyCreditBudgetUsd`, and `budgetActualAlertThresholds` values. The threshold
-object uses percentages because the Azure budget API is percentage-based. For a
-$1,000 budget, values of 10, 25, and 50 alert at $100, $250, and $500 actual
-cost respectively.
+object uses percentages because the Azure budget API is percentage-based. Current
+tenant values remain in the private overlay rather than this public repository.
 
 ## What it deliberately does not provision
 

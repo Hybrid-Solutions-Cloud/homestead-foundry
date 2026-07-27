@@ -10,7 +10,14 @@ What must **observability** cover for a Microsoft Foundry solution, and which Az
 
 ## Current position
 
-The existing observability package is intentionally a foundation. It provides an isolated observability resource group, an empty Log Analytics workspace, an empty Azure Monitor workspace, a notification action group, a subscription budget, and a no-cost Azure Monitor dashboard with Grafana resource. It does not enable diagnostic settings, Application Insights, Prometheus ingestion, health models, or solution-specific alerts.
+The existing Homestead observability package is intentionally a foundation. It provides
+an isolated observability resource group, an empty Log Analytics workspace, an empty
+Azure Monitor workspace, a notification action group, a subscription budget, and a
+no-cost Azure Monitor dashboard with Grafana resource. The complete reusable package
+is now owned by `D:/git/platform/observability`; Homestead contributes the
+Foundry-specific integration contract. The deployed Homestead foundation does not
+enable diagnostic settings, Application Insights, Prometheus ingestion, health models,
+or solution-specific alerts.
 
 A read-only check of the reference environment on 2026-07-27 found that the deployed Foundry account exposes platform metrics for model requests, availability, latency, tokens, images, errors, and voice usage. Its Foundry project also exposes preview agent metrics. Neither the account nor the project has a configured diagnostic setting. This is the correct low-cost baseline, but it is not yet complete solution observability.
 
@@ -112,10 +119,10 @@ For Azure Local, Azure Monitor provides more than 60 standard infrastructure met
 
 ## Decisions and follow-up work
 
-1. Adopt the `solution-core` profile as the next public implementation increment.
+1. Adopt the `solution-core` profile as the next public implementation increment in the Platform-owned package, then consume it from Homestead through Foundry-specific configuration.
 2. Keep diagnostic settings, Application Insights tracing, synthetic availability tests, managed Prometheus, and health models disabled until their individual activation gates are met.
 3. Add a proposed ADR before enabling `solution-diagnostics`, because it changes data classification, access, and recurring cost.
-4. Build the public Bicep as independent, optional modules: `solution-metric-alerts`, `activity-log-alerts`, `service-health-alerts`, `resource-health-alerts`, and a versioned native-Grafana dashboard definition. The standalone observability deployment remains separate from the core Foundry deployment.
+4. Keep the public Bicep as independent, optional modules: `solution-metric-alerts`, `activity-log-alerts`, `service-health-alerts`, `resource-health-alerts`, and a versioned native-Grafana dashboard definition. The Platform deployment remains separate from every core workload deployment.
 5. Add public examples with placeholder thresholds. Private overlays contain recipient addresses and approved values only.
 6. Validate every selected metric against the target Foundry account at deployment time. Preview project metrics and preview health models must never be hard production dependencies.
 

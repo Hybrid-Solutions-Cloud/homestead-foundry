@@ -4,21 +4,38 @@
 
 Provide an operations view of the Homestead Foundry deployment and its shared subscription: what is deployed, who owns it, what project it serves, whether it is temporary, what it costs, whether Azure or the solution is unhealthy, and when an operator must act. The design deliberately begins with free platform signals and does not begin with broad application-log collection.
 
+## Ownership and consumption boundary
+
+The full tenant observability product is implemented in
+`D:/git/platform/observability`. It owns the reusable Bicep modules, public parameter
+contract, query library, architecture, implementation guide, and operations model.
+Homestead owns only the Foundry-specific integration contract described in
+[Platform observability consumption](./platform-observability-consumption.md) and its
+small deployed foundation. Private recipients, actual scopes, and approved values
+remain in the private Homestead overlay.
+
 ## Scope of observability
 
-The package has two layers. The deployed foundation manages the cost-safe shared control plane. The planned `solution-core` profile monitors the Foundry solution itself with Azure Resource Graph, Azure Activity Log, Service Health, Resource Health, and standard Foundry platform metrics. The separately gated `solution-diagnostics` profile is for selected diagnostic logs, tracing, synthetic tests, and other ingestion-based telemetry.
+The package has two layers. The deployed Homestead foundation manages the cost-safe
+shared control plane. The Platform-owned `solution-core` profile monitors the Foundry
+solution itself with Azure Resource Graph, Azure Activity Log, Service Health, Resource
+Health, and standard Foundry platform metrics. The separately gated
+`solution-diagnostics` profile is for selected diagnostic logs, tracing, synthetic
+tests, and other ingestion-based telemetry.
 
 The full definition and Azure capability assessment are in [SPIKE-21: solution observability](../research/SPIKE-21-solution-observability). This design does not treat an empty workspace as permission to collect every log category.
 
 | Layer | Answers | Default state |
 |---|---|---|
 | Foundation | What is the budget, who receives notifications, and where can approved telemetry land? | Deployed |
-| Solution-core | What is deployed, what changed, is Azure healthy, and is the Foundry service behaving normally? | Designed, not yet deployed |
-| Solution-diagnostics | Why did an agent or request behave a particular way? | Disabled pending privacy, cost, retention, and RBAC approval |
+| Solution-core | What is deployed, what changed, is Azure healthy, and is the Foundry service behaving normally? | Implemented as reusable Platform capability; not enabled for Homestead |
+| Solution-diagnostics | Why did an agent or request behave a particular way? | Implemented as gated Platform capability; disabled pending privacy, cost, retention, and RBAC approval |
 
 ## Foundation topology
 
-The standalone `infra/observability/` subscription-scope package creates a separate observability resource group. It does not modify the core Foundry template or own the Foundry account.
+The standalone `infra/observability/` subscription-scope package creates the deployed
+Homestead foundation. It does not modify the core Foundry template or own the Foundry
+account. The full reusable deployment composition lives in Platform.
 
 | Resource | CAF pattern | Purpose | Default data cost |
 |---|---|---|---|
@@ -48,7 +65,7 @@ The standalone `infra/observability/` subscription-scope package creates a separ
 
 Use **Azure Monitor dashboards with Grafana**, not Azure Managed Grafana. The package creates the native `Microsoft.Dashboard/dashboards` resource shell. Dashboard definition JSON is created or imported in the Azure Monitor Grafana experience, exported as an ARM template, then reviewed before automation. This is necessary because the initial ARM create supplies an empty dashboard and the data-plane API writes its definition. [Microsoft Learn: Grafana APIs](https://learn.microsoft.com/azure/azure-monitor/visualize/visualize-call-grafana-api)
 
-Planned `solution-core` panels are:
+Platform `solution-core` panels for a Foundry consumer are:
 
 1. Subscription actual and forecast spend against the alert threshold.
 2. Resource inventory by resource type, region, Owner, Project, and Lifecycle.
@@ -56,12 +73,18 @@ Planned `solution-core` panels are:
 4. Foundry account platform metrics available without Log Analytics export: model requests, availability, latency, errors, tokens, images, and safety signals where applicable.
 5. Control-plane changes, failed deployments, Service Health, Resource Health, alert status, and the action-group response runbook.
 
-The deployed native Grafana resource is a shell. No dashboard definition or panels are deployed yet. The first panel definition must be source controlled and created under the optional `solution-core` profile. The native Grafana experience does not provide Grafana alerts or scheduled reports. Budgets and Azure Monitor alerts use the action group. Cost analysis, scheduled FinOps reports, and anomaly alerts remain Cost Management capabilities rather than Grafana data-source features.
+The deployed native Grafana resource is a shell. No dashboard definition or panels are
+deployed yet. The first panel definition must be source controlled in the Platform
+package, then supplied through the Homestead Foundry integration configuration. The
+native Grafana experience does not provide Grafana alerts or scheduled reports. Budgets
+and Azure Monitor alerts use the action group. Cost analysis, scheduled FinOps reports,
+and anomaly alerts remain Cost Management capabilities rather than Grafana data-source
+features.
 
-The Bicep template takes alert recipients, the budget amount, and actual-cost
-thresholds as parameters. The public example is anonymous. The private Homestead
-parameter file sets the current $1,000 subscription budget with 10%, 25%, and
-50% alerts, which correspond to $100, $250, and $500 actual cost.
+The Bicep template takes alert recipients, budget amount, and actual-cost thresholds
+as parameters. The public example is anonymous. The private Homestead parameter file
+holds the tenant's current values; no personal recipient or tenant-specific financial
+value is repeated in this public document.
 
 ## Tag contract
 
