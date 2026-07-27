@@ -1,6 +1,6 @@
 param name string
 param shortName string
-param emailAddress string
+param emailAddresses string[]
 param tags object
 
 resource actionGroup 'Microsoft.Insights/actionGroups@2023-01-01' = {
@@ -10,13 +10,11 @@ resource actionGroup 'Microsoft.Insights/actionGroups@2023-01-01' = {
   properties: {
     groupShortName: shortName
     enabled: true
-    emailReceivers: [
-      {
-        name: 'operations-owner'
+    emailReceivers: [for (emailAddress, index) in emailAddresses: {
+        name: 'operations-${index + 1}'
         emailAddress: emailAddress
         useCommonAlertSchema: true
-      }
-    ]
+      }]
   }
 }
 

@@ -5,7 +5,8 @@ param name string
 param amountUsd int
 param startDate string
 param actionGroupResourceId string
-param contactEmail string
+param contactEmails string[]
+param actualAlertThresholds object
 
 // Cost Management budgets alert on a roughly daily evaluation cadence. They do
 // not prevent spend and are intentionally separate from the core RG budget.
@@ -19,65 +20,35 @@ resource budget 'Microsoft.Consumption/budgets@2021-10-01' = {
       startDate: startDate
     }
     notifications: {
-      actual50Percent: {
+      actualLow: {
         enabled: true
         operator: 'GreaterThanOrEqualTo'
-        threshold: 50
+        threshold: actualAlertThresholds.low
         thresholdType: 'Actual'
         contactGroups: [
           actionGroupResourceId
         ]
-        contactEmails: [
-          contactEmail
-        ]
+        contactEmails: contactEmails
       }
-      actual75Percent: {
+      actualMedium: {
         enabled: true
         operator: 'GreaterThanOrEqualTo'
-        threshold: 75
+        threshold: actualAlertThresholds.medium
         thresholdType: 'Actual'
         contactGroups: [
           actionGroupResourceId
         ]
-        contactEmails: [
-          contactEmail
-        ]
+        contactEmails: contactEmails
       }
-      actual90Percent: {
+      actualHigh: {
         enabled: true
         operator: 'GreaterThanOrEqualTo'
-        threshold: 90
+        threshold: actualAlertThresholds.high
         thresholdType: 'Actual'
         contactGroups: [
           actionGroupResourceId
         ]
-        contactEmails: [
-          contactEmail
-        ]
-      }
-      actual100Percent: {
-        enabled: true
-        operator: 'GreaterThanOrEqualTo'
-        threshold: 100
-        thresholdType: 'Actual'
-        contactGroups: [
-          actionGroupResourceId
-        ]
-        contactEmails: [
-          contactEmail
-        ]
-      }
-      forecast100Percent: {
-        enabled: true
-        operator: 'GreaterThanOrEqualTo'
-        threshold: 100
-        thresholdType: 'Forecasted'
-        contactGroups: [
-          actionGroupResourceId
-        ]
-        contactEmails: [
-          contactEmail
-        ]
+        contactEmails: contactEmails
       }
     }
   }

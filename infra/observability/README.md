@@ -19,6 +19,15 @@ The dashboard resource is `Microsoft.Dashboard/dashboards`, not Azure Managed
 Grafana. It adds no Grafana service charge. Dashboard definition content is
 managed through the Azure Monitor Grafana experience after the resource exists.
 
+## Private alert configuration
+
+The public package contains no personal email address, budget amount, or alert
+threshold. A private `.local.bicepparam` file supplies the `operationsEmails`,
+`monthlyCreditBudgetUsd`, and `budgetActualAlertThresholds` values. The threshold
+object uses percentages because the Azure budget API is percentage-based. For a
+$1,000 budget, values of 10, 25, and 50 alert at $100, $250, and $500 actual
+cost respectively.
+
 ## What it deliberately does not provision
 
 - Azure Managed Grafana.

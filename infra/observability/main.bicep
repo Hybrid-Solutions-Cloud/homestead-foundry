@@ -57,8 +57,9 @@ param expiresOn string = ''
 @description('Automation owner recorded in the ManagedBy tag.')
 param managedBy string = 'bicep'
 
-@description('Action group email recipient. Keep the real value in a private local parameter file.')
-param operationsEmail string
+@description('Action group email recipients. Keep real addresses in a private local parameter file.')
+@minLength(1)
+param operationsEmails string[]
 
 @description('Short name shown in action group notifications. Azure limits this to 12 characters.')
 @minLength(1)
@@ -68,6 +69,9 @@ param actionGroupShortName string = 'foundry-obs'
 @description('Monthly subscription-level credit or spend alert threshold in USD. This is an alert, not a hard spending cap.')
 @minValue(1)
 param monthlyCreditBudgetUsd int
+
+@description('Actual-cost alert percentages for the subscription budget. Supply low, medium, and high values from a parameter file, for example 10, 25, and 50 for $100, $250, and $500 of a $1,000 budget.')
+param budgetActualAlertThresholds object
 
 @description('First day of the budget period, in yyyy-MM-01 form.')
 param budgetStartDate string = utcNow('yyyy-MM-01')
@@ -152,7 +156,7 @@ module actionGroup 'modules/action-group.bicep' = {
   params: {
     name: names.actionGroup
     shortName: actionGroupShortName
-    emailAddress: operationsEmail
+    emailAddresses: operationsEmails
     tags: tags
   }
 }
@@ -164,7 +168,8 @@ module subscriptionBudget 'modules/subscription-budget.bicep' = {
     amountUsd: monthlyCreditBudgetUsd
     startDate: budgetStartDate
     actionGroupResourceId: actionGroup.outputs.id
-    contactEmail: operationsEmail
+    contactEmails: operationsEmails
+    actualAlertThresholds: budgetActualAlertThresholds
   }
 }
 

@@ -43,6 +43,11 @@ Initial panels are:
 
 The native Grafana experience does not provide Grafana alerts or scheduled reports. Budgets and Azure Monitor alerts use the action group. Scheduled FinOps exports and reports belong to the Platform observability initiative.
 
+The Bicep template takes alert recipients, the budget amount, and actual-cost
+thresholds as parameters. The public example is anonymous. The private Homestead
+parameter file sets the current $1,000 subscription budget with 10%, 25%, and
+50% alerts, which correspond to $100, $250, and $500 actual cost.
+
 ## Tag contract
 
 Every new resource in this package receives these tags, following the live platform infrastructure standard:
