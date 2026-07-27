@@ -23,6 +23,7 @@ param actionGroupLocation = 'global'
 param monthlyBudgetUsd = 100
 param budgetName = 'budget-example-credit-sub-01'
 param budgetStartDate = '2026-01-01'
+param budgetEndDate = '2036-01-01T00:00:00Z'
 param budgetActualAlertThresholds = {
   low: 10
   medium: 25

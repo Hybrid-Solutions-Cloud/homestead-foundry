@@ -3,6 +3,7 @@ targetScope = 'subscription'
 param name string
 param amountUsd int
 param startDate string
+param endDate string
 param actionGroupResourceId string
 param contactEmails string[]
 param actualAlertThresholds object
@@ -83,6 +84,7 @@ resource budget 'Microsoft.Consumption/budgets@2021-10-01' = {
     timeGrain: 'Monthly'
     timePeriod: {
       startDate: startDate
+      endDate: endDate
     }
     notifications: union(actualNotifications, forecastNotifications)
   }

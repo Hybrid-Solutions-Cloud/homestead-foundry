@@ -76,6 +76,9 @@ param budgetName string
 @description('First day of the monthly budget period in yyyy-MM-01 form.')
 param budgetStartDate string
 
+@description('Inclusive end of the budget period in ISO 8601 UTC form.')
+param budgetEndDate string
+
 @description('Actual-cost budget notifications. Object keys: low, medium, high. Values are percentages.')
 param budgetActualAlertThresholds object
 
@@ -248,6 +251,7 @@ module subscriptionBudget 'modules/subscription-budget.bicep' = {
     name: budgetName
     amountUsd: monthlyBudgetUsd
     startDate: budgetStartDate
+    endDate: budgetEndDate
     actionGroupResourceId: actionGroup.outputs.id
     contactEmails: operationsEmails
     actualAlertThresholds: budgetActualAlertThresholds

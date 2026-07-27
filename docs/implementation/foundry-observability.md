@@ -57,7 +57,7 @@ approved what-if:
 | `env` | `environment` |
 | `regionToken` | `regionCode` |
 | `monthlyCreditBudgetUsd` | `monthlyBudgetUsd` |
-| Existing subscription budget resource name | `budgetName` |
+| Existing subscription budget resource name and period | `budgetName`, `budgetStartDate`, `budgetEndDate` |
 | defaulted Bicep values | Explicit private parameter-file values |
 
 The `environment` input accepts `prod` as well as `prd` so an established
