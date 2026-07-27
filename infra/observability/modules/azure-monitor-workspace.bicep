@@ -1,6 +1,7 @@
 param name string
 param location string
 param tags object
+param publicNetworkAccess string
 
 // Azure Monitor Workspace stores managed Prometheus data. Creation alone does
 // not begin collection. This package deliberately creates no data collection
@@ -9,7 +10,9 @@ resource workspace 'Microsoft.Monitor/accounts@2023-04-03' = {
   name: name
   location: location
   tags: tags
-  properties: {}
+  properties: {
+    publicNetworkAccess: publicNetworkAccess
+  }
 }
 
 output id string = workspace.id

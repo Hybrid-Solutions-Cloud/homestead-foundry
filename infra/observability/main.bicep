@@ -70,6 +70,9 @@ param actionGroupLocation string
 @description('Monthly subscription budget in USD. This is an alert threshold, not a spending cap.')
 param monthlyBudgetUsd int
 
+@description('Subscription budget resource name. Existing deployments must supply their current budget name to preserve it.')
+param budgetName string
+
 @description('First day of the monthly budget period in yyyy-MM-01 form.')
 param budgetStartDate string
 
@@ -84,6 +87,13 @@ param budgetForecastAlertThresholds object
 
 @description('Log Analytics SKU name selected by the consumer.')
 param logAnalyticsSkuName string
+
+@allowed([
+  'Enabled'
+  'Disabled'
+])
+@description('Azure Monitor Workspace public-network-access setting.')
+param azureMonitorWorkspacePublicNetworkAccess string
 
 @minValue(30)
 @description('Log Analytics interactive retention in days.')
@@ -156,7 +166,6 @@ var names = {
   logAnalytics: 'log-${observabilityBaseName}'
   azureMonitorWorkspace: 'amw-${observabilityBaseName}'
   actionGroup: 'ag-${observabilityBaseName}'
-  budget: 'budget-${workload}-${environment}-${instance}'
   dashboard: 'dash-${workload}-${environment}-${regionCode}-${instance}'
 }
 
@@ -214,6 +223,7 @@ module azureMonitorWorkspace 'modules/azure-monitor-workspace.bicep' = {
     name: names.azureMonitorWorkspace
     location: location
     tags: tags
+    publicNetworkAccess: azureMonitorWorkspacePublicNetworkAccess
   }
 }
 
@@ -233,9 +243,9 @@ module actionGroup 'modules/action-group.bicep' = {
 }
 
 module subscriptionBudget 'modules/subscription-budget.bicep' = {
-  name: 'deploy-${names.budget}'
+  name: 'deploy-${budgetName}'
   params: {
-    name: names.budget
+    name: budgetName
     amountUsd: monthlyBudgetUsd
     startDate: budgetStartDate
     actionGroupResourceId: actionGroup.outputs.id

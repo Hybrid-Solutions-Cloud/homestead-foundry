@@ -21,6 +21,7 @@ param actionGroupShortName = 'fdry-alerts'
 param actionGroupLocation = 'global'
 
 param monthlyBudgetUsd = 100
+param budgetName = 'budget-example-credit-sub-01'
 param budgetStartDate = '2026-01-01'
 param budgetActualAlertThresholds = {
   low: 10
@@ -35,6 +36,7 @@ param budgetForecastAlertThresholds = {
 }
 
 param logAnalyticsSkuName = 'PerGB2018'
+param azureMonitorWorkspacePublicNetworkAccess = 'Enabled'
 param logAnalyticsRetentionInDays = 30
 param logAnalyticsDailyQuotaGb = 1
 param deployGrafanaDashboardShell = true

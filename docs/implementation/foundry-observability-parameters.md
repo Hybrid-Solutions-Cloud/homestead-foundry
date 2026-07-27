@@ -10,8 +10,8 @@ fictitious. Actual values belong only in an ignored private overlay.
 | `workload`, `environment`, `regionCode`, `instance`, `location` | CAF-derived names and regional placement |
 | `ownerAlias`, `project`, `costCenter`, `lifecycle`, `expiresOn`, `managedBy` | Required ownership, allocation, and lifecycle tag values |
 | `operationsEmails`, `actionGroupShortName`, `actionGroupLocation` | Private notification routing |
-| `monthlyBudgetUsd`, `budgetStartDate`, actual and forecast threshold objects | Subscription budget and notification posture |
-| `logAnalyticsSkuName`, retention, daily quota | Workspace cost safeguards |
+| `monthlyBudgetUsd`, `budgetName`, `budgetStartDate`, actual and forecast threshold objects | Subscription budget and notification posture. An established deployment passes its existing budget name. |
+| `logAnalyticsSkuName`, `azureMonitorWorkspacePublicNetworkAccess`, retention, daily quota | Workspace cost and network safeguards |
 | Dashboard shell and preview-definition inputs | Native Azure Monitor Grafana resource and optional versioned JSON definition |
 
 ## Foundry core inputs
