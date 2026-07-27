@@ -2,7 +2,19 @@
 
 ## Objective
 
-Provide an operations view of the Homestead Foundry deployment and its shared subscription: what is deployed, who owns it, what project it serves, whether it is temporary, what it costs, and when a budget requires action. The design deliberately does not begin with application-performance telemetry.
+Provide an operations view of the Homestead Foundry deployment and its shared subscription: what is deployed, who owns it, what project it serves, whether it is temporary, what it costs, whether Azure or the solution is unhealthy, and when an operator must act. The design deliberately begins with free platform signals and does not begin with broad application-log collection.
+
+## Scope of observability
+
+The package has two layers. The deployed foundation manages the cost-safe shared control plane. The planned `solution-core` profile monitors the Foundry solution itself with Azure Resource Graph, Azure Activity Log, Service Health, Resource Health, and standard Foundry platform metrics. The separately gated `solution-diagnostics` profile is for selected diagnostic logs, tracing, synthetic tests, and other ingestion-based telemetry.
+
+The full definition and Azure capability assessment are in [SPIKE-21: solution observability](../research/SPIKE-21-solution-observability). This design does not treat an empty workspace as permission to collect every log category.
+
+| Layer | Answers | Default state |
+|---|---|---|
+| Foundation | What is the budget, who receives notifications, and where can approved telemetry land? | Deployed |
+| Solution-core | What is deployed, what changed, is Azure healthy, and is the Foundry service behaving normally? | Designed, not yet deployed |
+| Solution-diagnostics | Why did an agent or request behave a particular way? | Disabled pending privacy, cost, retention, and RBAC approval |
 
 ## Foundation topology
 
@@ -21,27 +33,30 @@ The standalone `infra/observability/` subscription-scope package creates a separ
 
 | Signal plane | First release | Activation gate |
 |---|---|---|
-| Azure platform metrics | Use from Azure Monitor and native Grafana | Available without log collection |
-| Azure Resource Graph | Use for inventory, tags, lifecycle, and owner views | Reader access to the subscription |
-| Cost Management | Use for cost, budget, forecast, and tag allocation views | Cost Management Reader or equivalent |
-| Resource logs | Disabled | Named operations question, selected category, cost estimate, and owner approval |
-| Foundry traces | Disabled | Data classification, retention, sampling, and access review |
+| Azure platform metrics | Use Foundry model and project metrics in dashboards and selected metric alerts | Available without log collection; validate metric support on the target resource |
+| Azure Resource Graph | Use for inventory, tags, lifecycle, owner, and expiry views | Reader access to the subscription |
+| Cost Management | Use for cost, budget, forecast, anomaly, Advisor, and tag-allocation views | Cost Management Reader or equivalent |
+| Activity Log | Review changes and failed deployments; add narrow activity-log alerts | Automatically collected; export only for justified retention or correlation |
+| Service Health and Resource Health | Alert on incidents, maintenance, advisories, and relevant health transitions | Action-group recipient and low-noise scope review |
+| Resource logs | Disabled | Named operations question, selected category, data classification, cost estimate, and owner approval |
+| Foundry traces | Disabled | Data classification, redaction, retention, sampling, and access review |
 | Managed Prometheus | Disabled | Azure Arc or Azure Local Kubernetes workload and sample-volume review |
-| Health models | Disabled | Successful non-production preview pilot |
+| Health models | Disabled | Successful non-production preview pilot using established source signals |
+| Synthetic availability tests | Disabled | Supported non-destructive endpoint, test cost estimate, and endpoint access design |
 
 ## Dashboard model
 
 Use **Azure Monitor dashboards with Grafana**, not Azure Managed Grafana. The package creates the native `Microsoft.Dashboard/dashboards` resource shell. Dashboard definition JSON is created or imported in the Azure Monitor Grafana experience, exported as an ARM template, then reviewed before automation. This is necessary because the initial ARM create supplies an empty dashboard and the data-plane API writes its definition. [Microsoft Learn: Grafana APIs](https://learn.microsoft.com/azure/azure-monitor/visualize/visualize-call-grafana-api)
 
-Initial panels are:
+Planned `solution-core` panels are:
 
 1. Subscription actual and forecast spend against the alert threshold.
 2. Resource inventory by resource type, region, Owner, Project, and Lifecycle.
 3. Untagged resources and temporary resources approaching `ExpiresOn`.
-4. Foundry account platform metrics available without Log Analytics export.
-5. Alert and budget status, with the action-group response runbook.
+4. Foundry account platform metrics available without Log Analytics export: model requests, availability, latency, errors, tokens, images, and safety signals where applicable.
+5. Control-plane changes, failed deployments, Service Health, Resource Health, alert status, and the action-group response runbook.
 
-The native Grafana experience does not provide Grafana alerts or scheduled reports. Budgets and Azure Monitor alerts use the action group. Scheduled FinOps exports and reports belong to the Platform observability initiative.
+The deployed native Grafana resource is a shell. No dashboard definition or panels are deployed yet. The first panel definition must be source controlled and created under the optional `solution-core` profile. The native Grafana experience does not provide Grafana alerts or scheduled reports. Budgets and Azure Monitor alerts use the action group. Cost analysis, scheduled FinOps reports, and anomaly alerts remain Cost Management capabilities rather than Grafana data-source features.
 
 The Bicep template takes alert recipients, the budget amount, and actual-cost
 thresholds as parameters. The public example is anonymous. The private Homestead
@@ -66,4 +81,4 @@ The core Foundry deployment currently uses lowercase legacy tags. Platform work 
 
 ## Future hybrid extension
 
-For Azure Local and Arc-enabled Kubernetes, reuse the same tag contract, action group, budget, and dashboard. Add managed Prometheus only for Kubernetes metrics. Add a separate and filtered Log Analytics collection profile for container and control-plane logs. For device-local Foundry Local, preserve local inference and keep any Azure-connected telemetry opt-in, metadata-only by default, and free of prompt and output content.
+For Azure Local and Arc-enabled Kubernetes, reuse the same tag contract, action group, budget, and dashboard. Azure Local standard infrastructure metrics are available without extra cost. Add managed Prometheus only for Kubernetes metrics after a scrape-volume and label-cardinality review. Add a separate and filtered Log Analytics collection profile for container and control-plane logs. For device-local Foundry Local, preserve local inference and keep any Azure-connected telemetry opt-in, metadata-only by default, and free of prompt and output content.

@@ -24,3 +24,4 @@ Every research spike behind the architecture decisions, in order. Each grounds i
 | [SPIKE-18](./SPIKE-18-foundry-local-windows-server) | Foundry Local on Windows Server, and whether the Arc run-command can install it (track 2) |
 | [SPIKE-19](./SPIKE-19-foundry-local-azure-local-deployment) | Where the ARM and Kubernetes seam sits for Foundry Local on Azure Local (track 3) |
 | [SPIKE-20](./SPIKE-20-cost-first-observability) | Cost-first Azure Monitor, Foundry, Grafana, and hybrid observability |
+| [SPIKE-21](./SPIKE-21-solution-observability) | Solution observability for Azure AI Foundry |
