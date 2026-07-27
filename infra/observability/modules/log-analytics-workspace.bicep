@@ -1,6 +1,7 @@
 param name string
 param location string
 param tags object
+param skuName string
 param retentionInDays int
 param dailyQuotaGb int
 
@@ -10,7 +11,7 @@ resource workspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   tags: tags
   properties: {
     sku: {
-      name: 'PerGB2018'
+      name: skuName
     }
     retentionInDays: retentionInDays
     workspaceCapping: {

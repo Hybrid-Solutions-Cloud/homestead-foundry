@@ -1,0 +1,9 @@
+// Foundry accounts and projects with the accountability tag contract.
+resources
+| where type in~ ('microsoft.cognitiveservices/accounts', 'microsoft.cognitiveservices/accounts/projects')
+| extend owner = tostring(tags['Owner'])
+| extend project = tostring(tags['Project'])
+| extend lifecycle = tostring(tags['Lifecycle'])
+| extend expiresOn = tostring(tags['ExpiresOn'])
+| project subscriptionId, resourceGroup, type, name, location, kind, owner, project, lifecycle, expiresOn, id
+| order by resourceGroup asc, type asc, name asc

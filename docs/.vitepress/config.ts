@@ -50,7 +50,7 @@ export default defineConfig({
             { text: "Reliability and operations", link: "/design/reliability-and-operations" },
             { text: "Performance efficiency", link: "/design/performance-efficiency" },
             { text: "Cost and governance", link: "/design/cost-and-governance" },
-            { text: "Observability foundation", link: "/design/observability-architecture" },
+            { text: "Foundry observability", link: "/design/observability-architecture" },
             { text: "Platform observability consumption", link: "/design/platform-observability-consumption" },
             { text: "Publish-pipeline integration", link: "/design/pipeline-integration-design" },
             { text: "Diagrams (Lucid index)", link: "/design/diagrams" },
@@ -119,6 +119,9 @@ export default defineConfig({
           text: "Implementation",
           items: [
             { text: "Implementation guide", link: "/implementation/implementation-guide" },
+            { text: "Foundry observability implementation", link: "/implementation/foundry-observability" },
+            { text: "Foundry observability operations", link: "/implementation/foundry-observability-operations" },
+            { text: "Foundry observability parameters", link: "/implementation/foundry-observability-parameters" },
             { text: "As-built record", link: "/implementation/as-built" },
           ],
         },

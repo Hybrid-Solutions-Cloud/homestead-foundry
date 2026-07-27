@@ -3,18 +3,21 @@
 ## Decision
 
 The complete, reusable tenant observability package is owned by the Platform
-repository at `D:/git/platform/observability`. Homestead Foundry is a consumer. It
-does not own a second generic observability implementation and it does not send
-private deployment values upstream.
+repository at `D:/git/platform/observability`. Homestead Foundry publishes a
+Foundry-specific subset under `infra/observability/`. It does not own a second generic
+tenant observability implementation and it does not send private deployment values
+upstream.
 
 ## What Homestead owns
 
+- Foundry-specific Bicep composition for standard metrics, health and deployment
+  alerts, selected diagnostics, dashboard definitions, and response routing.
 - Foundry-specific operating questions, supported Azure Monitor metric definitions,
   and alert rationale.
 - Selected Foundry diagnostic categories after data classification, retention, RBAC,
   sampling, and cost approval.
 - Foundry dashboard panels and links to Foundry response runbooks.
-- The public integration documentation and a configuration example without private
+- The public implementation, integration documentation, and configuration example without private
   recipients, subscription scope, resource identifiers, or financial values.
 
 ## What Platform owns
@@ -36,11 +39,11 @@ public repository.
 ## Consumption sequence
 
 1. Improve generic capability in Platform first.
-2. Add only Foundry-specific configuration or documentation in Homestead public.
+2. Add only Foundry-specific implementation, configuration, or documentation in Homestead public.
 3. Copy approved configuration to the private Homestead overlay.
 4. Run what-if, receive explicit approval, deploy through the private overlay, and
    record the as-built result.
 
-The currently deployed Homestead foundation remains separate from the core Foundry
-template. It is intentionally small and does not imply that diagnostic, tracing,
-Prometheus, health-model, or dashboard-definition features are enabled.
+The Foundry package remains separate from the core Foundry template. Every diagnostic,
+tracing, Prometheus, health-model, or dashboard-definition feature remains opt-in and
+is not implied by the public source code or a deployed foundation.

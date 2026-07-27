@@ -1,0 +1,13 @@
+// Foundry resources missing the required accountability or lifecycle tags.
+resources
+| where type startswith 'microsoft.cognitiveservices/'
+| extend owner = tostring(tags['Owner'])
+| extend project = tostring(tags['Project'])
+| extend environment = tostring(tags['Environment'])
+| extend costCenter = tostring(tags['CostCenter'])
+| extend managedBy = tostring(tags['ManagedBy'])
+| extend lifecycle = tostring(tags['Lifecycle'])
+| extend expiresOn = tostring(tags['ExpiresOn'])
+| where isempty(owner) or isempty(project) or isempty(environment) or isempty(costCenter) or isempty(managedBy) or isempty(lifecycle) or ((lifecycle =~ 'temporary' or lifecycle =~ 'sandbox') and isempty(expiresOn))
+| project subscriptionId, resourceGroup, type, name, owner, project, environment, costCenter, managedBy, lifecycle, expiresOn, id
+| order by subscriptionId asc, resourceGroup asc, name asc

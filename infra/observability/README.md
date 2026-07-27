@@ -1,53 +1,60 @@
-# Observability package
+# Foundry observability package
 
-This is a standalone, subscription-scope Bicep package for the cost-first
-observability foundation around an existing Foundry deployment. It does not
-modify `infra/main.bicep`, the Foundry account, model deployments, or the
-resource-group budget owned by the core template.
+This is the public, Foundry-specific observability package for an existing Azure AI
+Foundry deployment. It is standalone, subscription-scope Bicep and does not modify
+`infra/main.bicep`, a Foundry account, model deployment, Foundry project, or application.
 
-The complete reusable tenant observability package is owned by
-`D:/git/platform/observability`. This Homestead package remains the small deployed
-foundation and Foundry consumption reference. Generic tenant-wide modules, policy,
-cost reporting, and hybrid capabilities are added in Platform first and then consumed
-here through a configuration contract.
+It is derived from the canonical Platform observability package at
+`D:/git/platform/observability`, but only implements the operating capabilities that a
+Foundry workload needs. Platform remains the source for tenant-wide governance, FinOps
+reporting and exports, broad inventory, Azure Local collection, Prometheus, and health
+model capabilities.
 
-## What it provisions
+## Profiles
 
-- A dedicated CAF-named observability resource group.
-- A Log Analytics workspace with 30-day retention and a configurable low daily
-  cap. It receives no data until a separate, approved collection change.
-- An Azure Monitor Workspace for future managed Prometheus use with Azure Arc
-  and Azure Local. It has no data collection rule in this package.
-- One action group and one subscription-level Cost Management budget.
-- An optional native Azure Monitor dashboard with Grafana resource shell.
+| Profile | Included | Data-cost posture |
+|---|---|---|
+| Foundation | Isolated resource group, workspaces, action group, subscription budget, query library, dashboard shell | No telemetry ingestion |
+| Foundry core | Foundation plus Foundry metric alerts, deployment and Azure-health alerts, alert routing, and source-controlled dashboard definition | Standard platform metrics before logs |
+| Foundry diagnostics | Individually approved Foundry diagnostic categories, Application Insights, availability tests, and scheduled-query alerts | Explicit privacy, retention, RBAC, and cost gates |
 
-The dashboard resource is `Microsoft.Dashboard/dashboards`, not Azure Managed
-Grafana. It adds no Grafana service charge. Dashboard definition content is
-managed through the Azure Monitor Grafana experience after the resource exists.
+## What this package provisions
 
-## Private alert configuration
+- A CAF-named observability resource group, Log Analytics workspace, Azure Monitor
+  Workspace, action group, subscription budget, and native Azure Monitor dashboard
+  with Grafana shell.
+- Optional Activity Log alerts for Foundry deployment failures, high-risk changes,
+  Service Health, and Resource Health.
+- Optional Azure Monitor metric alerts for Foundry account and project metrics that
+  the target resource actually supports.
+- Optional alert-processing rules for approved maintenance suppression or routing.
+- Optional selected Foundry diagnostic settings, workspace-based Application Insights,
+  safe availability tests, and scheduled query alerts.
+- Foundry inventory and tag-compliance Resource Graph queries.
 
-The public package contains no personal email address, budget amount, or alert
-threshold. A private `.local.bicepparam` file supplies the `operationsEmails`,
-`monthlyCreditBudgetUsd`, and `budgetActualAlertThresholds` values. The threshold
-object uses percentages because the Azure budget API is percentage-based. Current
-tenant values remain in the private overlay rather than this public repository.
+## What it does not provision
 
-## What it deliberately does not provision
+- A Foundry account, project, model deployment, endpoint, model, network, or identity.
+- Azure Managed Grafana, catch-all diagnostic categories, prompt or response capture,
+  or a diagnostic setting without an explicit approved definition.
+- Tenant-wide Policy assignments, Cost Management exports or scheduled reports, broad
+  Activity Log export, generic resource governance, Prometheus collection, Azure Arc
+  extensions, data collection rules, or Azure Monitor health-model preview.
 
-- Azure Managed Grafana.
-- Any diagnostic setting or `allLogs` collection.
-- Application Insights or Foundry tracing.
-- Managed Prometheus scraping, a data collection rule, or an Azure Arc
-  extension.
-- Azure Monitor health models, which remain preview and are a later pilot.
+## Public and private configuration
 
-## Validate before deployment
+`params/example.bicepparam` is a complete, fictitious public contract. Copy it to an
+ignored private overlay and replace its recipients, values, scopes, resource identifiers,
+thresholds, and approved definitions. No personal email, subscription identifier,
+private endpoint, credential, or tenant value belongs in reusable Bicep.
+
+## Validation and deployment
 
 ```powershell
-az bicep build --file infra/observability/main.bicep
+az bicep build --file infra/observability/main.bicep --outfile D:\tmp\homestead-foundry-observability.json
 az deployment sub what-if --location <deployment-region> --template-file infra/observability/main.bicep --parameters <private-params>.bicepparam
 ```
 
-`what-if` is read-only. A real `az deployment sub create` requires the owner's
-immediate confirmation after the what-if is reviewed.
+`what-if` is read-only. A real deployment requires the owner's immediate approval after
+the reviewed what-if. The public package is never deployed with its example parameter
+file.

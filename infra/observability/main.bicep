@@ -1,116 +1,184 @@
-// Cost-first observability foundation for an existing Azure AI Foundry workload.
-// This package is intentionally separate from ../main.bicep. It creates shared
-// observability controls without owning the Foundry account or model deployments.
-// No diagnostic setting, Application Insights tracing, or Prometheus scraping is
-// enabled here. Those data-producing features require a separate approved change.
+// Foundry-specific observability package for an existing Azure AI Foundry workload.
+// This subscription-scope deployment is separate from ../main.bicep. It owns only
+// Foundry observability, cost controls, and response resources. It never creates,
+// changes, or deletes the Foundry account, project, model deployments, or application.
 targetScope = 'subscription'
 
-@description('Short, lowercase, undelimited workload token. Limited to 11 characters so the native Grafana dashboard name remains within Azure limits.')
-@minLength(3)
-@maxLength(11)
+@minLength(2)
+@maxLength(24)
+@description('Lowercase workload token used in CAF-derived resource names.')
 param workload string
 
-@description('Environment served by the workload.')
 @allowed([
-  'prod'
   'dev'
-  'test'
+  'stg'
+  'prd'
 ])
-param env string
+@description('Deployment environment.')
+param environment string
 
-@description('CAF short code for the Azure region, for example eus.')
 @minLength(2)
 @maxLength(5)
-param regionToken string
+@description('CAF region token used in resource names.')
+param regionCode string
 
-@description('Two-digit instance token; first instance is 01.')
 @minLength(2)
 @maxLength(2)
-param instance string = '01'
+@description('Zero-padded CAF instance identifier.')
+param instance string
 
-@description('Azure region for the observability resource group and regional resources.')
+@description('Azure region for regional observability resources.')
 param location string
 
-@description('Named human owner. Do not supply an object ID or credential.')
-@minLength(2)
+@description('Accountable owner or team alias for the Owner tag.')
 param ownerAlias string
 
-@description('Product or project name used for cost allocation.')
-@minLength(2)
+@description('Foundry product or workload value for the Project tag.')
 param project string
 
-@description('Cost center or personal allocation code.')
-@minLength(1)
+@description('Allocation code for the CostCenter tag.')
 param costCenter string
 
-@description('Lifecycle classification for the observability foundation.')
 @allowed([
   'permanent'
   'temporary'
   'sandbox'
 ])
-param lifecycle string = 'permanent'
+@description('Lifecycle tag for package-created resources.')
+param lifecycle string
 
-@description('ISO 8601 expiry date for temporary or sandbox resources. Leave empty for permanent resources.')
-param expiresOn string = ''
+@description('ISO 8601 expiry date for temporary or sandbox resources. Supply an empty string only for permanent resources.')
+param expiresOn string
 
-@description('Automation owner recorded in the ManagedBy tag.')
-param managedBy string = 'bicep'
+@description('Provisioning authority for the ManagedBy tag.')
+param managedBy string
 
-@description('Action group email recipients. Keep real addresses in a private local parameter file.')
 @minLength(1)
+@description('Private action-group recipient addresses. Keep real addresses in a private overlay.')
 param operationsEmails string[]
 
-@description('Short name shown in action group notifications. Azure limits this to 12 characters.')
 @minLength(1)
 @maxLength(12)
-param actionGroupShortName string = 'foundry-obs'
+@description('Short display name in action-group notifications.')
+param actionGroupShortName string
 
-@description('Monthly subscription-level credit or spend alert threshold in USD. This is an alert, not a hard spending cap.')
+@description('Azure-supported action-group location.')
+param actionGroupLocation string
+
 @minValue(1)
-param monthlyCreditBudgetUsd int
+@description('Monthly subscription budget in USD. This is an alert threshold, not a spending cap.')
+param monthlyBudgetUsd int
 
-@description('Actual-cost alert percentages for the subscription budget. Supply low, medium, and high values from a parameter file, for example 10, 25, and 50 for $100, $250, and $500 of a $1,000 budget.')
+@description('First day of the monthly budget period in yyyy-MM-01 form.')
+param budgetStartDate string
+
+@description('Actual-cost budget notifications. Object keys: low, medium, high. Values are percentages.')
 param budgetActualAlertThresholds object
 
-@description('First day of the budget period, in yyyy-MM-01 form.')
-param budgetStartDate string = utcNow('yyyy-MM-01')
+@description('Whether forecast budget notifications are enabled.')
+param enableBudgetForecastNotifications bool
 
-@description('Log Analytics interactive retention. Thirty days is the lean baseline; no data is sent until an approved data source is configured.')
+@description('Forecast budget notifications. Object keys: low, medium, high. Values are percentages.')
+param budgetForecastAlertThresholds object
+
+@description('Log Analytics SKU name selected by the consumer.')
+param logAnalyticsSkuName string
+
 @minValue(30)
-param logAnalyticsRetentionInDays int = 30
+@description('Log Analytics interactive retention in days.')
+param logAnalyticsRetentionInDays int
 
-@description('Log Analytics daily cap in GB. This is a safety circuit, not a billing hard-stop. Keep it low until an approved data source needs more.')
 @minValue(1)
-param logAnalyticsDailyQuotaGb int = 1
+@description('Log Analytics daily quota safety value in GB.')
+param logAnalyticsDailyQuotaGb int
 
-@description('Create a native Azure Monitor dashboard resource shell for the Grafana experience. It is not Azure Managed Grafana and carries no Grafana service charge.')
-param deployGrafanaDashboardShell bool = true
+@description('Whether to create the native Azure Monitor dashboard with Grafana shell.')
+param deployGrafanaDashboardShell bool
 
-var observabilityBaseName = '${workload}-obs-${env}-${regionToken}-${instance}'
-var dashboardName = 'dash-${workload}-${env}-${regionToken}-${instance}'
+@description('Whether to deploy the preview native Grafana dashboard-definition resource.')
+param deployGrafanaDashboardDefinitionPreview bool
+
+@description('Dashboard-definition child-resource name.')
+param grafanaDashboardDefinitionName string
+
+@description('Serialized source-controlled dashboard JSON. It must contain no credentials, private URLs, prompts, responses, or personal data.')
+param grafanaDashboardDefinitionSerializedData string
+
+@description('Azure-supported location for Foundry alert rule resources.')
+param alertRuleLocation string
+
+@description('Whether to deploy selected Activity Log alerts for Foundry deployment failures, Service Health, Resource Health, or high-risk resource changes.')
+param enableActivityLogAlerts bool
+
+@description('Activity Log alert definitions. Each item contains name, description, enabled, scopes, and conditionAllOf.')
+param activityLogAlertDefinitions array
+
+@description('Whether to deploy Azure Monitor metric alerts for existing Foundry resources. Enable only metrics supported by the target account or project.')
+param enableMetricAlerts bool
+
+@description('Foundry metric alert definitions. Each item contains name and full metric-alert properties except actions.')
+param metricAlertDefinitions array
+
+@description('Whether to deploy Foundry alert-processing rules for approved maintenance or response routing scenarios.')
+param enableAlertProcessingRules bool
+
+@description('Alert-processing rule definitions. Each item contains name, location, and full properties.')
+param alertProcessingRuleDefinitions array
+
+@description('Whether to deploy selected diagnostic categories to an existing Microsoft Foundry account.')
+param enableFoundryDiagnosticSetting bool
+
+@description('Foundry diagnostic-setting configuration. Required keys when enabled: targetSubscriptionId, targetResourceGroupName, targetFoundryAccountName, name, logs, metrics, optional logAnalyticsDestinationType.')
+param foundryDiagnosticSetting object
+
+@description('Whether to create workspace-based Application Insights for an approved Foundry application, API, or agent telemetry scenario.')
+param enableApplicationInsights bool
+
+@description('Application Insights configuration. Required keys when enabled are documented in docs/implementation/foundry-observability.md.')
+param applicationInsightsConfiguration object
+
+@description('Whether to create approved Application Insights availability tests. This requires Application Insights and a safe, non-destructive health endpoint.')
+param enableAvailabilityTests bool
+
+@description('Availability-test definitions. Each item contains name, kind, properties, and optional tags. No secret-bearing request data is allowed.')
+param availabilityTestDefinitions array
+
+@description('Whether to create scheduled query alerts against approved Foundry diagnostics or application telemetry.')
+param enableScheduledQueryAlerts bool
+
+@description('Scheduled query alert definitions. Each item contains name and full alert properties.')
+param scheduledQueryAlertDefinitions array
+
+var observabilityBaseName = '${workload}-obs-${environment}-${regionCode}-${instance}'
 var names = {
   resourceGroup: 'rg-${observabilityBaseName}'
   logAnalytics: 'log-${observabilityBaseName}'
   azureMonitorWorkspace: 'amw-${observabilityBaseName}'
   actionGroup: 'ag-${observabilityBaseName}'
-  subscriptionBudget: 'budget-${workload}-credit-sub-${instance}'
-  dashboard: dashboardName
+  budget: 'budget-${workload}-${environment}-${instance}'
+  dashboard: 'dash-${workload}-${environment}-${regionCode}-${instance}'
 }
 
 var requiredTags = {
   Owner: ownerAlias
   Project: project
-  Environment: env
+  Environment: environment
   CostCenter: costCenter
   ManagedBy: managedBy
   Lifecycle: lifecycle
 }
+
 var tags = empty(expiresOn) ? requiredTags : union(requiredTags, {
   ExpiresOn: expiresOn
 })
 
-module observabilityRg 'modules/resource-group.bicep' = {
+var deployActivityAlerts = enableActivityLogAlerts && !empty(activityLogAlertDefinitions)
+var deployMetricAlertDefinitions = enableMetricAlerts && !empty(metricAlertDefinitions)
+var deployAlertProcessingRules = enableAlertProcessingRules && !empty(alertProcessingRuleDefinitions)
+var deployAvailability = enableApplicationInsights && enableAvailabilityTests && !empty(availabilityTestDefinitions)
+var deployScheduledQueries = enableScheduledQueryAlerts && !empty(scheduledQueryAlertDefinitions)
+
+module observabilityResourceGroup 'modules/resource-group.bicep' = {
   name: 'deploy-${names.resourceGroup}'
   params: {
     name: names.resourceGroup
@@ -121,14 +189,15 @@ module observabilityRg 'modules/resource-group.bicep' = {
 
 module logAnalytics 'modules/log-analytics-workspace.bicep' = {
   name: 'deploy-${names.logAnalytics}'
-  scope: az.resourceGroup(names.resourceGroup)
+  scope: resourceGroup(names.resourceGroup)
   dependsOn: [
-    observabilityRg
+    observabilityResourceGroup
   ]
   params: {
     name: names.logAnalytics
     location: location
     tags: tags
+    skuName: logAnalyticsSkuName
     retentionInDays: logAnalyticsRetentionInDays
     dailyQuotaGb: logAnalyticsDailyQuotaGb
   }
@@ -136,9 +205,9 @@ module logAnalytics 'modules/log-analytics-workspace.bicep' = {
 
 module azureMonitorWorkspace 'modules/azure-monitor-workspace.bicep' = {
   name: 'deploy-${names.azureMonitorWorkspace}'
-  scope: az.resourceGroup(names.resourceGroup)
+  scope: resourceGroup(names.resourceGroup)
   dependsOn: [
-    observabilityRg
+    observabilityResourceGroup
   ]
   params: {
     name: names.azureMonitorWorkspace
@@ -149,12 +218,13 @@ module azureMonitorWorkspace 'modules/azure-monitor-workspace.bicep' = {
 
 module actionGroup 'modules/action-group.bicep' = {
   name: 'deploy-${names.actionGroup}'
-  scope: az.resourceGroup(names.resourceGroup)
+  scope: resourceGroup(names.resourceGroup)
   dependsOn: [
-    observabilityRg
+    observabilityResourceGroup
   ]
   params: {
     name: names.actionGroup
+    location: actionGroupLocation
     shortName: actionGroupShortName
     emailAddresses: operationsEmails
     tags: tags
@@ -162,37 +232,129 @@ module actionGroup 'modules/action-group.bicep' = {
 }
 
 module subscriptionBudget 'modules/subscription-budget.bicep' = {
-  name: 'deploy-${names.subscriptionBudget}'
+  name: 'deploy-${names.budget}'
   params: {
-    name: names.subscriptionBudget
-    amountUsd: monthlyCreditBudgetUsd
+    name: names.budget
+    amountUsd: monthlyBudgetUsd
     startDate: budgetStartDate
     actionGroupResourceId: actionGroup.outputs.id
     contactEmails: operationsEmails
     actualAlertThresholds: budgetActualAlertThresholds
+    enableForecastNotifications: enableBudgetForecastNotifications
+    forecastAlertThresholds: budgetForecastAlertThresholds
   }
 }
 
 module grafanaDashboard 'modules/grafana-dashboard.bicep' = if (deployGrafanaDashboardShell) {
   name: 'deploy-${names.dashboard}'
-  scope: az.resourceGroup(names.resourceGroup)
+  scope: resourceGroup(names.resourceGroup)
   dependsOn: [
-    observabilityRg
+    observabilityResourceGroup
   ]
   params: {
     name: names.dashboard
+    location: location
+    tags: tags
+    deployDashboardDefinitionPreview: deployGrafanaDashboardDefinitionPreview
+    dashboardDefinitionName: grafanaDashboardDefinitionName
+    dashboardDefinitionSerializedData: grafanaDashboardDefinitionSerializedData
+  }
+}
+
+module activityAlerts 'modules/activity-log-alerts.bicep' = if (deployActivityAlerts) {
+  name: 'deploy-${workload}-activity-alerts-${instance}'
+  scope: resourceGroup(names.resourceGroup)
+  params: {
+    alertDefinitions: activityLogAlertDefinitions
+    actionGroupResourceId: actionGroup.outputs.id
+    alertLocation: alertRuleLocation
+    tags: tags
+  }
+}
+
+module metricAlerts 'modules/metric-alerts.bicep' = if (deployMetricAlertDefinitions) {
+  name: 'deploy-${workload}-metric-alerts-${instance}'
+  scope: resourceGroup(names.resourceGroup)
+  params: {
+    alertDefinitions: metricAlertDefinitions
+    actionGroupResourceId: actionGroup.outputs.id
+    alertLocation: alertRuleLocation
+    tags: tags
+  }
+}
+
+module alertProcessingRules 'modules/alert-processing-rules.bicep' = if (deployAlertProcessingRules) {
+  name: 'deploy-${workload}-alert-processing-${instance}'
+  scope: resourceGroup(names.resourceGroup)
+  params: {
+    ruleDefinitions: alertProcessingRuleDefinitions
+  }
+}
+
+module foundryDiagnostics 'modules/foundry-diagnostic-setting.bicep' = if (enableFoundryDiagnosticSetting) {
+  name: 'deploy-${workload}-foundry-diagnostics-${instance}'
+  scope: resourceGroup(foundryDiagnosticSetting.targetSubscriptionId, foundryDiagnosticSetting.targetResourceGroupName)
+  params: {
+    targetFoundryAccountName: foundryDiagnosticSetting.targetFoundryAccountName
+    name: foundryDiagnosticSetting.name
+    logAnalyticsWorkspaceResourceId: logAnalytics.outputs.id
+    logs: foundryDiagnosticSetting.logs
+    metrics: foundryDiagnosticSetting.metrics
+    logAnalyticsDestinationType: foundryDiagnosticSetting.?logAnalyticsDestinationType ?? ''
+  }
+}
+
+module applicationInsights 'modules/application-insights.bicep' = if (enableApplicationInsights) {
+  name: 'deploy-${workload}-application-insights-${instance}'
+  scope: resourceGroup(names.resourceGroup)
+  params: {
+    name: applicationInsightsConfiguration.name
+    location: location
+    kind: applicationInsightsConfiguration.kind
+    applicationType: applicationInsightsConfiguration.applicationType
+    logAnalyticsWorkspaceResourceId: logAnalytics.outputs.id
+    retentionInDays: applicationInsightsConfiguration.retentionInDays
+    samplingPercentage: applicationInsightsConfiguration.samplingPercentage
+    disableLocalAuth: applicationInsightsConfiguration.disableLocalAuth
+    publicNetworkAccessForIngestion: applicationInsightsConfiguration.publicNetworkAccessForIngestion
+    publicNetworkAccessForQuery: applicationInsightsConfiguration.publicNetworkAccessForQuery
+    tags: tags
+  }
+}
+
+module availabilityTests 'modules/availability-tests.bicep' = if (deployAvailability) {
+  name: 'deploy-${workload}-availability-tests-${instance}'
+  scope: resourceGroup(names.resourceGroup)
+  params: {
+    tests: availabilityTestDefinitions
+    applicationInsightsResourceId: applicationInsights!.outputs.id
+    location: location
+    tags: tags
+  }
+}
+
+module scheduledQueryAlerts 'modules/scheduled-query-alerts.bicep' = if (deployScheduledQueries) {
+  name: 'deploy-${workload}-scheduled-query-alerts-${instance}'
+  scope: resourceGroup(names.resourceGroup)
+  params: {
+    alertDefinitions: scheduledQueryAlertDefinitions
+    actionGroupResourceId: actionGroup.outputs.id
     location: location
     tags: tags
   }
 }
 
 output observabilityResourceGroupName string = names.resourceGroup
-output logAnalyticsWorkspaceName string = names.logAnalytics
-output azureMonitorWorkspaceName string = names.azureMonitorWorkspace
-output actionGroupName string = names.actionGroup
-output subscriptionBudgetName string = names.subscriptionBudget
-output grafanaDashboardName string = deployGrafanaDashboardShell ? names.dashboard : ''
 output logAnalyticsWorkspaceResourceId string = logAnalytics.outputs.id
 output azureMonitorWorkspaceResourceId string = azureMonitorWorkspace.outputs.id
 output actionGroupResourceId string = actionGroup.outputs.id
-output grafanaDashboardResourceId string = deployGrafanaDashboardShell ? grafanaDashboard!.outputs.id : ''
+output capabilityStatus object = {
+  activityLogAlerts: deployActivityAlerts
+  metricAlerts: deployMetricAlertDefinitions
+  alertProcessingRules: deployAlertProcessingRules
+  foundryDiagnosticSetting: enableFoundryDiagnosticSetting
+  applicationInsights: enableApplicationInsights
+  availabilityTests: deployAvailability
+  scheduledQueryAlerts: deployScheduledQueries
+  dashboardDefinitionPreview: deployGrafanaDashboardShell && deployGrafanaDashboardDefinitionPreview && !empty(grafanaDashboardDefinitionSerializedData)
+}

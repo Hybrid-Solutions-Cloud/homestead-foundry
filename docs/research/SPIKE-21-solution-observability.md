@@ -10,14 +10,14 @@ What must **observability** cover for a Microsoft Foundry solution, and which Az
 
 ## Current position
 
-The existing Homestead observability package is intentionally a foundation. It provides
+The deployed Homestead observability instance is intentionally a foundation. It provides
 an isolated observability resource group, an empty Log Analytics workspace, an empty
 Azure Monitor workspace, a notification action group, a subscription budget, and a
-no-cost Azure Monitor dashboard with Grafana resource. The complete reusable package
-is now owned by `D:/git/platform/observability`; Homestead contributes the
-Foundry-specific integration contract. The deployed Homestead foundation does not
-enable diagnostic settings, Application Insights, Prometheus ingestion, health models,
-or solution-specific alerts.
+no-cost Azure Monitor dashboard with Grafana resource. The public Homestead package now
+implements the Foundry-specific core and diagnostics modules, while the complete
+tenant-wide reusable package remains owned by `D:/git/platform/observability`. The
+optional Foundry modules are not enabled in the deployed instance until their approval
+gates are met.
 
 A read-only check of the reference environment on 2026-07-27 found that the deployed Foundry account exposes platform metrics for model requests, availability, latency, tokens, images, errors, and voice usage. Its Foundry project also exposes preview agent metrics. Neither the account nor the project has a configured diagnostic setting. This is the correct low-cost baseline, but it is not yet complete solution observability.
 
@@ -79,10 +79,12 @@ The deployment must remain modular. A consumer chooses a profile in a public par
 | Profile | Included | Excluded | Cost expectation |
 |---|---|---|---|
 | `foundation` | Existing budget, action group, resource inventory, Azure Monitor workspace, empty Log Analytics workspace, native Grafana shell | Logs, tracing, Prometheus, health models, synthetic tests | No telemetry-ingestion cost by default |
-| `solution-core` | Foundation plus Resource Graph panels, Foundry platform-metric panels, service-health alert, resource-health alert, deployment-failure alert, and selected metric alerts | Resource-log export, traces, Prometheus, synthetic tests | Standard metrics are free to collect. Alert-rule costs must be checked against current Azure pricing before enablement. |
-| `solution-diagnostics` | Solution-core plus individually approved diagnostic categories, Application Insights tracing or availability test, and relevant Log Analytics queries | Broad request or response logs, unbounded retention, all-resource diagnostic settings | Variable, controlled by data volume, retention, test frequency, and alert count |
+| `foundry-core` | Foundation plus Resource Graph panels, Foundry platform-metric panels, service-health alert, resource-health alert, deployment-failure alert, and selected metric alerts | Resource-log export, traces, Prometheus, synthetic tests | Standard metrics are free to collect. Alert-rule costs must be checked against current Azure pricing before enablement. |
+| `foundry-diagnostics` | Foundry core plus individually approved diagnostic categories, Application Insights tracing or availability test, and relevant Log Analytics queries | Broad request or response logs, unbounded retention, all-resource diagnostic settings | Variable, controlled by data volume, retention, test frequency, and alert count |
 
-`solution-core` is the next implementation target. It observes the solution using Azure metadata and standard metrics. It does not collect prompt or output content, and it avoids the main ingestion-cost drivers.
+`foundry-core` is implemented as public source. It observes the solution using Azure
+metadata and standard metrics. It does not collect prompt or output content, and it
+avoids the main ingestion-cost drivers. Its deployment remains separately approval-gated.
 
 ## Dashboard and response model
 
@@ -100,7 +102,10 @@ The native Grafana dashboard should be a navigation surface, not a fabricated si
 
 Cost Management is deliberately outside the Grafana-only data contract. Native Grafana supports Azure Monitor metrics, Logs, Traces, Resource Graph, Azure Data Explorer, and managed Prometheus, but it is not a Cost Management data source. Cost reports and budget or anomaly notifications remain in Cost Management unless a future, separately approved export and analytics design is added.
 
-The dashboard resource currently exists as a shell. A dashboard definition and panels are not yet deployed. The first panel implementation must follow the `solution-core` profile and be reviewed as configuration, not hand-built in the portal without source control.
+The dashboard resource currently exists as a shell. A dashboard definition and panels
+are not yet deployed. The public package supports a source-controlled definition through
+the `foundry-core` profile; the definition must be reviewed as configuration, not
+hand-built in the portal without source control.
 
 ## Alert policy
 
@@ -119,10 +124,10 @@ For Azure Local, Azure Monitor provides more than 60 standard infrastructure met
 
 ## Decisions and follow-up work
 
-1. Adopt the `solution-core` profile as the next public implementation increment in the Platform-owned package, then consume it from Homestead through Foundry-specific configuration.
+1. Implement the `foundry-core` profile in the Homestead public package, using Platform's generic patterns without duplicating its tenant-wide capabilities. Deployment remains a separately approved private-overlay change.
 2. Keep diagnostic settings, Application Insights tracing, synthetic availability tests, managed Prometheus, and health models disabled until their individual activation gates are met.
-3. Add a proposed ADR before enabling `solution-diagnostics`, because it changes data classification, access, and recurring cost.
-4. Keep the public Bicep as independent, optional modules: `solution-metric-alerts`, `activity-log-alerts`, `service-health-alerts`, `resource-health-alerts`, and a versioned native-Grafana dashboard definition. The Platform deployment remains separate from every core workload deployment.
+3. Add a proposed ADR before enabling `foundry-diagnostics`, because it changes data classification, access, and recurring cost.
+4. Keep the public Bicep as independent, optional Foundry modules: metric alerts, Activity Log alerts, selected diagnostics, application telemetry, scheduled query alerts, and a versioned native-Grafana dashboard definition. Platform's tenant-wide package remains separate from every core workload deployment.
 5. Add public examples with placeholder thresholds. Private overlays contain recipient addresses and approved values only.
 6. Validate every selected metric against the target Foundry account at deployment time. Preview project metrics and preview health models must never be hard production dependencies.
 
