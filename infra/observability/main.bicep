@@ -13,8 +13,9 @@ param workload string
   'dev'
   'stg'
   'prd'
+  'prod'
 ])
-@description('Deployment environment.')
+@description('Deployment environment token. prod is retained for compatibility with established CAF-named workloads.')
 param environment string
 
 @minLength(2)

@@ -59,5 +59,10 @@ approved what-if:
 | `monthlyCreditBudgetUsd` | `monthlyBudgetUsd` |
 | defaulted Bicep values | Explicit private parameter-file values |
 
+The `environment` input accepts `prod` as well as `prd` so an established
+deployment can retain its existing CAF-derived resource names. Do not change
+the environment token for a live deployment merely to normalize an
+abbreviation, because that would target a different set of resource names.
+
 No existing Azure resource changes because of this source update. A private parameter
 overlay is migrated and deployed only through a separately approved change.
