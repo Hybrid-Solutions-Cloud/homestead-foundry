@@ -45,3 +45,17 @@ If any item is unknown, leave the optional module disabled.
    data classification permits access.
 5. Capture the outcome in the workload incident or operations record, then tune the
    metric threshold or runbook through source control if appropriate.
+
+## Model-use investigation
+
+1. Select the incident or reporting time window in the model-usage dashboard.
+2. Start with `ModelRequests` split by `ModelDeploymentName` to identify the model
+   deployment and timing.
+3. Compare input, output, and total tokens for the same deployment. This is consumption
+   evidence, not billed currency.
+4. Review availability, HTTP 429 throttles, and 5xx server errors before assuming a
+   consumer or model problem.
+5. Use Cost Management for actual and forecast charges. Billing data can arrive later
+   than platform metrics, and currency cost is not inferred from generic token counts.
+6. Do not enable request, response, trace, or usage diagnostics during an incident
+   without its data-classification and cost approval record.

@@ -19,3 +19,4 @@ Every Architecture Decision Record this project has locked, in decision order. E
 | [ADR-0013](./ADR-0013-foundry-local-windows-server-install) | Track 2 install mechanism, identity exception, and governance scope (supersedes part of ADR-0011) |
 | [ADR-0014](./ADR-0014-foundry-local-azure-local-deployment-layers) | Track 3 deployment layers, GPU scope, and authentication (supersedes part of ADR-0011, amends ADR-0009) |
 | [ADR-0015](./ADR-0015-cost-first-observability-boundaries) | Cost-first observability package boundaries and activation gates |
+| [ADR-0016](./ADR-0016-foundry-model-usage-observability) | Native Foundry metrics for model usage observability |

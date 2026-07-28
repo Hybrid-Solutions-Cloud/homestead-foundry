@@ -16,6 +16,7 @@ tenant-wide package, not a competing tenant operations product.
 | What changed or failed? | Activity Log alerts for deployment failure and high-risk operations | Activity Log signal, no broad export |
 | Is Azure affecting the Foundry workload? | Service Health and Resource Health alerts | Narrow scopes and action group |
 | Are models behaving normally? | Standard Foundry account and project metrics, targeted metric alerts | Metrics before logs |
+| Which model was used, when, and how much? | `ModelDeploymentName` dimensions on request, token, availability, and status metrics | Native metrics, no diagnostic ingestion |
 | Why did a request, application, or agent fail? | Selected diagnostics and Application Insights | Disabled until data and cost approval |
 | Can operators respond consistently? | Action group, alert-processing rules, severity policy, and runbooks | Required for every enabled alert |
 
@@ -51,6 +52,7 @@ the named existing account in the private overlay.
 | Signal | Use | Design rule |
 |---|---|---|
 | Foundry account metrics | Requests, availability, latency, errors, throttling, tokens, generated images, and safety signals | Select only metrics exposed by the deployed account and model type |
+| Model-use dimensions | Model deployment, model name, model version, status code, and service tier where emitted | Use model deployment for dashboard series and retain Cost Management as the currency authority |
 | Foundry project metrics | Agent runs, responses, tools, threads, tokens, and hosted-agent capacity | Treat preview metrics as advisory until production support is established |
 | Activity Log | Deployment failure, control-plane changes, Service Health, Resource Health | Use narrow alert conditions and scopes before exporting activity data |
 | Foundry resource logs | Audit, request usage, managed network, request or response categories | Enable one named category only after its operational question and data posture are approved |
@@ -66,6 +68,11 @@ the named existing account in the private overlay.
 4. Do not use all-log categories or capture request and response content by default.
 5. Every diagnostics definition records its question, category, classification,
    retention, sampling, daily-volume estimate, monthly cost owner, and removal date.
+
+The model-use dashboard and alerts use native Azure Monitor metrics. They do not need a
+diagnostic setting. `Audit` diagnostics may be enabled for control-plane evidence, but
+request, response, trace, and request-usage categories remain off unless their data and
+cost gate is approved.
 
 ## Platform relationship and hybrid future
 

@@ -5,6 +5,24 @@ It is not Azure Managed Grafana. Dashboard-definition deployment is an explicit 
 switch and must use source-controlled JSON with no credentials, private URLs, prompts,
 responses, or personal data.
 
+`foundry-model-usage.dashboard.json` is the initial core definition. It is intentionally
+generic: `__SUBSCRIPTION_ID__`, `__FOUNDRY_RESOURCE_GROUP__`,
+`__FOUNDRY_RESOURCE_NAME__`, and `__LOCATION__` are placeholders that a private overlay
+must replace at deployment time. Do not replace them in this public file. The definition
+uses native `Microsoft.CognitiveServices/accounts` metrics, so it does not create a
+diagnostic setting or send metric data to Log Analytics.
+
+It answers model-use questions by deployment and time range:
+
+1. Which deployment was used: metric dimension `ModelDeploymentName`.
+2. When it was used: the selected dashboard time window.
+3. How much it was used: request and input, output, and total token trends.
+4. Whether service behavior was affected: availability, HTTP 429 throttles, and 5xx
+   server errors.
+
+Token use is a leading consumption signal, not a billed-currency calculation. Use Cost
+Management for actual and forecast charges.
+
 The first Foundry dashboard should contain only these operational views:
 
 1. Subscription budget progress and a link to Cost Management for actual and forecast cost.

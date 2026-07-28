@@ -102,10 +102,12 @@ The native Grafana dashboard should be a navigation surface, not a fabricated si
 
 Cost Management is deliberately outside the Grafana-only data contract. Native Grafana supports Azure Monitor metrics, Logs, Traces, Resource Graph, Azure Data Explorer, and managed Prometheus, but it is not a Cost Management data source. Cost reports and budget or anomaly notifications remain in Cost Management unless a future, separately approved export and analytics design is added.
 
-The dashboard resource currently exists as a shell. A dashboard definition and panels
-are not yet deployed. The public package supports a source-controlled definition through
-the `foundry-core` profile; the definition must be reviewed as configuration, not
-hand-built in the portal without source control.
+The dashboard resource currently exists as a shell. The `foundry-core` profile now
+includes a source-controlled model-usage definition. A private overlay replaces its
+target placeholders and deploys the definition as configuration, not as a hand-built
+portal artifact. It uses native platform metrics for model deployment, request, token,
+availability, throttle, and server-error views. It does not capture prompts, responses,
+or traces.
 
 ## Alert policy
 

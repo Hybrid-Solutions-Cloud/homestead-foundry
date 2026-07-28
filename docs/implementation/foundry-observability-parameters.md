@@ -33,3 +33,22 @@ fictitious. Actual values belong only in an ignored private overlay.
 
 Feature switches do not fill missing objects or create defaults. A false switch keeps the
 module disabled; a true switch requires a complete, reviewed private definition.
+
+## Model-use profile inputs
+
+The model-use profile has no public subscription or account values. A private overlay
+uses the dashboard-definition switches plus a source-controlled dashboard JSON file. It
+replaces the file's four target placeholders before supplying the serialized string.
+
+The initial private metric-alert definitions use only verified account metrics and
+explicit static thresholds:
+
+| Signal | Metric and dimension | Recommended initial response |
+|---|---|---|
+| Availability degradation | `ModelAvailabilityRate` by model deployment | Investigate Azure health and current deployment use |
+| Throttling | `ModelRequests` with `StatusCode` 429 | Identify the deployment and request-rate change |
+| Server failure | `ModelRequests` with `StatusCode` 5xx | Investigate Azure health, configuration change, and active alerts |
+
+No hardcoded metric thresholds, resource IDs, subscription IDs, locations, account
+names, or recipients are added to the reusable Bicep. The private parameter file owns
+all of them.

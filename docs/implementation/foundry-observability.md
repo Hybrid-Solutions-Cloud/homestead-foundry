@@ -46,6 +46,30 @@ The initial candidates are model requests, availability rate, response latency, 
 errors, throttling, input and output tokens, generated images, and safety metrics. They
 begin as dashboard signals; alerting requires an agreed normal baseline.
 
+## Model-use dashboard
+
+`infra/observability/dashboards/foundry-model-usage.dashboard.json` is the core
+dashboard definition. A private overlay must load the JSON and replace all four target
+placeholders before it supplies the serialized definition to
+`grafanaDashboardDefinitionSerializedData`.
+
+```bicep
+param grafanaDashboardDefinitionSerializedData = replace(
+  replace(
+    replace(
+      replace(loadTextContent('../../core/homestead-foundry/infra/observability/dashboards/foundry-model-usage.dashboard.json'), '__SUBSCRIPTION_ID__', '<private-subscription-id>'),
+      '__FOUNDRY_RESOURCE_GROUP__', '<private-foundry-resource-group>'),
+    '__FOUNDRY_RESOURCE_NAME__', '<private-foundry-account-name>'),
+  '__LOCATION__', '<private-azure-region>')
+```
+
+The dashboard uses only native `Microsoft.CognitiveServices/accounts` metrics. Its
+`ModelDeploymentName` series show which deployment was used and when. `ModelRequests`
+and `InputTokens`, `OutputTokens`, and `TotalTokens` show how much it was used. The
+availability and status-code panels show the operating condition. Do not represent those
+token counts as billed currency. Cost Management remains the source for actual and
+forecast charges.
+
 ## Migration from the original foundation
 
 The expanded public contract deliberately aligns with Platform naming. A private overlay
