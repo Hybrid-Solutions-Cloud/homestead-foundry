@@ -2,6 +2,24 @@
 
 Homestead Foundry (`Hybrid-Solutions-Cloud/homestead-foundry`) documents and automates building on **Azure AI Foundry**. This site is a published mirror of the repository's `ai/` and `models/` content, meant to be read on its own without needing repo access.
 
+## Your route from zero to useful
+
+Use this map as your checklist. Follow the blue path from top to bottom. Once
+the smoke test succeeds, choose the branch that matches what you want to do
+next. Every box links to the guide or check that explains that step in detail.
+
+<OnboardingMap />
+
+### The one rule to remember
+
+**Your own registry is the plan.** The public starter registry is a researched
+example, not a requirement to deploy every listed model. The deployment only
+creates model resources whose registry entries have `status: "deployed"`.
+
+After a successful smoke test, use [Using your deployment](./using-your-deployment)
+for direct calls. From there, either [connect your tools](./connect-your-tools)
+or [build agents](./building-agents).
+
 ## What is here
 
 - **[Methodology](./methodology)** - how a build moves through this repo's phase-gated process: research spike, then Architecture Decision Record, then design doc, then diagram, then implementation, then review.
