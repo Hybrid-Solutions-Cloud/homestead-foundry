@@ -8,7 +8,9 @@ Use this map as your checklist. Follow the blue path from top to bottom. Once
 the smoke test succeeds, choose the branch that matches what you want to do
 next. Every box links to the guide or check that explains that step in detail.
 
-<OnboardingMap />
+![Homestead Foundry onboarding journey](../assets/diagrams/foundry-onboarding-map.png)
+
+The map is maintained as an editable [draw.io source file](../assets/diagrams/foundry-onboarding-map.drawio).
 
 ### The one rule to remember
 
