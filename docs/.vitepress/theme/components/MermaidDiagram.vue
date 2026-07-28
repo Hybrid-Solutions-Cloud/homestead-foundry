@@ -39,6 +39,9 @@ onMounted(async () => {
 }
 
 .mermaid-diagram :deep(svg) {
-  min-width: 780px;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
 }
 </style>
