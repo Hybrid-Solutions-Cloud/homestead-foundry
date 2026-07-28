@@ -42,7 +42,7 @@ param logAnalyticsRetentionInDays = 30
 param logAnalyticsDailyQuotaGb = 1
 param deployGrafanaDashboardShell = true
 param deployGrafanaDashboardDefinitionPreview = false
-param grafanaDashboardDefinitionName = 'definition'
+param grafanaDashboardDefinitionName = 'default'
 param grafanaDashboardDefinitionSerializedData = ''
 
 param alertRuleLocation = 'global'

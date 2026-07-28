@@ -112,7 +112,10 @@ param deployGrafanaDashboardShell bool
 @description('Whether to deploy the preview native Grafana dashboard-definition resource.')
 param deployGrafanaDashboardDefinitionPreview bool
 
-@description('Dashboard-definition child-resource name.')
+@allowed([
+  'default'
+])
+@description('Dashboard-definition child-resource name. Azure Monitor dashboards require the literal value default.')
 param grafanaDashboardDefinitionName string
 
 @description('Serialized source-controlled dashboard JSON. It must contain no credentials, private URLs, prompts, responses, or personal data.')

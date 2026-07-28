@@ -5,6 +5,11 @@ It is not Azure Managed Grafana. Dashboard-definition deployment is an explicit 
 switch and must use source-controlled JSON with no credentials, private URLs, prompts,
 responses, or personal data.
 
+Azure Monitor dashboard definitions have one supported child-resource name: `default`.
+The public Bicep contract enforces that literal value. The versioned JSON file remains
+the source-controlled definition; a descriptive dashboard definition resource name is
+not supported by the Azure API.
+
 `foundry-model-usage.dashboard.json` is the initial core definition. It is intentionally
 generic: `__SUBSCRIPTION_ID__`, `__FOUNDRY_RESOURCE_GROUP__`,
 `__FOUNDRY_RESOURCE_NAME__`, and `__LOCATION__` are placeholders that a private overlay

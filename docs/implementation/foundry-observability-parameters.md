@@ -39,6 +39,8 @@ module disabled; a true switch requires a complete, reviewed private definition.
 The model-use profile has no public subscription or account values. A private overlay
 uses the dashboard-definition switches plus a source-controlled dashboard JSON file. It
 replaces the file's four target placeholders before supplying the serialized string.
+`grafanaDashboardDefinitionName` is always `default`, which Azure requires for native
+Azure Monitor dashboard definitions.
 
 The initial private metric-alert definitions use only verified account metrics and
 explicit static thresholds:
