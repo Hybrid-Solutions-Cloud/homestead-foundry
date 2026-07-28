@@ -8,7 +8,22 @@ Use this map as your checklist. Follow the blue path from top to bottom. Once
 the smoke test succeeds, choose the branch that matches what you want to do
 next. Every box links to the guide or check that explains that step in detail.
 
-![Homestead Foundry onboarding journey](../assets/diagrams/foundry-onboarding-map.png)
+<img src="../assets/diagrams/foundry-onboarding-map.png" alt="Homestead Foundry onboarding journey. The numbered cards link to their detailed guides." usemap="#foundry-onboarding-map" style="width: 100%; height: auto;" />
+
+<map name="foundry-onboarding-map">
+  <area shape="rect" coords="20,184,270,294" href="./deployment#before-you-start" alt="Confirm prerequisites" />
+  <area shape="rect" coords="309,184,560,294" href="./deployment#before-you-start" alt="Choose one region" />
+  <area shape="rect" coords="599,184,850,294" href="./model-registry" alt="Create your registry" />
+  <area shape="rect" coords="890,184,1140,294" href="./deployment#3-generate-the-model-catalog" alt="Resolve the live catalog" />
+  <area shape="rect" coords="1150,490,1400,600" href="./deployment#2-create-the-two-security-groups" alt="Configure access" />
+  <area shape="rect" coords="860,490,1110,600" href="./deployment#4-fill-in-your-parameters" alt="Complete private parameters" />
+  <area shape="rect" coords="570,490,820,600" href="./deployment#5-preview-then-deploy" alt="Build and run what-if" />
+  <area shape="rect" coords="40,490,290,600" href="./deployment#5-preview-then-deploy" alt="Approve and deploy" />
+  <area shape="rect" coords="380,645,700,755" href="./deployment#6-verify" alt="Smoke test all three paths" />
+  <area shape="rect" coords="100,1000,460,1109" href="./using-your-deployment" alt="Call models directly" />
+  <area shape="rect" coords="560,1000,920,1109" href="./connect-your-tools" alt="Connect your tools" />
+  <area shape="rect" coords="1020,1000,1380,1109" href="./building-agents" alt="Build an agent" />
+</map>
 
 The map is maintained as an editable [draw.io source file](../assets/diagrams/foundry-onboarding-map.drawio).
 
