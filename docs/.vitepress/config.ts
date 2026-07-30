@@ -1,10 +1,18 @@
 import { defineConfig } from "vitepress";
 
+// VitePress rewrites site-root paths for you in page content and in
+// themeConfig.logo, but NOT inside `head` entries: whatever string you put in a
+// head href is emitted verbatim. On the project Pages site the page therefore
+// asked for /favicon.svg while the file was served at /homestead-foundry/favicon.svg,
+// so the browser tab fell back to the default globe. Any head href must be
+// prefixed with BASE by hand.
+const BASE = process.env.GITHUB_PAGES_BASE ?? "/";
+
 export default defineConfig({
   title: "Homestead Foundry",
   description: "A knowledge and automation center for building on Azure AI Foundry.",
   // GitHub Pages serves a project site under /<repo-name>/, a custom domain serves it at the root.
-  base: process.env.GITHUB_PAGES_BASE ?? "/",
+  base: BASE,
   cleanUrls: true,
   // Dead links now fail the build. This was `true` while the canonical
   // architecture content was being moved under docs/, which meant a broken
@@ -17,9 +25,16 @@ export default defineConfig({
   // The mark is a hexagon, the shape Azure uses for a resource, holding a forge
   // flame. Hand-authored SVG in docs/public/. There is no raster fallback yet:
   // producing .ico and apple-touch-icon.png needs a rasterizer, and installing
-  // one is owner-gated. Modern browsers use the SVG icon.
+  // one is owner-gated. Chrome, Edge, Firefox, and Safari all render the SVG
+  // icon; only pre-2019 browsers need the .ico.
   head: [
-    ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
+    ["link", { rel: "icon", type: "image/svg+xml", href: `${BASE}favicon.svg` }],
+    // Same mark again as the generic fallback, so a browser that ignores the
+    // typed SVG link still has something to request other than /favicon.ico at
+    // the server root, which on a project Pages site is not this site.
+    ["link", { rel: "alternate icon", href: `${BASE}favicon.svg` }],
+    ["link", { rel: "apple-touch-icon", href: `${BASE}favicon.svg` }],
+    ["link", { rel: "mask-icon", href: `${BASE}favicon.svg`, color: "#0B4A8F" }],
     ["meta", { name: "theme-color", content: "#0B4A8F" }],
     ["meta", { property: "og:type", content: "website" }],
     ["meta", { property: "og:title", content: "Homestead Foundry" }],
