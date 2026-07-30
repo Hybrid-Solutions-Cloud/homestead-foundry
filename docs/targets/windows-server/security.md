@@ -1,8 +1,8 @@
-# Security and identity: Windows Server (track 2)
+# Security and identity: Foundry Local
 
 ::: info Scope
-This is the security and identity page for **Foundry Local on Windows Server**,
-track 2 of [ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation).
+This is the security and identity page for **Foundry Local**,
+one of the three targets in [ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation).
 Compare all three targets on the [Deployment targets hub](../).
 :::
 
@@ -26,4 +26,4 @@ This page is filled out as the research and decisions below land. Until then, th
 [comparison hub](../) marks the corresponding cells `UNKNOWN` rather than guessing.
 
 - [ADR-0013](../../adr/ADR-0013-foundry-local-windows-server-install), ADR-0013
-- **SPIKE-23**, the track 2 install-artifacts spike
+- **SPIKE-23**, the Foundry Local install-artifacts spike

@@ -109,12 +109,33 @@ the page's scope is the Azure cloud target, track 1 of ADR-0011, and links to th
 deployment-targets hub. A page that silently describes one of three targets is a
 defect, not a formatting preference.
 
-### 4. The reader sees "targets"; the record keeps "track N"
+### 4. The reader sees product names; the record keeps "track N"
 
 URLs and navigation use `targets` and the three slugs. ADR-0011's track numbering
 stays the internal identifier so every decision remains traceable. The hub
 reconciles the two vocabularies in exactly one mapping table, the one at the top
 of this ADR. No other page invents a third name.
+
+**Amended 2026-07-30, on the owner's direction.** As first written this decision
+had reader-facing pages carry the track numbers alongside the slugs, and they
+did: every page title, every scope banner, and every comparison-table column
+header read "Azure cloud (track 1)", "Windows Server (track 2)", or "Azure Local
+(track 3)". That is a repo-internal identifier presented to a reader who has no
+way to resolve it, and it competes with the product names Microsoft actually
+ships. Reader-facing pages now name each target by its product:
+
+| Product name, reader-facing | Slug | Internal identifier, in the record |
+|---|---|---|
+| **Azure AI Foundry** | `azure-cloud` | track 1 |
+| **Foundry Local** | `windows-server` | track 2 |
+| **Azure Local Foundry** | `azure-local` | track 3 |
+
+The rest of the decision is unchanged. The track numbers remain the internal
+identifier and are not rewritten out of the decision records and research spikes
+that already use them, because those are dated records and renaming them
+retroactively would break every citation between them. The hub's mapping table
+is the one place a reader meets both vocabularies. New documents use the product
+names only.
 
 ### 5. Two model catalogs, not one and not three
 
@@ -123,7 +144,7 @@ is retitled to name the Azure cloud catalog explicitly. A second catalog,
 `docs/reference/model-catalog-foundry-local.md`, carries the Foundry Local
 roster with per-track columns:
 
-`Model | Provider | Variant and execution provider | Track 2 (Windows Server) | Track 3 (Azure Local) | Size and RAM | License | Status | Source`
+`Model | Provider | Variant and execution provider | Foundry Local | Azure Local Foundry | Size and RAM | License | Status | Source`
 
 A `Track` column on the single existing catalog was rejected because the rosters
 are disjoint. SPIKE-08 and SPIKE-09 both record zero overlap, so the column would
@@ -137,6 +158,28 @@ identity. This premise is explicitly a finding to confirm in SPIKE-22 before the
 second catalog is authored; if SPIKE-22 finds the device SDK and the Azure Local
 operator catalogs materially diverge, the split becomes three at that point and
 this decision is amended, not worked around.
+
+**Annotated 2026-07-30.
+[SPIKE-22](../research/SPIKE-22-foundry-local-model-catalog) refuted the premise
+and confirmed the outcome.** The two catalogs do not differ only in execution
+provider and deployment mechanics. They diverge in model identity, in both
+directions and substantially: Azure Local Foundry carries 100 catalog entries
+that Foundry Local cannot run at all, and Foundry Local carries NPU and generic
+GPU variants that Azure Local Foundry never syncs.
+
+The stated trigger for splitting into three catalogs is therefore met on its
+literal terms, and the split is still rejected, for a reason the original text
+did not anticipate. The two per-target columns this decision already specified
+are exactly the mechanism that expresses the divergence: a row present on one
+target and absent on the other is a filled cell and an empty cell in the same
+table, which is more legible than the same fact split across two pages a reader
+must diff by hand. What changes is the rationale above and the page's internal
+structure, not the page count. One page, three sections: entries both targets
+carry, entries only Azure Local Foundry carries, and variants only Foundry Local
+carries.
+
+Decision 5's outcome stands as written. The paragraph above it, asserting a
+shared catalog, does not, and the catalog page must not repeat it.
 
 `docs/reference/index.md` is added as a reference hub, with a `/reference/`
 sidebar group.

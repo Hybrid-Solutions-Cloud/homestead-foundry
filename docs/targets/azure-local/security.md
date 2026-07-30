@@ -1,8 +1,8 @@
-# Security and identity: Azure Local (track 3)
+# Security and identity: Azure Local Foundry
 
 ::: info Scope
-This is the security and identity page for **Foundry Local on Azure Local**,
-track 3 of [ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation).
+This is the security and identity page for **Azure Local Foundry**,
+one of the three targets in [ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation).
 Compare all three targets on the [Deployment targets hub](../).
 :::
 
@@ -23,5 +23,5 @@ first-party research. Treat it as a design, not an as-built record.
 This page is filled out as the research and decisions below land. Until then, the
 [comparison hub](../) marks the corresponding cells `UNKNOWN` rather than guessing.
 
-- **SPIKE-28**, the track 3 networking, storage, and certificates spike
-- **ADR-0023**, the track 3 networking ADR
+- **SPIKE-28**, the Azure Local Foundry networking, storage, and certificates spike
+- **ADR-0023**, the Azure Local Foundry networking ADR

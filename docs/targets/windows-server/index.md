@@ -1,8 +1,8 @@
-# Windows Server (track 2)
+# Foundry Local
 
 ::: info Scope
 **Foundry Local** running on a single Windows Server that you own, Arc-enabled
-for governance of the host. Track 2 of
+for governance of the host. One of the three targets in
 [ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation). Compare all
 three targets on the [Deployment targets hub](../).
 :::

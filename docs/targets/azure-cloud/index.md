@@ -1,8 +1,8 @@
-# Azure cloud (track 1)
+# Azure AI Foundry
 
 ::: info Scope
-**Azure AI Foundry (AIServices)**, running in a Microsoft Azure region. Track 1
-of [ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation). Compare all
+**Azure AI Foundry (AIServices)**, running in a Microsoft Azure region. One of the three targets in
+[ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation). Compare all
 three targets on the [Deployment targets hub](../).
 :::
 
@@ -16,7 +16,7 @@ and the only one with access to proprietary frontier reasoning models.
 
 ## The pages on this site are the source of truth
 
-The nine pages in this section are maps, not copies. Track 1 is documented in
+The nine pages in this section are maps, not copies. Azure AI Foundry is documented in
 full under Guide, Architecture, Models, and Implementation, and those documents
 stay canonical. These pages exist so the three-way comparison has somewhere
 symmetric to point.

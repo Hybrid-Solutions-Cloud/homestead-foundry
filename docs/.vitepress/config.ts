@@ -114,8 +114,8 @@ export default defineConfig({
             { text: "ADR-0010 FLUX adoption (superseded)", link: "/adr/ADR-0010-flux-image-model-adoption" },
             { text: "ADR-0011 Multi-target deployment automation", link: "/adr/ADR-0011-multi-target-deployment-automation" },
             { text: "ADR-0012 Agent MCP gateway governance", link: "/adr/ADR-0012-agent-mcp-gateway-governance" },
-            { text: "ADR-0013 Track 2 install, identity, governance scope", link: "/adr/ADR-0013-foundry-local-windows-server-install" },
-            { text: "ADR-0014 Track 3 deployment layers and auth", link: "/adr/ADR-0014-foundry-local-azure-local-deployment-layers" },
+            { text: "ADR-0013 Foundry Local install, identity, governance scope", link: "/adr/ADR-0013-foundry-local-windows-server-install" },
+            { text: "ADR-0014 Azure Local Foundry deployment layers and auth", link: "/adr/ADR-0014-foundry-local-azure-local-deployment-layers" },
             { text: "ADR-0015 Cost-first observability boundaries", link: "/adr/ADR-0015-cost-first-observability-boundaries" },
             { text: "ADR-0016 Foundry model-usage observability", link: "/adr/ADR-0016-foundry-model-usage-observability" },
             { text: "ADR-0017 Deployment-target docs and repo structure", link: "/adr/ADR-0017-deployment-target-documentation-structure" },
@@ -131,7 +131,7 @@ export default defineConfig({
           ],
         },
         {
-          text: "Azure cloud (track 1)",
+          text: "Azure AI Foundry",
           items: [
             { text: "Overview", link: "/targets/azure-cloud/" },
             { text: "Architecture", link: "/targets/azure-cloud/architecture" },
@@ -145,7 +145,7 @@ export default defineConfig({
           ],
         },
         {
-          text: "Windows Server (track 2)",
+          text: "Foundry Local",
           items: [
             { text: "Overview", link: "/targets/windows-server/" },
             { text: "Architecture", link: "/targets/windows-server/architecture" },
@@ -159,7 +159,7 @@ export default defineConfig({
           ],
         },
         {
-          text: "Azure Local (track 3)",
+          text: "Azure Local Foundry",
           items: [
             { text: "Overview", link: "/targets/azure-local/" },
             { text: "Architecture", link: "/targets/azure-local/architecture" },

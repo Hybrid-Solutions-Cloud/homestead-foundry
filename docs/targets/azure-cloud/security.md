@@ -1,8 +1,8 @@
-# Security and identity: Azure cloud (track 1)
+# Security and identity: Azure AI Foundry
 
 ::: info Scope
-This is the security and identity page for the **Azure cloud** target,
-track 1 of [ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation).
+This is the security and identity page for the **Azure AI Foundry** target,
+the hosted-cloud target of [ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation).
 It is a map into the canonical documents, which are the source of truth. Compare
 all three targets on the [Deployment targets hub](../).
 :::

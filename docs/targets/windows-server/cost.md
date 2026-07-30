@@ -1,8 +1,8 @@
-# Cost: Windows Server (track 2)
+# Cost: Foundry Local
 
 ::: info Scope
-This is the cost page for **Foundry Local on Windows Server**,
-track 2 of [ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation).
+This is the cost page for **Foundry Local**,
+one of the three targets in [ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation).
 Compare all three targets on the [Deployment targets hub](../).
 :::
 

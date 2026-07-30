@@ -12,15 +12,19 @@ as prose, for readers who want the reasoning rather than the grid.
 
 ## The three targets
 
-| Track | Slug | Product | Runs on |
+| Target | Slug | What it is | Runs on |
 |---|---|---|---|
-| 1 | [`azure-cloud`](./azure-cloud/) | Azure AI Foundry (AIServices) | Microsoft's Azure regions |
-| 2 | [`windows-server`](./windows-server/) | Foundry Local | One Windows Server you own, Arc-enabled |
-| 3 | [`azure-local`](./azure-local/) | Foundry Local on Azure Local | An Arc-connected AKS Arc cluster on your own hardware |
+| **Azure AI Foundry** | [`azure-cloud`](./azure-cloud/) | The hosted Azure service, `Microsoft.CognitiveServices/accounts` of kind `AIServices` | Microsoft's Azure regions |
+| **Foundry Local** | [`windows-server`](./windows-server/) | The on-device runtime | One Windows Server you own, Arc-enabled |
+| **Azure Local Foundry** | [`azure-local`](./azure-local/) | Foundry Local at cluster scale, via the `Microsoft.Foundry` cluster extension | An Arc-connected AKS Arc cluster on your own hardware |
 
-Track numbering comes from [ADR-0011](../adr/ADR-0011-multi-target-deployment-automation.md)
-and is the identifier used throughout the decision record. The slugs are the URLs
-on this site. Those are the only two names for each target.
+Each target is named for its Microsoft product, and the slug is its URL on this
+site. Those are the only two names for each target. Decision records written
+before [ADR-0017](../adr/ADR-0017-deployment-target-documentation-structure.md)
+call these targets track 1, track 2, and track 3, numbering that comes from
+[ADR-0011](../adr/ADR-0011-multi-target-deployment-automation.md); the numbers
+survive in those records and in the research spikes, and map to this table in
+order.
 
 ::: warning How to read the cells
 Every cell below is either a fact with a source behind it, or an explicit
@@ -30,8 +34,8 @@ the [roadmap](../roadmap).
 :::
 
 ::: info Status of this page
-The track 1 columns are drawn from a deployed, smoke-tested environment. The
-track 2 and track 3 columns are drawn from research and accepted decisions with
+The Azure AI Foundry columns are drawn from a deployed, smoke-tested environment. The
+Foundry Local and Azure Local Foundry columns are drawn from research and accepted decisions with
 no deployment behind them yet. Table 1's "status in this repo" row says so per
 target, and the per-target pages repeat it. Do not read a filled cell as a
 deployed cell.
@@ -39,7 +43,7 @@ deployed cell.
 
 ## 1. At a glance
 
-| | Azure cloud (track 1) | Windows Server (track 2) | Azure Local (track 3) |
+| | Azure AI Foundry | Foundry Local | Azure Local Foundry |
 |---|---|---|---|
 | Microsoft product | Azure AI Foundry, `Microsoft.CognitiveServices/accounts` of kind `AIServices` | Foundry Local | Foundry Local on Azure Local, via the `Microsoft.Foundry` cluster extension |
 | Where it runs | Azure region (this repo: East US) | One Windows Server in your own facility | An AKS Arc cluster on Azure Local hardware in your own facility |
@@ -57,7 +61,7 @@ This is the table most readers come for, and it is where the three targets diffe
 most. The rosters are close to disjoint. Nothing in this repository's cloud model
 catalog runs on either on-premises target.
 
-| Capability | Azure cloud (track 1) | Windows Server (track 2) | Azure Local (track 3) |
+| Capability | Azure AI Foundry | Foundry Local | Azure Local Foundry |
 |---|---|---|---|
 | Text and chat | Yes | Yes | Yes |
 | Reasoning | Yes, frontier-class hosted models | Small-model only, quality bounded by the host | Yes, up to `gpt-oss-20b` class with GPU |
@@ -77,7 +81,7 @@ catalog runs on either on-premises target.
 
 ## 3. Features and platform capabilities
 
-| Feature | Azure cloud (track 1) | Windows Server (track 2) | Azure Local (track 3) |
+| Feature | Azure AI Foundry | Foundry Local | Azure Local Foundry |
 |---|---|---|---|
 | OpenAI-compatible chat completions | Yes | Yes | Yes |
 | Foundry Agent Service | Yes | No | UNKNOWN (SPIKE-31) |
@@ -95,7 +99,7 @@ catalog runs on either on-premises target.
 
 ## 4. Deployment and automation
 
-| Aspect | Azure cloud (track 1) | Windows Server (track 2) | Azure Local (track 3) |
+| Aspect | Azure AI Foundry | Foundry Local | Azure Local Foundry |
 |---|---|---|---|
 | Automation form | Declarative | Imperative | Declarative for one layer, imperative for two |
 | Layers | One | One | Three: Kubernetes prerequisites, ARM platform, Kubernetes intent |
@@ -112,7 +116,7 @@ catalog runs on either on-premises target.
 
 ## 5. Identity, authentication, and secrets
 
-| Aspect | Azure cloud (track 1) | Windows Server (track 2) | Azure Local (track 3) |
+| Aspect | Azure AI Foundry | Foundry Local | Azure Local Foundry |
 |---|---|---|---|
 | Deploy-time principal | User-assigned managed identity, federated to GitHub via OIDC | Same, for the Arc run command. A service principal is accepted for Arc onboarding only. | Same |
 | Runtime identity | Managed identity | Arc system-assigned managed identity. User-assigned is not supported on Arc machines. | Managed identity |
@@ -126,7 +130,7 @@ catalog runs on either on-premises target.
 
 ## 6. Cost model
 
-| Aspect | Azure cloud (track 1) | Windows Server (track 2) | Azure Local (track 3) |
+| Aspect | Azure AI Foundry | Foundry Local | Azure Local Foundry |
 |---|---|---|---|
 | Billing unit | Per token or per image, per deployment | None for the runtime | Per physical core of the Azure Local host, per month |
 | Fixed or variable | Variable, driven by usage | Fixed. Hardware you already own. | Fixed, driven by core count rather than usage |
@@ -141,7 +145,7 @@ catalog runs on either on-premises target.
 
 ## 7. Observability
 
-| Signal | Azure cloud (track 1) | Windows Server (track 2) | Azure Local (track 3) |
+| Signal | Azure AI Foundry | Foundry Local | Azure Local Foundry |
 |---|---|---|---|
 | Azure Monitor platform metrics | Yes | No, for the inference endpoint | Yes for the infrastructure. More than sixty standard Azure Local metrics at no extra cost. |
 | Diagnostic settings to Log Analytics | Yes | No | UNKNOWN (SPIKE-27) |
@@ -156,7 +160,7 @@ catalog runs on either on-premises target.
 
 ## 8. Operations and lifecycle
 
-| Aspect | Azure cloud (track 1) | Windows Server (track 2) | Azure Local (track 3) |
+| Aspect | Azure AI Foundry | Foundry Local | Azure Local Foundry |
 |---|---|---|---|
 | Runtime patching | Microsoft's problem | MSIX servicing. Mechanism UNKNOWN (SPIKE-29). | Cluster extension versions, plus AKS Arc and Kubernetes upgrades |
 | Model updates | Automatic version upgrade, preserved by default | Re-pull into the model cache | A new `ModelDeployment` revision |

@@ -1,8 +1,8 @@
-# Azure Local (track 3)
+# Azure Local Foundry
 
 ::: info Scope
 **Foundry Local on Azure Local**, running at cluster scale on an Arc-connected
-AKS Arc cluster on your own hardware. Track 3 of
+AKS Arc cluster on your own hardware. One of the three targets in
 [ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation). Compare all
 three targets on the [Deployment targets hub](../).
 :::

@@ -1,8 +1,8 @@
-# Deployment: Azure Local (track 3)
+# Deployment: Azure Local Foundry
 
 ::: info Scope
-This is the deployment page for **Foundry Local on Azure Local**,
-track 3 of [ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation).
+This is the deployment page for **Azure Local Foundry**,
+one of the three targets in [ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation).
 Compare all three targets on the [Deployment targets hub](../).
 :::
 
