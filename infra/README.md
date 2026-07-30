@@ -59,3 +59,30 @@ az deployment sub what-if --location <region> \
 Both are read-only. `*.local.bicepparam` is gitignored, which is where real values
 belong; nothing in this directory should ever contain a real subscription, tenant,
 group object id, vault name, or email address.
+
+## The other two deployment targets
+
+`infra/` gained two sibling subtrees in Phase P, per
+[ADR-0017](../docs/adr/ADR-0017-deployment-target-documentation-structure.md)
+decision 6. **The cloud stack stays at the root**; nothing above this line moved.
+
+| Subtree | Target | Form | Status |
+|---|---|---|---|
+| `windows-server/` | Foundry Local | Imperative PowerShell, delivered by Azure Arc run command | **Written, never executed** |
+| `azure-local/` | Azure Local Foundry | Three layers: `kubectl` and Helm, then Bicep, then `kubectl` | **Written, never executed** |
+
+Neither is proven. Foundry Local is blocked on an owner-authorized install test
+against a disposable build VM, and Azure Local Foundry is blocked on preview
+access plus an AKS Arc cluster. Read each subtree's README before running
+anything.
+
+Two things worth knowing without opening them:
+
+- **Foundry Local is imperative because it is not an Azure resource.** There is
+  nothing for ARM to create. Arc governs the host, and Arc run command executes
+  a script. It also **cannot read state, only run an action**, so idempotence is
+  a contract those scripts implement rather than a property of the tooling.
+- **Azure Local Foundry's `what-if` covers one layer of three.** Bicep owns only
+  the platform layer; the Gateway API and Istio prerequisites underneath it and
+  the `ModelDeployment` intent above it are `kubectl`. There is no single command
+  that shows the state of that deployment.

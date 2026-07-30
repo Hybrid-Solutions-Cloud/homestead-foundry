@@ -1,0 +1,72 @@
+# Azure Local Foundry, LAYER 3 of 3: the model intent.
+#
+# ADR-0019: the first increment on both on-premises targets is
+# Phi-4-mini-instruct-generic-cpu. It is chosen because it is the ONLY catalog
+# entry with both a published size (4.8 GB CPU) and a published licence (MIT).
+# Every other row has UNKNOWN in at least one of those columns, and adopting a
+# model whose licence is unverified is not acceptable in a public repository.
+# That is a documentation-quality argument, not a capability one, and it is
+# stated plainly rather than dressed up.
+#
+# ADR-0014, as amended: CPU-first. No GPU is required for this increment.
+# The 100-entry vLLM roster is GPU-only and out of scope until GPU hardware
+# exists and a workload needs it.
+#
+# ADR-0024 decision 7: the deprecated ModelDeployment endpoint fields are NOT
+# used here. Microsoft has already published their deprecation plus an
+# nginx-to-Gateway-API annotation migration table INSIDE the preview, which is
+# the strongest available evidence of how this preview behaves at GA. Building
+# on a surface Microsoft has published a migration away from is a self-inflicted
+# upgrade.
+#
+# NEVER APPLIED. No AKS Arc cluster exists in this project.
+---
+apiVersion: foundry.microsoft.com/v1alpha1
+kind: ModelDeployment
+metadata:
+  name: phi-4-mini
+  namespace: foundry-local
+  labels:
+    # Ties this object back to the registry entry it implements, so the roster
+    # and the cluster can be reconciled by id rather than by guesswork.
+    homestead-foundry/registry-id: phi-4-mini
+    homestead-foundry/target: azure-local
+spec:
+  model:
+    # The catalog alias. On this target the deployable unit is the VARIANT, not
+    # the model name: one alias fans out to several variants that differ by
+    # execution provider (SPIKE-22).
+    name: phi-4-mini
+    variant: Phi-4-mini-instruct-generic-cpu
+
+  runtime:
+    # onnx-genai, not vllm. vLLM is GPU-only and Azure Local Foundry only.
+    framework: onnx-genai
+    compute: cpu
+
+  # Internal by default (ADR-0023 decision 6). Switching this to `external`
+  # requires a working LoadBalancer implementation, which an AKS Arc cluster
+  # does NOT have by default and which appears in no Foundry Local document
+  # (SPIKE-28). deploy.ps1 checks for one before allowing it.
+  #
+  # TLS note: internal traffic is secured by a SELF-SIGNED cluster root CA that
+  # cert-manager mints on first deployment, and every model sidecar chains to
+  # it. That is the default and mandatory mechanism, not a fallback. A real CA
+  # certificate is needed ONLY at the external Gateway. SPIKE-19 had this
+  # backwards; ADR-0023 reverses it.
+  exposure: internal
+
+  replicas: 1
+
+  resources:
+    requests:
+      # TRANSFERRED, not published. Microsoft publishes no CPU, RAM, or disk
+      # minimum for this at all (SPIKE-25), so these are derived from the one
+      # published model size (4.8 GB) with headroom. Per ADR-0020 every hardware
+      # number in this repository carries its provenance, and this one is
+      # transferred rather than published or observed.
+      cpu: "2"
+      memory: 8Gi
+    limits:
+      cpu: "4"
+      memory: 12Gi

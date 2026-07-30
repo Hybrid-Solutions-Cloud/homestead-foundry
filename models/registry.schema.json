@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://homestead-foundry/models/registry.schema.json",
   "title": "Homestead Foundry model registry",
-  "description": "Schema for a single Azure AI Foundry (or Foundry-adjacent) model registry entry. A registry file is a JSON array of entries matching this schema. See models/README.md for the full design rationale and the consumption contract a consuming repo follows to resolve an id to a usable endpoint.",
+  "description": "Schema v2 for a single model registry entry, across all three deployment targets. A registry file is a JSON array of entries matching this schema. The optional `target` discriminator selects which fields are required: omit it (or set it to azure-cloud) for a hosted Azure AI Foundry deployment, or name an on-premises target for a Foundry Local or Azure Local Foundry entry. See ADR-0018 for the rationale, models/README.md for the consumption contract, and docs/guide/model-selection.md for how an entry earns its status. IMPORTANT: this file and infra/types.bicep are a single unit of change. additionalProperties is false here and infra/main.bicep loads the registry through loadJsonContent against a closed user-defined type, so a field added to one and not the other breaks the Bicep build.",
   "type": "array",
   "items": {
     "type": "object",
@@ -12,8 +12,6 @@
       "kind",
       "provider",
       "deploymentName",
-      "sku",
-      "region",
       "status",
       "accessGating",
       "capabilities",
@@ -26,35 +24,66 @@
         "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
         "description": "Stable, kebab-case identifier a consuming repo references. Never reused across two different models once published."
       },
+      "target": {
+        "description": "Which deployment targets this entry runs on, using the docs/targets/ slugs. ALWAYS AN ARRAY, even for a single target: Bicep user-defined type unions must be all literal values (BCP293), so a string-or-array shape cannot be mirrored in infra/types.bicep. OMIT for a hosted Azure AI Foundry entry: absent means [\"azure-cloud\"], which is why every v1 registry file remains valid unchanged. A multi-value array is for the shared ONNX core, the 35 aliases both on-premises targets carry (SPIKE-22); writing those twice guarantees the copies drift. azure-cloud may not be combined with an on-premises target, because no model runs both in the hosted service and on premises: the rosters are disjoint.",
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": ["azure-cloud", "windows-server", "azure-local"]
+        },
+        "minItems": 1,
+        "uniqueItems": true,
+        "if": { "contains": { "const": "azure-cloud" } },
+        "then": { "maxItems": 1 }
+      },
       "kind": {
         "type": "string",
-        "enum": ["image", "voice", "video", "reasoning"],
-        "description": "Add new values here as new modalities are adopted; keep this enum authoritative, do not let consumers infer kind from id or provider."
+        "enum": ["image", "voice", "video", "reasoning", "text", "speech-to-text"],
+        "description": "Add new values here as new modalities are adopted; keep this enum authoritative and in sync with the union in infra/types.bicep. Do not let consumers infer kind from id or provider. text and speech-to-text were added in v2 because the on-premises rosters are text, reasoning, code, and speech-to-text only: neither on-premises target has an image, voice, or video model at all (SPIKE-22)."
       },
       "provider": {
         "type": "string",
         "minLength": 1,
-        "description": "Prefer the vendor's own name (for example Microsoft, BlackForestLabs, OpenAI, xAI). Free text beyond a common set is fine."
+        "description": "Prefer the vendor's own name (for example Microsoft, BlackForestLabs, OpenAI, xAI). For an on-premises ONNX build this is the publisher of the build, which reads Microsoft on every catalog row and is not the originating lab; name the originating lab in notes."
       },
       "deploymentName": {
         "type": "string",
         "minLength": 1,
-        "description": "The actual Foundry deployment name a caller passes as the model parameter. For an entry whose status is planned or rejected, this is the name it would use (or did use) once deployed, not a placeholder."
+        "description": "The name a caller passes as the model parameter. On azure-cloud this is the Foundry deployment name. On an on-premises target it is the catalog alias, for example phi-4-mini. For an entry whose status is planned or rejected, this is the name it would use (or did use) once deployed, not a placeholder."
       },
       "sku": {
         "type": "string",
         "minLength": 1,
-        "description": "For example GlobalStandard, S0."
+        "description": "AZURE-CLOUD ONLY, and required there. For example GlobalStandard, S0. Forbidden on an on-premises entry: neither on-premises target has a SKU, and a value here would be silently meaningless rather than merely unused."
       },
       "region": {
         "type": "string",
         "minLength": 1,
-        "description": "Azure region the deployment targets, or the region a planned deployment would target."
+        "description": "AZURE-CLOUD ONLY, and required there. The Azure region the deployment targets. Forbidden on an on-premises entry: inference runs on your own hardware, so there is no region. The Azure Local Foundry ARM resource does have a region, but that governs where its metadata and billing live and is a property of the cluster, not of a model entry."
+      },
+      "variant": {
+        "type": "string",
+        "minLength": 1,
+        "description": "ON-PREMISES ONLY, and required there. The catalog entry name, for example Phi-4-mini-instruct-generic-cpu. SPIKE-22 established that the variant, not the model name, is the deployable unit on both on-premises targets: one alias fans out to several variants that differ by execution provider."
+      },
+      "executionProvider": {
+        "type": "string",
+        "enum": [
+          "CPUExecutionProvider",
+          "CUDAExecutionProvider",
+          "QNNExecutionProvider",
+          "VitisAIExecutionProvider",
+          "OpenVINOExecutionProvider",
+          "WebGpuExecutionProvider",
+          "NvTensorRTRTXExecutionProvider",
+          "vllm"
+        ],
+        "description": "ON-PREMISES ONLY, and required there. vllm is Azure Local Foundry only and is GPU only. The QNN, VitisAI, OpenVINO, WebGpu, and NvTensorRTRTX providers are Foundry Local only: the Azure Local Foundry catalog sync paginates CPU and GPU only and never syncs them (SPIKE-22)."
       },
       "status": {
         "type": "string",
         "enum": ["deployed", "planned", "rejected"],
-        "description": "rejected entries are kept, with notes explaining why, so the decision is not re-researched later - never delete a rejected entry."
+        "description": "rejected entries are kept, with notes explaining why, so the decision is not re-researched later - never delete a rejected entry. No on-premises entry may be marked deployed until it has answered a real request (ADR-0019)."
       },
       "accessGating": {
         "type": "string",
@@ -65,7 +94,12 @@
         "type": "array",
         "items": { "type": "string", "minLength": 1 },
         "minItems": 1,
-        "description": "For example text-to-image, image-edit, vision-input, word-timestamps, viseme-output."
+        "description": "For example text-to-image, image-edit, vision-input, word-timestamps, viseme-output, chat-completion, automatic-speech-recognition."
+      },
+      "sizeNote": {
+        "type": "string",
+        "minLength": 1,
+        "description": "OPTIONAL, on-premises entries only. Free text, because the published catalog carries no size column and the honest value is usually UNKNOWN. Per ADR-0020 any number here carries its provenance as published, transferred, or observed. Never back-fill a size or a licence from an upstream model card: the ONNX build's properties are not the upstream model's properties."
       },
       "notes": {
         "type": "string",
@@ -76,6 +110,31 @@
         "type": "string",
         "minLength": 1,
         "description": "Relative path to the spike, ADR, or backlog entry that backs this entry (for example docs/research/SPIKE-01-image-model.md)."
+      }
+    },
+    "if": {
+      "anyOf": [
+        { "not": { "required": ["target"] } },
+        {
+          "required": ["target"],
+          "properties": { "target": { "const": ["azure-cloud"] } }
+        }
+      ]
+    },
+    "then": {
+      "required": ["sku", "region"],
+      "not": {
+        "anyOf": [
+          { "required": ["variant"] },
+          { "required": ["executionProvider"] },
+          { "required": ["sizeNote"] }
+        ]
+      }
+    },
+    "else": {
+      "required": ["variant", "executionProvider"],
+      "not": {
+        "anyOf": [{ "required": ["sku"] }, { "required": ["region"] }]
       }
     }
   }

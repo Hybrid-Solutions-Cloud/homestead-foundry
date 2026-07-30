@@ -1,0 +1,42 @@
+# Gateway API CRDs, LAYER 1 of 3.
+#
+# NOT VENDORED, AND PINNED ON PURPOSE.
+#
+# ADR-0024 decision 11: Microsoft publishes no compatibility matrix for this
+# stack, only version floors. So the version is pinned to a known-good release
+# rather than tracking latest, and it is upgraded as a gated change rather than
+# incidentally.
+#
+# ORDER IS LOAD-BEARING: these CRDs must be Established BEFORE Istio installs.
+# Reversing it restarts istiod against missing CRDs and Microsoft reports that
+# outcome as flaky. ../deploy.ps1 applies this, waits for
+# condition=Established, and refuses to continue to Istio if the wait fails.
+#
+# This file is a pointer rather than a copy: vendoring several thousand lines of
+# upstream CRD into this repository would mean maintaining a fork of something
+# nobody here owns, and it would go stale silently. The apply is done by the
+# wrapper against the pinned URL below.
+#
+# PINNED RELEASE: v1.2.1 (standard channel)
+#   https://github.com/kubernetes-sigs/gateway-api/releases/tag/v1.2.1
+#   https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/standard-install.yaml
+#
+# Verify the pin against the Istio version you install and against the Azure
+# Local release you are on before changing it. Bumping this is a gated change,
+# not routine maintenance.
+#
+# NEVER APPLIED. No AKS Arc cluster exists in this project.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-api-pin
+  namespace: foundry-local
+  labels:
+    homestead-foundry/layer: "1"
+data:
+  # Read by ../deploy.ps1. Kept as data rather than a comment so the wrapper
+  # applies exactly the version this repository claims to have reasoned about.
+  channel: standard
+  version: v1.2.1
+  url: https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.1/standard-install.yaml

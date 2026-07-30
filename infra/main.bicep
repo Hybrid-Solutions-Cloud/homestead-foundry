@@ -156,12 +156,22 @@ var baseTags = {
 }
 var tags = empty(costCenter) ? baseTags : union(baseTags, { costCenter: costCenter })
 
-var deployableModels = filter(modelRegistry, m => m.status == 'deployed' && !contains(skipDeploymentModelIds, m.id))
+// Schema v2 lets one registry describe all three deployment targets, so this
+// stack must ignore on-premises entries rather than fail on them. `target` is
+// optional and absent means azure-cloud, which is what keeps every v1 registry
+// file working unchanged. Only a single-valued azure-cloud target deploys here:
+// an array target is by definition on-premises, because the schema forbids
+// azure-cloud inside one. See ADR-0018.
+var cloudModels = filter(modelRegistry, m => contains(m.?target ?? ['azure-cloud'], 'azure-cloud'))
+
+var deployableModels = filter(cloudModels, m => m.status == 'deployed' && !contains(skipDeploymentModelIds, m.id))
 
 // Deployment resources are children of the account and always land in
 // location; a registry entry claiming a different region is surfaced below as
 // an output so drift is visible in every what-if, never silently absorbed.
-var regionMismatchedRegistryIds = map(filter(deployableModels, m => m.region != location), m => m.id)
+// region is required on every azure-cloud entry, so the ?? is unreachable in
+// practice and exists only to satisfy the now-optional type.
+var regionMismatchedRegistryIds = map(filter(deployableModels, m => (m.?region ?? location) != location), m => m.id)
 
 // -------------------------------- modules ----------------------------------
 
