@@ -7,7 +7,7 @@ for governance of the host. One of the three targets in
 three targets on the [Deployment targets hub](../).
 :::
 
-::: warning Researched and decided, not deployed
+::: warning This target has not been built yet
 No deployment exists for this target and no automation is written. The pages in
 this section are drawn from [SPIKE-08](../../research/SPIKE-08-foundry-local-on-device),
 [SPIKE-18](../../research/SPIKE-18-foundry-local-windows-server), and

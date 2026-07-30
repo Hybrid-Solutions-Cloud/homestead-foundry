@@ -6,7 +6,7 @@ one of the three targets in [ADR-0011](../../adr/ADR-0011-multi-target-deploymen
 Compare all three targets on the [Deployment targets hub](../).
 :::
 
-::: warning Researched and decided, not deployed
+::: warning This target has not been built yet
 Nothing on this target has been deployed from this repository, and no automation
 exists for it yet. Everything below is drawn from accepted decisions and
 first-party research. Treat it as a design, not an as-built record.

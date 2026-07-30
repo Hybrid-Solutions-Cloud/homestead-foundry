@@ -7,7 +7,7 @@ AKS Arc cluster on your own hardware. One of the three targets in
 three targets on the [Deployment targets hub](../).
 :::
 
-::: warning Researched and decided, not deployed
+::: warning This target has not been built yet
 No deployment exists for this target and no automation is written. The pages in
 this section are drawn from [SPIKE-09](../../research/SPIKE-09-azure-local-foundry),
 [SPIKE-19](../../research/SPIKE-19-foundry-local-azure-local-deployment),

@@ -33,12 +33,18 @@ cells and no hedges. The unknowns are real and are being worked in order; see
 the [roadmap](../roadmap).
 :::
 
-::: info Status of this page
-The Azure AI Foundry columns are drawn from a deployed, smoke-tested environment. The
-Foundry Local and Azure Local Foundry columns are drawn from research and accepted decisions with
-no deployment behind them yet. Table 1's "status in this repo" row says so per
-target, and the per-target pages repeat it. Do not read a filled cell as a
-deployed cell.
+::: info One column is observed, two are designed
+**Only the Azure AI Foundry column describes something that exists.** It is drawn
+from an environment this repository actually deployed and smoke-tested.
+
+The Foundry Local and Azure Local Foundry columns describe **designs, not
+systems.** They are drawn from first-party research and accepted decisions, and
+nothing behind them has been built, deployed, or automated. Every cell in those
+two columns is what the documentation says *should* happen, not something anyone
+here has observed happening.
+
+So: **do not read a filled cell as a working cell.** Table 1's "status in this
+repo" row repeats this per target, and so does every per-target page.
 :::
 
 ## 1. At a glance
@@ -50,8 +56,9 @@ deployed cell.
 | Scale unit | Foundry account | Host | Cluster |
 | Azure subscription required | Yes | For Arc governance of the host, yes. The runtime itself needs none. | Yes |
 | Product maturity | GA, with individual models in preview | GA | Public preview, access by request. No SLA and no GA date. |
-| Region constraint | Per-model region availability | None. It is not an Azure resource. | Eighteen supported regions, East US among them |
-| Status in this repo | Deployed, live, smoke-tested end to end | Researched and decided. No deployment, no automation. | Researched and decided. No deployment, no automation. |
+| Where inference actually runs | In the Azure region you chose | On your server, in your building | On your cluster, in your building |
+| Region constraint | Per-model region availability, and it governs where inference runs | None. It is not an Azure resource. | **None for inference.** The Azure *resource* registers into one of eighteen supported regions (East US among them), which sets where its metadata and billing live, not where inference happens |
+| Status in this repo | **Built and running.** Deployed from the Bicep in this repo, live, and smoke-tested end to end. | **Designed on paper only.** The research and the decisions are done, but nothing has been built, deployed, or automated. | **Designed on paper only.** The research and the decisions are done, but nothing has been built, deployed, or automated. |
 | Governing ADRs | [0001](../adr/ADR-0001-target-tenant), [0004](../adr/ADR-0004-foundry-topology-and-region), [0005](../adr/ADR-0005-identity-and-secrets), [0006](../adr/ADR-0006-cost-governance), [0011](../adr/ADR-0011-multi-target-deployment-automation) | [0011](../adr/ADR-0011-multi-target-deployment-automation), [0013](../adr/ADR-0013-foundry-local-windows-server-install) | [0009](../adr/ADR-0009-azure-local-reviewer-track), [0011](../adr/ADR-0011-multi-target-deployment-automation), [0014](../adr/ADR-0014-foundry-local-azure-local-deployment-layers) |
 | Governing spikes | [01](../research/SPIKE-01-image-model), [02](../research/SPIKE-02-voice-model), [03](../research/SPIKE-03-tenant-readiness), [04](../research/SPIKE-04-identity-security), [05](../research/SPIKE-05-cost-governance) | [08](../research/SPIKE-08-foundry-local-on-device), [18](../research/SPIKE-18-foundry-local-windows-server) | [09](../research/SPIKE-09-azure-local-foundry), [19](../research/SPIKE-19-foundry-local-azure-local-deployment) |
 
