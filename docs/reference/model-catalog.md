@@ -8,13 +8,33 @@ operations. Compare all three on [Deployment targets](../targets/).
 :::
 
 
+::: tip This is a curated shortlist, not a menu
+This page records what **this project** chose, considered, and rejected. It is
+**not** a list of what Azure AI Foundry can run. It holds roughly 38 rows; a
+single Azure region offers several hundred models. If you want to know what is
+*available* rather than what was *chosen*, go to
+[Available models: Azure AI Foundry](./model-availability-azure-cloud). The
+distinction is explained in
+[chosen versus available](../guide/model-selection#chosen-versus-available).
+:::
+
 This catalog is the living, human-readable list of the models this repo's
 Azure AI Foundry methodology has deployed, evaluated, or rejected **on the Azure
-cloud target**. It is the single source of truth for "which models are on the
-table and where each one stands" for that target. None of these models runs on
-Foundry Local, on either on-premises target: those run a separate open-weight
-roster with no image generation and no text to speech, tracked in its own
-catalog. See the [reference index](./) for why the two are split, and the
+cloud target**. It is the single source of truth for "which models has this
+project put on the table, and where does each one stand" for that target.
+
+It began as the model set this project originally needed, and it has grown by
+evaluation since. **A model absent from it is not unavailable; it is
+unevaluated**, or it was evaluated and rejected, in which case there is a row
+below saying so. A reader adopting this methodology rather than this project
+should expect their own catalog to differ: the methodology transfers, the roster
+does not.
+
+None of these models runs on either on-premises target: those run a separate
+open-weight roster with no image generation and no text to speech, listed in
+full in
+[Available models: Foundry Local and Azure Local Foundry](./model-catalog-foundry-local).
+See the [reference index](./) for why the lists are split, and the
 [deployment targets comparison](../targets/#_2-models-and-modalities) for what
 each target can run. The machine-readable counterpart is the model registry
 (`models/registry.schema.json`, with `models/registry.starter.json` as the real starting roster), which a

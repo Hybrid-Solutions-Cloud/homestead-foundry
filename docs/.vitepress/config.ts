@@ -55,7 +55,7 @@ export default defineConfig({
       { text: "Deployment targets", link: "/targets/" },
       { text: "ADRs", link: "/adr/" },
       { text: "Research", link: "/research/" },
-      { text: "Models", link: "/reference/model-catalog" },
+      { text: "Models", link: "/reference/" },
       { text: "Implementation", link: "/implementation/implementation-guide" },
       { text: "Roadmap", link: "/roadmap" },
       { text: "Changelog", link: "/changelog" },
@@ -67,6 +67,7 @@ export default defineConfig({
           items: [
             { text: "Getting started", link: "/guide/getting-started" },
             { text: "Methodology", link: "/guide/methodology" },
+            { text: "Model selection", link: "/guide/model-selection" },
             { text: "Model registry", link: "/guide/model-registry" },
             { text: "Deployment", link: "/guide/deployment" },
           ],
@@ -178,7 +179,19 @@ export default defineConfig({
           text: "Reference",
           items: [
             { text: "Reference index", link: "/reference/" },
-            { text: "Model catalog (Azure cloud)", link: "/reference/model-catalog" },
+          ],
+        },
+        {
+          text: "What this project chose",
+          items: [
+            { text: "Model catalog", link: "/reference/model-catalog" },
+          ],
+        },
+        {
+          text: "What is available",
+          items: [
+            { text: "Azure AI Foundry", link: "/reference/model-availability-azure-cloud" },
+            { text: "Foundry Local and Azure Local Foundry", link: "/reference/model-catalog-foundry-local" },
           ],
         },
       ],
