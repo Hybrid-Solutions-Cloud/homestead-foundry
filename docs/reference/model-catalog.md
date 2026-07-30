@@ -1,9 +1,23 @@
-# Model catalog
+# Model catalog: Azure cloud
+
+::: info Scope: Azure cloud (track 1)
+This page describes the **Azure cloud** target, track 1 of
+[ADR-0011](../adr/ADR-0011-multi-target-deployment-automation). Foundry Local on
+Windows Server and Foundry Local on Azure Local differ from it in models,
+features, identity, cost, and operations. Compare all three on
+[Deployment targets](../targets/).
+:::
+
 
 This catalog is the living, human-readable list of the models this repo's
-Azure AI Foundry methodology has deployed, evaluated, or rejected. It is the
-single source of truth for "which models are on the table and where each one
-stands." The machine-readable counterpart is the model registry
+Azure AI Foundry methodology has deployed, evaluated, or rejected **on the Azure
+cloud target**. It is the single source of truth for "which models are on the
+table and where each one stands" for that target. None of these models runs on
+Foundry Local, on either on-premises target: those run a separate open-weight
+roster with no image generation and no text to speech, tracked in its own
+catalog. See the [reference index](./) for why the two are split, and the
+[deployment targets comparison](../targets/#_2-models-and-modalities) for what
+each target can run. The machine-readable counterpart is the model registry
 (`models/registry.schema.json`, with `models/registry.starter.json` as the real starting roster), which a
 consuming project resolves at runtime; this catalog is the prose record a
 human reads to understand the why behind each row.

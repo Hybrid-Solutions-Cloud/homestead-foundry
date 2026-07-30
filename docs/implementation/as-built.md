@@ -1,5 +1,14 @@
 # As-built record
 
+::: info Scope: Azure cloud (track 1)
+This page describes the **Azure cloud** target, track 1 of
+[ADR-0011](../adr/ADR-0011-multi-target-deployment-automation). Foundry Local on
+Windows Server and Foundry Local on Azure Local differ from it in models,
+features, identity, cost, and operations. Compare all three on
+[Deployment targets](../targets/).
+:::
+
+
 This is an anonymized as-built record: it documents the methodology's real,
 running deployment with resource names genericized to the CAF placeholder
 pattern for this public writeup. It is not a live private inventory, and it

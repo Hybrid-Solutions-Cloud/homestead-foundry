@@ -1,5 +1,14 @@
 # Design: resource topology and CAF naming
 
+::: info Scope: Azure cloud (track 1)
+This page describes the **Azure cloud** target, track 1 of
+[ADR-0011](../adr/ADR-0011-multi-target-deployment-automation). Foundry Local on
+Windows Server and Foundry Local on Azure Local differ from it in models,
+features, identity, cost, and operations. Compare all three on
+[Deployment targets](../targets/).
+:::
+
+
 - Status: draft for review
 - Date: 2026-07-11 (main body rewritten brand-neutral 2026-07-21, per D-03 and D-16; see the closing worked-example section for the real deployed instance)
 - Author: foundry-architect

@@ -1,5 +1,14 @@
 # Deployment
 
+::: info Scope: Azure cloud (track 1)
+This page describes the **Azure cloud** target, track 1 of
+[ADR-0011](../adr/ADR-0011-multi-target-deployment-automation). Foundry Local on
+Windows Server and Foundry Local on Azure Local differ from it in models,
+features, identity, cost, and operations. Compare all three on
+[Deployment targets](../targets/).
+:::
+
+
 This is the runbook. Following it end to end stands up an Azure AI Foundry environment in your own subscription: a resource group, a Foundry account, model deployments driven by your model registry, an optional project, data-plane RBAC, a cost budget, and Key Vault secret-name references.
 
 The environment described in `docs/implementation/as-built.md` was deployed from exactly this template.

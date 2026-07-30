@@ -1,5 +1,14 @@
 # Diagram set (Lucid)
 
+::: info Scope: Azure cloud (track 1)
+This page describes the **Azure cloud** target, track 1 of
+[ADR-0011](../adr/ADR-0011-multi-target-deployment-automation). Foundry Local on
+Windows Server and Foundry Local on Azure Local differ from it in models,
+features, identity, cost, and operations. Compare all three on
+[Deployment targets](../targets/).
+:::
+
+
 This file is the diagram index for the design set: the eleven diagrams that
 together visualize the architecture, and what each one is meant to show. It is
 written so you can reproduce the same set for your own deployment rather than

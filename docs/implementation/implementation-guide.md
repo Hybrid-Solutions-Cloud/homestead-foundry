@@ -1,5 +1,14 @@
 # Implementation guide: Azure AI Foundry deployment runbook
 
+::: info Scope: Azure cloud (track 1)
+This page describes the **Azure cloud** target, track 1 of
+[ADR-0011](../adr/ADR-0011-multi-target-deployment-automation). Foundry Local on
+Windows Server and Foundry Local on Azure Local differ from it in models,
+features, identity, cost, and operations. Compare all three on
+[Deployment targets](../targets/).
+:::
+
+
 > **If you want to deploy, read the [deployment guide](../guide/deployment.md) instead.** That is the current, tested, Bicep-driven runbook. This document is the longer-form reference behind it: the ordered manual procedure, the reasoning for each step, and the confirmation and owner-input registers. It was followed to build the first version of the environment recorded in [as-built](./as-built.md), which has since been rebuilt from `infra/`.
 
 - Status: executed. Followed in full to stand up the environment in [as-built](./as-built.md); retained as the reference procedure and the source the Bicep automates.
