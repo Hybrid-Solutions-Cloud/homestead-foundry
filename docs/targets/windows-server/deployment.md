@@ -20,12 +20,13 @@ first-party research. Treat it as a design, not an as-built record.
 - Success is proven by `foundry service status` plus one real inference call, never by an installer exit code.
 - The gate is two read-only resolutions, then one owner-authorized install test on a dedicated disposable Windows Server build VM. No automation is written yet.
 
-## What is still open
+## The research and decisions behind this page
 
-This page is filled out as the research and decisions below land. Until then, the
-[comparison hub](../) carries the sourced answers for this target, including the
-findings that corrected earlier claims on this page.
+These were open when this page was first written. **They are now written and linked below.** Where a finding contradicted an earlier claim on this page, the page has been corrected and says so inline.
 
-- [ADR-0013](../../adr/ADR-0013-foundry-local-windows-server-install), ADR-0013
-- **SPIKE-23**, the Foundry Local install-artifacts spike
+- [ADR-0013](../../adr/ADR-0013-foundry-local-windows-server-install), the governing decision **(Status: Proposed, awaiting approval)**
+- [SPIKE-23](../../research/SPIKE-23-foundry-local-install-artifacts-and-run-command), the Foundry Local install-artifacts spike
+
+### Still genuinely open
+
 - **SPIKE-24**, the Foundry Local install test

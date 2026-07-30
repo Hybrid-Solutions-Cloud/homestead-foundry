@@ -18,11 +18,9 @@ first-party research. Treat it as a design, not an as-built record.
 - Arc governs installing and configuring the host. It does not govern the running inference service.
 - The install is a single idempotent unit of four check-before-act stages: install, model cache, service configuration, validate. The on-disk model cache is the unit of state, not a flag file.
 
-## What is still open
+## The research and decisions behind this page
 
-This page is filled out as the research and decisions below land. Until then, the
-[comparison hub](../) carries the sourced answers for this target, including the
-findings that corrected earlier claims on this page.
+These were open when this page was first written. **They are now written and linked below.** Where a finding contradicted an earlier claim on this page, the page has been corrected and says so inline.
 
-- [ADR-0013](../../adr/ADR-0013-foundry-local-windows-server-install), ADR-0013
-- **SPIKE-25**, the hardware sizing spike
+- [ADR-0013](../../adr/ADR-0013-foundry-local-windows-server-install), the governing decision **(Status: Proposed, awaiting approval)**
+- [SPIKE-25](../../research/SPIKE-25-local-track-hardware-sizing), the hardware sizing spike

@@ -19,11 +19,12 @@ first-party research. Treat it as a design, not an as-built record.
 - Istio is adopted as a Gateway API provider only, not as a service mesh.
 - Bicep for the AKS Arc cluster itself is provisional pending a `what-if` test, because every current first-party example uses `az aksarc`.
 
-## What is still open
+## The research and decisions behind this page
 
-This page is filled out as the research and decisions below land. Until then, the
-[comparison hub](../) carries the sourced answers for this target, including the
-findings that corrected earlier claims on this page.
+These were open when this page was first written. **They are now written and linked below.** Where a finding contradicted an earlier claim on this page, the page has been corrected and says so inline.
 
-- [ADR-0014](../../adr/ADR-0014-foundry-local-azure-local-deployment-layers), ADR-0014
+- [ADR-0014](../../adr/ADR-0014-foundry-local-azure-local-deployment-layers), the governing decision **(Status: Proposed, awaiting approval)**
+
+### Still genuinely open
+
 - **SPIKE-30**, the AKS Arc Bicep feasibility spike

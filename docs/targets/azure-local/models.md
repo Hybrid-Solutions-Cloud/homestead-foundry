@@ -19,11 +19,9 @@ first-party research. Treat it as a design, not an as-built record.
 - The first increment is a CPU-only text reviewer in the `Phi-4-mini-instruct-generic-cpu` class.
 - Resources must be set explicitly on every model. The CRD defaults of 256Mi request and 1Gi limit cannot run a 4.8 GB model.
 
-## What is still open
+## The research and decisions behind this page
 
-This page is filled out as the research and decisions below land. Until then, the
-[comparison hub](../) carries the sourced answers for this target, including the
-findings that corrected earlier claims on this page.
+These were open when this page was first written. **They are now written and linked below.** Where a finding contradicted an earlier claim on this page, the page has been corrected and says so inline.
 
-- **SPIKE-22**, the Foundry Local model catalog spike
-- **ADR-0019**, the per-target model roster ADR
+- [SPIKE-22](../../research/SPIKE-22-foundry-local-model-catalog), the Foundry Local model catalog spike
+- [ADR-0019](../../adr/ADR-0019-on-premises-model-rosters), the per-target model roster ADR **(Status: Proposed, awaiting approval)**

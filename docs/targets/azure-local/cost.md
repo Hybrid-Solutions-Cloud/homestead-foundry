@@ -37,11 +37,9 @@ first-party research. Treat it as a design, not an as-built record.
 - **Billing continues for 31 days after disconnection unless the ARM resource is
   deleted**, so a decommission step is a real cost control, not hygiene.
 
-## What is still open
+## The research and decisions behind this page
 
-This page is filled out as the research and decisions below land. Until then, the
-[comparison hub](../) carries the sourced answers for this target, including the
-findings that corrected earlier claims on this page.
+These were open when this page was first written. **They are now written and linked below.** Where a finding contradicted an earlier claim on this page, the page has been corrected and says so inline.
 
-- **SPIKE-26**, the local-track cost spike
-- **ADR-0021**, the local-track cost governance ADR
+- [SPIKE-26](../../research/SPIKE-26-local-track-cost-model), the local-track cost spike
+- [ADR-0021](../../adr/ADR-0021-on-premises-cost-governance), the local-track cost governance ADR **(Status: Proposed, awaiting approval)**

@@ -17,11 +17,12 @@ first-party research. Treat it as a design, not an as-built record.
 - The service exposes an OpenAI-compatible endpoint on the local host, so any client with a configurable base URL can call it.
 - There is no authentication on that endpoint. The security boundary is the machine.
 
-## What is still open
+## The research and decisions behind this page
 
-This page is filled out as the research and decisions below land. Until then, the
-[comparison hub](../) carries the sourced answers for this target, including the
-findings that corrected earlier claims on this page.
+These were open when this page was first written. **They are now written and linked below.** Where a finding contradicted an earlier claim on this page, the page has been corrected and says so inline.
+
+- [SPIKE-31](../../research/SPIKE-31-cross-track-feature-parity), the cross-track feature parity spike
+
+### Still genuinely open
 
 - **SPIKE-24**, the Foundry Local install test
-- **SPIKE-31**, the cross-track feature parity spike

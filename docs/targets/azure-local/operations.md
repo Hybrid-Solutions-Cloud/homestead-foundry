@@ -35,13 +35,11 @@ first-party research. Treat it as a design, not an as-built record.
 - Teardown leaves residue, some of it by design. Certificate material and
   disconnected-operations artifacts are the parts that are not simply rebuildable.
 
-## What is still open
+## The research and decisions behind this page
 
-This page is filled out as the research and decisions below land. Until then, the
-[comparison hub](../) carries the sourced answers for this target, including the
-findings that corrected earlier claims on this page.
+These were open when this page was first written. **They are now written and linked below.** Where a finding contradicted an earlier claim on this page, the page has been corrected and says so inline.
 
-- **SPIKE-27**, the local-track observability spike
-- **SPIKE-29**, the local-track lifecycle and upgrade spike
-- **ADR-0022**, the local-track observability boundaries ADR
-- **ADR-0024**, the local-track lifecycle ADR
+- [SPIKE-27](../../research/SPIKE-27-local-track-observability), the local-track observability spike
+- [SPIKE-29](../../research/SPIKE-29-local-track-lifecycle-and-upgrade), the local-track lifecycle and upgrade spike
+- [ADR-0022](../../adr/ADR-0022-on-premises-observability-boundaries), the local-track observability boundaries ADR **(Status: Proposed, awaiting approval)**
+- [ADR-0024](../../adr/ADR-0024-on-premises-lifecycle-and-upgrade), the local-track lifecycle ADR **(Status: Proposed, awaiting approval)**

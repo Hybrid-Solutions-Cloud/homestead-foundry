@@ -29,11 +29,9 @@ first-party research. Treat it as a design, not an as-built record.
 - `exposure: external` additionally needs a working LoadBalancer implementation,
   which an AKS Arc cluster does not have by default.
 
-## What is still open
+## The research and decisions behind this page
 
-This page is filled out as the research and decisions below land. Until then, the
-[comparison hub](../) carries the sourced answers for this target, including the
-findings that corrected earlier claims on this page.
+These were open when this page was first written. **They are now written and linked below.** Where a finding contradicted an earlier claim on this page, the page has been corrected and says so inline.
 
-- **SPIKE-28**, the Azure Local Foundry networking, storage, and certificates spike
-- **SPIKE-31**, the cross-track feature parity spike
+- [SPIKE-28](../../research/SPIKE-28-azure-local-networking-storage-certificates), the Azure Local Foundry networking, storage, and certificates spike
+- [SPIKE-31](../../research/SPIKE-31-cross-track-feature-parity), the cross-track feature parity spike
