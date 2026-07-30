@@ -21,3 +21,10 @@ Every Architecture Decision Record this project has locked, in decision order. E
 | [ADR-0015](./ADR-0015-cost-first-observability-boundaries) | Cost-first observability package boundaries and activation gates |
 | [ADR-0016](./ADR-0016-foundry-model-usage-observability) | Native Foundry metrics for model usage observability |
 | [ADR-0017](./ADR-0017-deployment-target-documentation-structure) | Deployment-target documentation and repository structure (the `docs/targets/` tree, two model catalogs, the `infra/` subtree layout) |
+| [ADR-0018](./ADR-0018-model-registry-schema-v2) | Model registry schema v2, with an optional target discriminator (implements ADR-0017 decision 7) |
+| [ADR-0019](./ADR-0019-on-premises-model-rosters) | The on-premises model rosters and the first increment for each target |
+| [ADR-0020](./ADR-0020-on-premises-hardware-sizing-and-gpu-scope) | On-premises hardware sizing provenance and GPU scope (corrects SPIKE-18's binding-constraint claim) |
+| [ADR-0021](./ADR-0021-on-premises-cost-governance) | On-premises cost governance, where ADR-0006 layer 1 has no referent (amends ADR-0006) |
+| [ADR-0022](./ADR-0022-on-premises-observability-boundaries) | On-premises observability boundaries, and that ADR-0016 cannot be met on either target |
+| [ADR-0023](./ADR-0023-azure-local-foundry-networking-and-tls) | Azure Local Foundry networking, ingress, and TLS (reverses SPIKE-19's certificate position) |
+| [ADR-0024](./ADR-0024-on-premises-lifecycle-and-upgrade) | On-premises lifecycle, upgrade, drift, and teardown |

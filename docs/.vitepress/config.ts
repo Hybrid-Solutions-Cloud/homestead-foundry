@@ -254,6 +254,13 @@ export default defineConfig({
             { text: "ADR-0013 Foundry Local install, identity, governance scope", link: "/adr/ADR-0013-foundry-local-windows-server-install" },
             { text: "ADR-0014 Azure Local Foundry deployment layers and auth", link: "/adr/ADR-0014-foundry-local-azure-local-deployment-layers" },
             { text: "ADR-0015 Cost-first observability boundaries", link: "/adr/ADR-0015-cost-first-observability-boundaries" },
+            { text: "ADR-0018 Model registry schema v2", link: "/adr/ADR-0018-model-registry-schema-v2" },
+            { text: "ADR-0019 On-premises model rosters", link: "/adr/ADR-0019-on-premises-model-rosters" },
+            { text: "ADR-0020 Hardware sizing and GPU scope", link: "/adr/ADR-0020-on-premises-hardware-sizing-and-gpu-scope" },
+            { text: "ADR-0021 On-premises cost governance", link: "/adr/ADR-0021-on-premises-cost-governance" },
+            { text: "ADR-0022 On-premises observability boundaries", link: "/adr/ADR-0022-on-premises-observability-boundaries" },
+            { text: "ADR-0023 Azure Local Foundry networking and TLS", link: "/adr/ADR-0023-azure-local-foundry-networking-and-tls" },
+            { text: "ADR-0024 On-premises lifecycle and upgrade", link: "/adr/ADR-0024-on-premises-lifecycle-and-upgrade" },
           ],
         },
         {
