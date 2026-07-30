@@ -25,3 +25,11 @@ Every research spike behind the architecture decisions, in order. Each grounds i
 | [SPIKE-19](./SPIKE-19-foundry-local-azure-local-deployment) | Where the ARM and Kubernetes seam sits for Foundry Local on Azure Local (track 3) |
 | [SPIKE-20](./SPIKE-20-cost-first-observability) | Cost-first Azure Monitor, Foundry, Grafana, and hybrid observability |
 | [SPIKE-21](./SPIKE-21-solution-observability) | Solution observability for Azure AI Foundry |
+| [SPIKE-22](./SPIKE-22-foundry-local-model-catalog) | The Foundry Local model catalog, and whether tracks 2 and 3 draw from one catalog or two |
+| [SPIKE-23](./SPIKE-23-foundry-local-install-artifacts-and-run-command) | Foundry Local install artifacts, and the real mechanics of Azure Arc run command |
+| [SPIKE-25](./SPIKE-25-local-track-hardware-sizing) | Hardware sizing and capacity planning for the two local Foundry tracks |
+| [SPIKE-26](./SPIKE-26-local-track-cost-model) | The cost model for the two local tracks, and where a spend cap can actually be enforced |
+| [SPIKE-27](./SPIKE-27-local-track-observability) | What Azure can and cannot see for the local deployment tracks |
+| [SPIKE-28](./SPIKE-28-azure-local-networking-storage-certificates) | Networking, ingress, TLS, and storage for Foundry Local on Azure Local |
+| [SPIKE-29](./SPIKE-29-local-track-lifecycle-and-upgrade) | Lifecycle, upgrade, and drift for the two Foundry Local tracks |
+| [SPIKE-31](./SPIKE-31-cross-track-feature-parity) | Cross-track capability and feature parity across the three deployment targets |
