@@ -3,6 +3,9 @@ layout: home
 hero:
   name: Homestead Foundry
   text: A knowledge and automation center for Azure AI Foundry
+  image:
+    src: /logo.svg
+    alt: Homestead Foundry
   tagline: Detailed documentation on how to design, deploy, and govern an Azure AI Foundry build, plus the AI agent roster and Bicep automation that does the work, proven on a real production deployment.
   actions:
     - theme: brand

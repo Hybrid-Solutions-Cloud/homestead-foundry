@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Homestead Foundry">
+  <title>Homestead Foundry</title>
+  <!-- Simplified for 16px: no hairline stroke, no inner core, a chunkier flame. -->
+  <defs>
+    <linearGradient id="fv-shell" x1="32" y1="2" x2="32" y2="62" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2B93E8"/>
+      <stop offset="1" stop-color="#0B4A8F"/>
+    </linearGradient>
+    <linearGradient id="fv-flame" x1="32" y1="12" x2="32" y2="54" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFD166"/>
+      <stop offset="1" stop-color="#E4572E"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 2 L58 17 L58 47 L32 62 L6 47 L6 17 Z" fill="url(#fv-shell)"/>
+  <path d="M32 12 C 42 24, 46.5 30, 46.5 39 C 46.5 47.5, 40 54, 32 54 C 24 54, 17.5 47.5, 17.5 39 C 17.5 31.5, 21 27, 25 21 C 26 28, 29 31.5, 31 34 C 31.5 26, 31 19, 32 12 Z" fill="url(#fv-flame)"/>
+</svg>

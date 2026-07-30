@@ -14,7 +14,26 @@ export default defineConfig({
   // now absolute repository links. Link to a page by relative path, or to a
   // repository file by its GitHub URL. See ADR-0017.
   ignoreDeadLinks: false,
+  // The mark is a hexagon, the shape Azure uses for a resource, holding a forge
+  // flame. Hand-authored SVG in docs/public/. There is no raster fallback yet:
+  // producing .ico and apple-touch-icon.png needs a rasterizer, and installing
+  // one is owner-gated. Modern browsers use the SVG icon.
+  head: [
+    ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
+    ["meta", { name: "theme-color", content: "#0B4A8F" }],
+    ["meta", { property: "og:type", content: "website" }],
+    ["meta", { property: "og:title", content: "Homestead Foundry" }],
+    [
+      "meta",
+      {
+        property: "og:description",
+        content:
+          "A knowledge and automation center for Azure AI Foundry, across all three deployment targets.",
+      },
+    ],
+  ],
   themeConfig: {
+    logo: { src: "/logo.svg", alt: "Homestead Foundry" },
     nav: [
       { text: "Guide", link: "/guide/getting-started" },
       { text: "Architecture", link: "/design/architecture-overview" },
