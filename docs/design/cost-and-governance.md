@@ -12,7 +12,7 @@ operations. Compare all three on [Deployment targets](../targets/).
 - Date: 2026-07-11
 - Author: foundry-architect (Fable)
 - WAF pillar: **Cost Optimization** (set spending guardrails, measure unit cost, optimize rates)
-- Grounded in: **ADR-0006** (cost governance and the spending cap), **ADR-0002** (image model, tokens-per-image UNKNOWN, Flash lever), plus ADR-0001 (MVP credit mechanics) and ADR-0003 (voice rate); research base SPIKE-05 and SPIKE-01
+- Grounded in: **[ADR-0006](../adr/ADR-0006-cost-governance)** (cost governance and the spending cap), **[ADR-0002](../adr/ADR-0002-image-model-and-access)** (image model, tokens-per-image UNKNOWN, Flash lever), plus [ADR-0001](../adr/ADR-0001-target-tenant) (MVP credit mechanics) and [ADR-0003](../adr/ADR-0003-voice-model-and-voice-set) (voice rate); research base SPIKE-05 and SPIKE-01
 - Designs only what the ADRs decided; anything an ADR left open is listed under "ADR gaps" at the end
 
 ## Scope
@@ -52,7 +52,7 @@ Confidence caveat carried from SPIKE-05 and SPIKE-01: the first-party pricing pa
 
 ### 1.2 The declared UNKNOWN: tokens per generated image
 
-Microsoft publishes no tokens-per-image figure for any MAI image model, and the documented response shows no usage field. Every image dollar figure in this design scales linearly off this number. **It is UNKNOWN by decision (ADR-0002 decision 5) and is measured in the smoke test, not assumed.** Until measured, the pipeline guard uses a deliberately conservative high assumption, 4,200 output tokens per image (about 0.20 USD per image on 2.5), so the guard trips early rather than late (ADR-0006 decision 1). Measurement plan in section 7.
+Microsoft publishes no tokens-per-image figure for any MAI image model, and the documented response shows no usage field. Every image dollar figure in this design scales linearly off this number. **It is UNKNOWN by decision and is measured in the smoke test, not assumed.** Until measured, the pipeline guard uses a deliberately conservative high assumption, 4,200 output tokens per image (about 0.20 USD per image on 2.5), so the guard trips early rather than late. Measurement plan in section 7.
 
 ### 1.3 Voice meter (first-party confirmed, deterministic)
 
@@ -68,7 +68,7 @@ Before authorizing any batch, forecast spend across at least three scenario type
 | Backfill month | A one-time catch-up pass over existing content (for example, adding a new voice across the entire back catalog) |
 | Full push | A backfill plus a full image-catalog build-out landing in the same month |
 
-A cap is well sized when it comfortably covers the realistic full-push scenario while still being tight enough to stop a runaway loop (ADR-0006 context). See the worked example for the actual figures behind this initiative's cap.
+A cap is well sized when it comfortably covers the realistic full-push scenario while still being tight enough to stop a runaway loop. See the worked example for the actual figures behind this initiative's cap.
 
 ## 2. The three enforcement layers (ADR-0006 decision, verbatim intent)
 
@@ -84,7 +84,7 @@ A cap is well sized when it comfortably covers the realistic full-push scenario 
 
 - A per-month in-pipeline ledger (`chars`, `estUsd` with `estUsd = chars * 22 / 1,000,000` for voice) is printed at the end of every run; a `--*-budget-usd <n>` flag refuses to proceed once the month's estimated spend would exceed the flag. This mirrors any existing per-tier usage guard already proven in the publish pipeline.
 - Voice enforcement is exact (characters known pre-call). Image enforcement uses the conservative 4,200-tokens-per-image assumption until the smoke test replaces it with the measured value.
-- **Default set to match the cap, with one owner-decided exception:** the guard can be lifted deliberately during a credit-burn window so spend can be front-loaded before the credit resets, then the default reverts to the cap amount once the credit resets (ADR-0006 decision 1). During that window, layer 3 is the only stop; acceptable only when the worst realistic month still fits inside a single monthly credit.
+- **Default set to match the cap, with one owner-decided exception:** the guard can be lifted deliberately during a credit-burn window so spend can be front-loaded before the credit resets, then the default reverts to the cap amount once the credit resets. During that window, layer 3 is the only stop; acceptable only when the worst realistic month still fits inside a single monthly credit.
 - The ledger is also the attribution record: it knows consumer (brand, product, tenant), voice, and model per call (section 5).
 - Wiring detail (which files, which flags) is specified in `pipeline-integration-design.md`.
 
@@ -105,7 +105,7 @@ Optionally, later and explicitly as custom development, the action group could f
 
 ### 2.3 Layer 3: the spending limit stays ON
 
-The subscription is an MVP credit subscription: the credit resets monthly and the spending limit auto-disables the subscription at the credit ceiling rather than billing a card. Keeping it ON is the only mechanism that prevents spend from becoming a real invoice. It is removed only if the owner deliberately elects pay-as-you-go for a spend that must exceed the monthly credit (ADR-0006 decision 3).
+The subscription is an MVP credit subscription: the credit resets monthly and the spending limit auto-disables the subscription at the credit ceiling rather than billing a card. Keeping it ON is the only mechanism that prevents spend from becoming a real invoice. It is removed only if the owner deliberately elects pay-as-you-go for a spend that must exceed the monthly credit.
 
 ## 3. CAF tag scheme (ADR-0006 decision, values locked this phase)
 
@@ -124,7 +124,7 @@ Two helpers and one hard limitation:
 - **Azure tags cannot split spend by consumer when one account serves several.** A shared account serving multiple brands, products, or tenants has no per-request tag, so Azure meters aggregate all of them together. The pipeline ledger is the authoritative per-consumer and per-model ledger; Azure gives the initiative-level rollup and the reconciliation baseline.
 - Expect some records to show as untagged for services that omit tags from usage data. Do not bother with formal cost-allocation rules (they need EA or MCA-E billing roles and add nothing here).
 
-## 4. Reporting and credit burn-down (ADR-0006)
+## 4. Reporting and credit burn-down
 
 - **Automated credit alerts are Enterprise-Agreement-only**, and an MVP credit subscription is unlikely to be EA, so they are not part of this design. The portable substitute:
   1. `budget-<workload>-<env>-<region>-<instance>` (section 2.2) as the always-on threshold notifier.
@@ -149,7 +149,7 @@ Two helpers and one hard limitation:
 - **The full-quality tier for the pilot and for all final published or hero art.** The pilot exists to prove style match at maximum quality; proving it on a lower-cost tier would prove nothing about the full-quality tier.
 - **The lower-cost tier ("Flash" or equivalent) for bulk only after a pilot arm proves style parity.** Such a tier typically exposes the same endpoints, the same parameters, and the same requests-per-minute ceiling as the full-quality tier, so it buys lower per-token cost, not throughput. Expected saving on a realistic catalog backfill is typically modest, so quality wins unless parity is demonstrated. See the worked example for this initiative's actual measured saving.
 - When the lower-cost tier is justified: (a) a pilot arm has shown acceptable quality on the target style, or (b) large throwaway candidate sweeps, or (c) the catalog grows enough that a roughly 30 percent output saving becomes material.
-- **Never substitute an older or retiring model version to save money:** check each model's retirement date and endpoint support (for example, an older generation lacking an edits endpoint) before ever treating it as a cost lever (ADR-0002).
+- **Never substitute an older or retiring model version to save money:** check each model's retirement date and endpoint support (for example, an older generation lacking an edits endpoint) before ever treating it as a cost lever.
 
 ## 7. Measurement plan: converting the UNKNOWN into a number
 
@@ -225,7 +225,7 @@ This is the pattern above as deployed in this repo's own production instance, pr
 | Full push, images on 2.5 | ~32 USD | catalog ~17 to 68 USD | ~49 to 100 USD | at the cap |
 | Full push, images on Flash | ~32 USD | catalog ~10 to 48 USD | ~42 to 80 USD | under the cap |
 
-The cap is well sized: it absorbs the entire one-shot build-out for both brands yet still stops a runaway loop (ADR-0006 context).
+The cap is well sized: it absorbs the entire one-shot build-out for both brands yet still stops a runaway loop.
 
 **Real Flash-for-bulk saving:** expected saving on Brand A's 340-image catalog backfill is roughly 5 to 20 USD, modest, so MAI-Image-2.5 (not Flash) is used for the pilot and all final published or hero art; Flash is reserved for after a Flash arm proves style parity, or for large throwaway candidate sweeps.
 

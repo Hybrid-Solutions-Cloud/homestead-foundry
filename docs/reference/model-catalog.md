@@ -49,7 +49,7 @@ new candidate is evaluated against that methodology and recorded here. A
 model gets its own ADR only when adopting it changes a decision the
 methodology cannot already express (for example a new region, a new resource,
 or a new access-governance posture). The FLUX adoption is the worked example:
-it was originally captured as its own record (ADR-0010) and is now folded back
+it was originally captured as its own record and is now folded back
 into the general image-selection ADR plus these catalog rows, so a future
 image model does not need a new ADR to be added.
 

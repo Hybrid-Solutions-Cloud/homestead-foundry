@@ -162,6 +162,16 @@ export default defineConfig({
               { text: "Building agents", link: "/guide/building-agents" },
             ],
           },
+          {
+            // The evidence layer sits here because the methodology is one chain:
+            // spike -> ADR -> design -> implement. Build already held the back
+            // half; this is the front half, in the same menu, in order.
+            text: "Why it is built this way",
+            items: [
+              { text: "Architecture Decision Records", link: "/adr/" },
+              { text: "Research spikes", link: "/research/" },
+            ],
+          },
         ],
       },
       {
@@ -175,22 +185,10 @@ export default defineConfig({
         ],
       },
       {
-        text: "Decision record",
+        text: "Project",
         items: [
-          {
-            text: "Evidence",
-            items: [
-              { text: "Architecture Decision Records", link: "/adr/" },
-              { text: "Research spikes", link: "/research/" },
-            ],
-          },
-          {
-            text: "Project",
-            items: [
-              { text: "Roadmap", link: "/roadmap" },
-              { text: "Changelog", link: "/changelog" },
-            ],
-          },
+          { text: "Roadmap", link: "/roadmap" },
+          { text: "Changelog", link: "/changelog" },
         ],
       },
     ],

@@ -11,7 +11,7 @@ operations. Compare all three on [Deployment targets](../targets/).
 - Status: draft for review
 - Date: 2026-07-11
 - Author: foundry-architect (Fable)
-- Grounded in: ADR-0002 (image model), ADR-0003 (voice model), ADR-0004 (topology and region), ADR-0008 (publish-pipeline integration); supporting references to ADR-0001, ADR-0005, ADR-0006, ADR-0007 where a flow crosses their territory
+- Grounded in: [ADR-0002](../adr/ADR-0002-image-model-and-access) (image model), [ADR-0003](../adr/ADR-0003-voice-model-and-voice-set) (voice model), [ADR-0004](../adr/ADR-0004-foundry-topology-and-region) (topology and region), [ADR-0008](../adr/ADR-0008-publish-pipeline-integration) (publish-pipeline integration); supporting references to [ADR-0001](../adr/ADR-0001-target-tenant), [ADR-0005](../adr/ADR-0005-identity-and-secrets), [ADR-0006](../adr/ADR-0006-cost-governance), [ADR-0007](../adr/ADR-0007-content-safety-and-responsible-ai) where a flow crosses their territory
 - Companion docs: `resource-topology-and-caf-naming.md` (names and tags), `reliability-and-operations.md` (Reliability and Operational Excellence), `performance-efficiency.md` (Performance Efficiency)
 
 This document describes the general methodology end to end in text: how to stand up one shared Azure AI Foundry account to serve image and voice generation for one or more downstream products, and how to wire that account into a publish-time pipeline safely. The Lucid phase draws it; nothing here depends on a diagram existing first. It designs only what the ADRs decided. Where an ADR is silent, the gap is called out in the final section rather than filled in. A concrete, deployed instance of this exact methodology is restated in full at the end, in the closing "Worked example" appendix.
@@ -59,17 +59,17 @@ Both modalities ride the single `AIServices` account. This is the load-bearing t
 
 ### 3.1 Image: MAI-Image-2.5 via the `mai-image-25` deployment
 
-- Endpoints on the account's custom subdomain: `https://<prefix>-<initiative>-<env>-<region>-01.services.ai.azure.com/mai/v1/images/generations` (JSON) and `.../mai/v1/images/edits` (multipart). The request `model` parameter is the deployment name `mai-image-25`, which stays stable even when the underlying Preview model version is redeployed (ADR-0002 version pinning).
-- The documented parameter surface is only `model`, `prompt`, `image` (edits only), `width`, `height`. No seed, mask, negative prompt, or candidate count exists, so style matching uses exactly two arms: prompt engineering on generations, and edits as a pseudo style reference (ADR-0002). Candidate selection is a human review step.
-- Canvas standardized at 1248x832 (a clean 3:2 at 1,038,336 pixels, under the 1,048,576-pixel cap). Larger legacy canvases that exceed the cap are not reproducible (ADR-0002).
-- Auth is Microsoft Entra ID, keyless: `DefaultAzureCredential` with scope `https://cognitiveservices.azure.com/.default`, resolving to the `az login` user on a workstation (ADR-0005). WAF Security: zero stored secret on the image path.
+- Endpoints on the account's custom subdomain: `https://<prefix>-<initiative>-<env>-<region>-01.services.ai.azure.com/mai/v1/images/generations` (JSON) and `.../mai/v1/images/edits` (multipart). The request `model` parameter is the deployment name `mai-image-25`, which stays stable even when the underlying Preview model version is redeployed.
+- The documented parameter surface is only `model`, `prompt`, `image` (edits only), `width`, `height`. No seed, mask, negative prompt, or candidate count exists, so style matching uses exactly two arms: prompt engineering on generations, and edits as a pseudo style reference. Candidate selection is a human review step.
+- Canvas standardized at 1248x832 (a clean 3:2 at 1,038,336 pixels, under the 1,048,576-pixel cap). Larger legacy canvases that exceed the cap are not reproducible.
+- Auth is Microsoft Entra ID, keyless: `DefaultAzureCredential` with scope `https://cognitiveservices.azure.com/.default`, resolving to the `az login` user on a workstation. WAF Security: zero stored secret on the image path.
 
 ### 3.2 Voice: MAI-Voice-2 via the Speech surface, no deployment
 
-- There is no deployment step and no Foundry-project dependency. A voice is selected per call by the SSML `<voice name>` attribute against the Speech synthesis endpoint; the key path uses the regional endpoint `https://<region>.tts.speech.microsoft.com/cognitiveservices/v1` (ADR-0003, ADR-0004).
-- Owner-locked voice set, identical across downstream consumers, listen-only in v1: a small fixed set of named voices, one rendered with an `excited` style via an `mstts:express-as` wrapper (the one real `tts.mjs` change). Read-along stays on each consumer's existing narrator because WordBoundary support for MAI-Voice-2 is unconfirmed (ADR-0003). WAF Reliability: the word-sync highlight never leaves the proven track.
-- Narrators stay where they are, each served by any existing pre-existing Speech account. The new account serves only MAI listen variants and image calls, so the pipeline carries a deliberate two-resource key split: one credential pair for the narrator (old resource) and one for the variants (new resource) (ADR-0004, ADR-0008).
-- Speech auth on the new account is key-based for now, with the key sourced from the platform Key Vault and injected via gitignored `.dev.vars`; the custom subdomain is kept enabled so a later Entra-for-Speech move stays cheap (ADR-0005).
+- There is no deployment step and no Foundry-project dependency. A voice is selected per call by the SSML `<voice name>` attribute against the Speech synthesis endpoint; the key path uses the regional endpoint `https://<region>.tts.speech.microsoft.com/cognitiveservices/v1`.
+- Owner-locked voice set, identical across downstream consumers, listen-only in v1: a small fixed set of named voices, one rendered with an `excited` style via an `mstts:express-as` wrapper (the one real `tts.mjs` change). Read-along stays on each consumer's existing narrator because WordBoundary support for MAI-Voice-2 is unconfirmed. WAF Reliability: the word-sync highlight never leaves the proven track.
+- Narrators stay where they are, each served by any existing pre-existing Speech account. The new account serves only MAI listen variants and image calls, so the pipeline carries a deliberate two-resource key split: one credential pair for the narrator (old resource) and one for the variants (new resource).
+- Speech auth on the new account is key-based for now, with the key sourced from the platform Key Vault and injected via gitignored `.dev.vars`; the custom subdomain is kept enabled so a later Entra-for-Speech move stays cheap.
 
 ## 4. End-to-end flows
 
@@ -77,41 +77,41 @@ Both modalities ride the single `AIServices` account. This is the load-bearing t
 
 1. An operator runs `node tools/publish.mjs --brand <consumer> --voices <all|slug[,slug]>` in the consumer's repo (default `none`, so today's behavior is unchanged).
 2. The pipeline parses source content into speakable blocks, then, for each requested listen voice, checks the voice-aware `variantHash` (content plus voice id plus style) against `tools/.state/<consumer>.json`. Unchanged variants are skipped; only missing or stale variants render (WAF Cost Optimization and Performance Efficiency).
-3. Before any metered call, a ledger guard runs: `state.maiLedger[month] = { chars, estUsd }` with `estUsd = chars x rate / 1,000,000`; the run aborts if a configured monthly budget cap would be exceeded. This is the synchronous, pre-spend cap (ADR-0006). WAF Cost Optimization.
-4. `tts.mjs` synthesizes block by block against the new account, wrapping the expressive voice's blocks in `mstts:express-as style="excited"`. Blocks respect the 10-minute-per-request audio cap and the 64 KB SSML limit; `stitch.mjs` joins block MP3s with ffmpeg on the publish machine (ADR-0008).
+3. Before any metered call, a ledger guard runs: `state.maiLedger[month] = { chars, estUsd }` with `estUsd = chars x rate / 1,000,000`; the run aborts if a configured monthly budget cap would be exceeded. This is the synchronous, pre-spend cap. WAF Cost Optimization.
+4. `tts.mjs` synthesizes block by block against the new account, wrapping the expressive voice's blocks in `mstts:express-as style="excited"`. Blocks respect the 10-minute-per-request audio cap and the 64 KB SSML limit; `stitch.mjs` joins block MP3s with ffmpeg on the publish machine.
 5. `r2-upload.mjs` uploads each variant to an immutable content-hashed key with a one-year immutable cache profile, retrying with backoff.
-6. The manifest gains an additive, optional `audioVariants` array per content unit (schemaVersion stays stable; old clients ignore it) and is uploaded last with a short cache profile, so downstream apps never see a manifest that points at missing objects (ADR-0008). WAF Reliability.
+6. The manifest gains an additive, optional `audioVariants` array per content unit (schemaVersion stays stable; old clients ignore it) and is uploaded last with a short cache profile, so downstream apps never see a manifest that points at missing objects. WAF Reliability.
 7. Variants carry empty word arrays; the narrator's `audio` and `timings` fields are untouched, so read-along keeps working everywhere.
 
 ### Flow B: image generation (one consumer pilots first, per ADR-0002 pilot scope)
 
 1. An operator runs `node tools/mai-image.mjs` in the piloting consumer's site repo with a scene id, an arm (`--gen` or `--edit <sourcePng>`), and the default 1248x832 canvas.
-2. The tool reads the scene's prompt from the prompt library, keeps whatever house illustration framing that consumer uses, and genericizes trademarked terms (ADR-0007, ADR-0008).
+2. The tool reads the scene's prompt from the prompt library, keeps whatever house illustration framing that consumer uses, and genericizes trademarked terms.
 3. It acquires an Entra bearer token via `DefaultAzureCredential` and calls generations or edits with `model: "mai-image-25"`, pacing to the tier rate limit (10 requests per minute, Tier 5) and retrying 429s with backoff.
-4. The first calls double as the cost probe: the tool reads any token usage off the live response (tokens-per-image is unpublished) before any batch is authorized (ADR-0002).
-5. The returned PNG is written to the consumer's image directory (or covers directory), and a record is appended to a committed provenance index (generator, modelVersion, endpoint, promptHash, promptRef, width, height, sourceImage, createdAt, tool; seed recorded as none because the API has no seed) (ADR-0007, ADR-0008).
-6. Publication is asymmetric by design: scene art is hotlinked from the marketing origin inside content JSON, so a site deploy makes regenerated scenes live in the downstream app with no republish; covers are content-hashed into object storage, so a changed cover re-uploads on the next `publish` run (ADR-0008).
+4. The first calls double as the cost probe: the tool reads any token usage off the live response (tokens-per-image is unpublished) before any batch is authorized.
+5. The returned PNG is written to the consumer's image directory (or covers directory), and a record is appended to a committed provenance index (generator, modelVersion, endpoint, promptHash, promptRef, width, height, sourceImage, createdAt, tool; seed recorded as none because the API has no seed).
+6. Publication is asymmetric by design: scene art is hotlinked from the marketing origin inside content JSON, so a site deploy makes regenerated scenes live in the downstream app with no republish; covers are content-hashed into object storage, so a changed cover re-uploads on the next `publish` run.
 
 ### Flow C: downstream consumption (runtime, no Azure dependency)
 
 1. A downstream app fetches `manifest.json` (short cache) from its consumer's object storage bucket, then content JSON and audio by immutable hashed URL.
-2. In listen mode the app plays the selected variant track; whenever read-along is active it always loads the narrator's `audio` plus `timings`, keeping the highlight on the proven WordBoundary track (ADR-0003).
-3. Scene art loads from the marketing origin; covers load from object storage. Offline-first downloads fetch the selected variant. No call in this flow touches Azure, so a preview-model outage never reaches a downstream user (ADR-0003, ADR-0008). WAF Reliability.
-4. Downstream apps show a user-facing disclosure that illustrations and some narration are AI-generated, where the content is aimed at a sensitive audience (ADR-0007).
+2. In listen mode the app plays the selected variant track; whenever read-along is active it always loads the narrator's `audio` plus `timings`, keeping the highlight on the proven WordBoundary track.
+3. Scene art loads from the marketing origin; covers load from object storage. Offline-first downloads fetch the selected variant. No call in this flow touches Azure, so a preview-model outage never reaches a downstream user. WAF Reliability.
+4. Downstream apps show a user-facing disclosure that illustrations and some narration are AI-generated, where the content is aimed at a sensitive audience.
 
 ### Flow D: cost and governance (continuous)
 
 1. The pipeline ledger is the authoritative per-consumer and per-model record and the only synchronous cap (Flow A step 3).
-2. `budget-<initiative>-<env>-<region>-01` (resource-group scope, capped USD monthly, actual thresholds at 50, 75, 90, 100 percent plus a forecasted alert at 100 percent) notifies the owner through one action group; it detects after the spend, roughly daily (ADR-0006).
-3. The subscription spending limit stays ON as the invoice-side hard stop for a credit subscription, where one applies; tags (`initiative=<initiative>`, `env=<env>`, `owner`, `costCenter`) are applied before any backfill so Cost Analysis can isolate the initiative; the per-consumer split lives only in the ledger (ADR-0006). WAF Cost Optimization and Operational Excellence.
+2. `budget-<initiative>-<env>-<region>-01` (resource-group scope, capped USD monthly, actual thresholds at 50, 75, 90, 100 percent plus a forecasted alert at 100 percent) notifies the owner through one action group; it detects after the spend, roughly daily.
+3. The subscription spending limit stays ON as the invoice-side hard stop for a credit subscription, where one applies; tags (`initiative=<initiative>`, `env=<env>`, `owner`, `costCenter`) are applied before any backfill so Cost Analysis can isolate the initiative; the per-consumer split lives only in the ledger. WAF Cost Optimization and Operational Excellence.
 
 ## 5. Trust boundaries and secret posture
 
-- Boundary 1, developer workstation to Azure: Entra user token for image (no stored secret); vault-sourced key for Speech (named secret in the platform Key Vault, injected via gitignored `.dev.vars`). Names only in git, values only in the vault or the CI secret store (ADR-0005). WAF Security.
+- Boundary 1, developer workstation to Azure: Entra user token for image (no stored secret); vault-sourced key for Speech (named secret in the platform Key Vault, injected via gitignored `.dev.vars`). Names only in git, values only in the vault or the CI secret store. WAF Security.
 - Boundary 2, pipeline to object storage: provider credentials for uploads, already established by the existing pipeline; out of Azure scope.
-- Boundary 3, runtime: none. Workers and browsers hold no Azure credentials and make no Azure calls (ADR-0008). WAF Security and Reliability.
-- Least-privilege roles on the account scope: pipeline identity holds Cognitive Services User (image data plane) plus Cognitive Services Speech User (TTS data plane); Cognitive Services Contributor is held by a human for the one-time deployment only (ADR-0005).
-- Network posture: public network access stays enabled because the pipeline runs outside Azure; an optional service-level IP allowlist is the only proportionate hardening (ADR-0005 follow-up record).
+- Boundary 3, runtime: none. Workers and browsers hold no Azure credentials and make no Azure calls. WAF Security and Reliability.
+- Least-privilege roles on the account scope: pipeline identity holds Cognitive Services User (image data plane) plus Cognitive Services Speech User (TTS data plane); Cognitive Services Contributor is held by a human for the one-time deployment only.
+- Network posture: public network access stays enabled because the pipeline runs outside Azure; an optional service-level IP allowlist is the only proportionate hardening.
 
 ## 6. WAF pillar map (why each major choice is shaped this way)
 
@@ -129,23 +129,23 @@ Both modalities ride the single `AIServices` account. This is the load-bearing t
 
 ## 7. Explicit non-goals (decided against in the ADRs)
 
-- No on-demand or worker-proxied synthesis (long-form content exceeds the 10-minute cap; Workers cannot run ffmpeg; keys would become runtime secrets) (ADR-0008).
-- No reuse or upgrade of an existing pre-Foundry Speech account, and no second region or split resource (ADR-0004).
-- No MAI-Image-2 or MAI-Image-2e deployments (both retire on a fixed date; neither has the edits endpoint) (ADR-0002).
-- No private endpoints or disabled public network access (the pipeline runs outside Azure) (ADR-0005 record).
-- No batch or Long Audio TTS path (it stores script and audio; the real-time path stores nothing) (ADR-0007).
+- No on-demand or worker-proxied synthesis (long-form content exceeds the 10-minute cap; Workers cannot run ffmpeg; keys would become runtime secrets).
+- No reuse or upgrade of an existing pre-Foundry Speech account, and no second region or split resource.
+- No MAI-Image-2 or MAI-Image-2e deployments (both retire on a fixed date; neither has the edits endpoint).
+- No private endpoints or disabled public network access (the pipeline runs outside Azure).
+- No batch or Long Audio TTS path (it stores script and audio; the real-time path stores nothing).
 - No bulk generation inside this plan: infrastructure is deployed and verified ready to generate, then holds for the owner (MASTER-PLAN scope).
 
 ## 8. Build order dependencies
 
-1. Any drifted `publish.mjs` copies across downstream consumer repos are reconciled first, in a standalone commit per repo. This blocks all MAI pipeline work (ADR-0008).
+1. Any drifted `publish.mjs` copies across downstream consumer repos are reconciled first, in a standalone commit per repo. This blocks all MAI pipeline work.
 2. Azure resources are created in dependency order (group, tags, account, deployment, roles, budget) with the budget in place before any spend; every resource-creating call is owner-gated (ADR-0006, MASTER-PLAN guardrail). The exact sequence belongs to the implementation guide.
-3. A short voice spike runs against the new account before variant code lands: WordBoundary behavior, output format acceptance, the exact voice identifiers, and the expressive style token (ADR-0003, ADR-0004 follow-ups).
+3. A short voice spike runs against the new account before variant code lands: WordBoundary behavior, output format acceptance, the exact voice identifiers, and the expressive style token.
 
 ## 9. ADR gaps surfaced by this design
 
 - Environment token: ADR-0004's illustrative naming shape and ADR-0006's tag table used a placeholder environment token as an example. The canonical set fixed in this design phase standardizes on a concrete environment token (for example `prod`) once a real deployment is scoped, because the account produces production-serving assets. ADR-0004 explicitly deferred final strings to the design phase, so this is a finalization, not a new decision.
-- Foundry project: ADR-0004 left creating the optional project open. This design creates `proj-<initiative>-media-01` for the playground audition (the ADR-0003 voice-token confirmations) and the auto-applied `project` cost tag (ADR-0006). No API flow depends on it.
+- Foundry project: ADR-0004 left creating the optional project open. This design creates `proj-<initiative>-media-01` for the playground audition (the ADR-0003 voice-token confirmations) and the auto-applied `project` cost tag. No API flow depends on it.
 - Runtime telemetry: no ADR decides diagnostic settings, a Log Analytics workspace, or Azure Monitor metric alerts (for example 429 rates) on the account. The decided monitoring is cost-only plus pipeline logs. Recorded as a gap in `reliability-and-operations.md`, not filled in here.
 - CI identity: ADR-0005 defers the exact OIDC workload-identity federation setup and role-assignment scripts to the design phase's identity-and-security doc, which is outside this four-document batch. The roles themselves are decided and summarized in section 5.
 

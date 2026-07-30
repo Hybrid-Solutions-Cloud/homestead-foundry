@@ -12,7 +12,7 @@ operations. Compare all three on [Deployment targets](../targets/).
 - Date: 2026-07-11 (genericized 2026-07-21)
 - Author: foundry-architect
 - WAF pillar: Performance Efficiency (with Cost Optimization named where a choice serves both)
-- Grounded in: ADR-0002 (image model, canvas, tiers), ADR-0003 (voice model, limits), ADR-0008 (publish-time pre-render and pipeline shape); supporting references to ADR-0004 (S0 throughput) and ADR-0006 (cost bands the throughput math reuses)
+- Grounded in: [ADR-0002](../adr/ADR-0002-image-model-and-access) (image model, canvas, tiers), [ADR-0003](../adr/ADR-0003-voice-model-and-voice-set) (voice model, limits), [ADR-0008](../adr/ADR-0008-publish-pipeline-integration) (publish-time pre-render and pipeline shape); supporting references to [ADR-0004](../adr/ADR-0004-foundry-topology-and-region) (S0 throughput) and [ADR-0006](../adr/ADR-0006-cost-governance) (cost bands the throughput math reuses)
 - Companion docs: `architecture-overview.md`, `resource-topology-and-caf-naming.md`, `reliability-and-operations.md`
 
 This document describes the general performance-efficiency methodology for any Azure AI Foundry build following this pattern: one image model and one voice model, publish-time pre-rendering, and a metered, budget-guarded backfill. Section headings and mechanisms are brand-neutral; the closing **Worked example** section restates the one real, deployed instance this methodology was built and measured against.
@@ -24,11 +24,11 @@ This document describes the general performance-efficiency methodology for any A
 The design's central Performance Efficiency decision is inherited from ADR-0008: every AI-generated asset is pre-rendered at publish time and served statically. Runtime performance is therefore decoupled from model performance entirely:
 
 - Readers fetch immutable, content-hashed objects from object storage (a long-lived, immutable cache profile) and a small manifest (a short, near-real-time cache profile), so repeat loads ride the edge cache and offline-first downloads work with no synthesis wait.
-- Scene art is hotlinked from the origin site inside the content JSON, so a regenerated scene is as fast as any static site image and needs no republish (ADR-0008).
+- Scene art is hotlinked from the origin site inside the content JSON, so a regenerated scene is as fast as any static site image and needs no republish.
 - No user-facing operation ever waits on an image quota or a synthesis request. Model latency, rate limits, and preview slowness are absorbed entirely by the operator-driven publish run.
 - The corollary: "performance work" in this initiative means throughput of the offline backfill and efficiency of each metered call, which the rest of this document quantifies.
 
-Rejected for performance as much as for reliability: on-demand synthesis (long-form audio exceeds a typical per-request duration cap, and edge/serverless runtimes cannot run an ffmpeg-class stitcher), so runtime generation is not a fallback path either (ADR-0008 alternatives).
+Rejected for performance as much as for reliability: on-demand synthesis (long-form audio exceeds a typical per-request duration cap, and edge/serverless runtimes cannot run an ffmpeg-class stitcher), so runtime generation is not a fallback path either.
 
 ## 2. The capacity envelope (what the platform will accept)
 
@@ -56,19 +56,19 @@ Standardized by ADR-0002 decision 3; restated here with the arithmetic because i
 | 1152x768 | 884,736 | Fits, 85 percent of the standard's pixels | Exactly 3:2 | Candidate cheaper canvas, pending the token-scaling measurement below |
 | 1264x848 (a legacy cover size) | 1,071,872 | Over by 23,296; returns 400 | 1.491 | Cannot be reproduced; visual delta from the standard is about 1 to 2 percent scale |
 
-Whether output tokens (and therefore cost) scale with pixel count is unpublished. The smoke-test cost probe measures tokens-per-image at the standard canvas and at a second size for exactly this reason (ADR-0002 decision 5). If tokens do scale with pixels, 1152x768 offers roughly a 15 percent per-image saving for any art direction that tolerates the smaller canvas; until measured, all planning uses 1248x832. Performance Efficiency and Cost Optimization together.
+Whether output tokens (and therefore cost) scale with pixel count is unpublished. The smoke-test cost probe measures tokens-per-image at the standard canvas and at a second size for exactly this reason. If tokens do scale with pixels, 1152x768 offers roughly a 15 percent per-image saving for any art direction that tolerates the smaller canvas; until measured, all planning uses 1248x832. Performance Efficiency and Cost Optimization together.
 
 ## 4. Batching strategy
 
-- Image: there is no server-side batching (one image per call, no `n`), so "batching" means client-side micro-batches paced to the RPM: per-collection batches for scene art, and a fixed small micro-batch (for example 20 images) the cost probe uses to divide a Cost Management meter delta (ADR-0002). Human candidate review between batches is deliberate, not waste: with no seed, selection is the quality-control step (ADR-0002).
-- Voice: the unit of work is the speakable block; content synthesizes block by block and stitches. A hosted batch-synthesis API is deliberately not part of this design: ADR-0007 keeps the real-time path for its zero-retention property, batch-mode eligibility for the chosen voice model is unverified, and the real-time plus ffmpeg path is already proven (ADR-0003 and ADR-0008 grounding). If a future backfill's wall-clock ever matters enough to revisit, that is a new decision with a retention trade-off attached, not a tuning knob.
+- Image: there is no server-side batching (one image per call, no `n`), so "batching" means client-side micro-batches paced to the RPM: per-collection batches for scene art, and a fixed small micro-batch (for example 20 images) the cost probe uses to divide a Cost Management meter delta. Human candidate review between batches is deliberate, not waste: with no seed, selection is the quality-control step.
+- Voice: the unit of work is the speakable block; content synthesizes block by block and stitches. A hosted batch-synthesis API is deliberately not part of this design: ADR-0007 keeps the real-time path for its zero-retention property, batch-mode eligibility for the chosen voice model is unverified, and the real-time plus ffmpeg path is already proven. If a future backfill's wall-clock ever matters enough to revisit, that is a new decision with a retention trade-off attached, not a tuning knob.
 - Both: the ledger guard runs before each metered call, so batches never race past the budget (ADR-0006; per-call arithmetic is negligible).
 
 ## 5. Backfill throughput math
 
 ### 5.1 Image backfill (bounded by RPM)
 
-Pilot phase (ADR-0002 scope): a small pilot batch (order of tens of calls) proves the API floor is fast in absolute terms. At the 10 RPM floor (6 seconds per call), even a full 20-call pilot completes in about 2 minutes of API time, so pilot duration is review-dominated, not API-dominated.
+Pilot phase: a small pilot batch (order of tens of calls) proves the API floor is fast in absolute terms. At the 10 RPM floor (6 seconds per call), even a full 20-call pilot completes in about 2 minutes of API time, so pilot duration is review-dominated, not API-dominated.
 
 Full-catalog backfill: the shape is a simple formula, (scenes x candidates-per-scene) / RPM, converted to minutes at 6 seconds per call. The tier ladder changes the multiplier, not the shape:
 
@@ -86,7 +86,7 @@ Cost bands the throughput plan carries (decided in ADR-0006, measured before use
 
 ### 5.2 Voice backfill (bounded by character volume, priced by character rate)
 
-The billable and plannable quantity is characters, known exactly before any call (this is what makes the voice budget guard deterministic, ADR-0006). At the voice model's per-character rate (ADR-0003), typical work items scale like this:
+The billable and plannable quantity is characters, known exactly before any call (this is what makes the voice budget guard deterministic, ADR-0006). At the voice model's per-character rate, typical work items scale like this:
 
 | Work item (shape) | Characters | Cost |
 | --- | --- | --- |
@@ -103,15 +103,15 @@ Throughput shape:
 - One measurable win generalizes across any deployment on this pattern: dropping legacy inter-request spacing for calls on a modern, higher-throughput account removes fixed dead time per block across the whole catalog (section 2).
 - Storage and egress rarely gate anything if the object-storage tier's free egress and free-tier capacity comfortably covers a multi-voice, multi-collection build (verify per deployment).
 
-Incremental efficiency rules (ADR-0008): a voices flag defaults to none/off so ordinary publishes pay nothing new; a voice-aware variant hash re-renders only missing or stale variants, so re-runs and partial failures never re-pay for finished audio; adding another voice later is a full catalog re-render for that voice only, a planned and bounded cost, not a redesign.
+Incremental efficiency rules: a voices flag defaults to none/off so ordinary publishes pay nothing new; a voice-aware variant hash re-renders only missing or stale variants, so re-runs and partial failures never re-pay for finished audio; adding another voice later is a full catalog re-render for that voice only, a planned and bounded cost, not a redesign.
 
 ## 6. Bulk variant for scale
 
-The bulk (Flash-class) variant of the image model is the designed bulk arm, strictly sequenced after the primary model wins the style pilot (ADR-0002 decision 4):
+The bulk (Flash-class) variant of the image model is the designed bulk arm, strictly sequenced after the primary model wins the style pilot:
 
 - What it buys: about 30 percent lower image-output cost (the dominant meter) and cheaper inputs; on a representative several-hundred-image catalog that is a real, bounded dollar saving (see the Worked example section for the measured figure, ADR-0006 basis).
 - What it does not buy: throughput. The bulk variant sits on the same RPM ladder (10 RPM at Tier 5, 12 at Tier 6) as the primary model, so backfill wall-clock is identical. Performance Efficiency verdict: the bulk variant is a Cost Optimization lever only.
-- Usage rule: the primary model for the pilot and all final published art; the bulk variant considered for large candidate sweeps and future bulk backfills only after it demonstrates the chosen art direction holds. Any generations-only, retiring model variant is not an option at any price once it is past its posted retirement date (ADR-0002).
+- Usage rule: the primary model for the pilot and all final published art; the bulk variant considered for large candidate sweeps and future bulk backfills only after it demonstrates the chosen art direction holds. Any generations-only, retiring model variant is not an option at any price once it is past its posted retirement date.
 
 ## 7. Efficiency guardrails already built into the pipeline
 
@@ -130,7 +130,7 @@ The bulk (Flash-class) variant of the image model is the designed bulk arm, stri
 2. The real-time synthesis factor (wall-clock per synthesized minute) for the chosen voice model is undocumented; no ADR estimates it. Any voice backfill schedule cannot be committed until a short spike observes it.
 3. Catalog-size discrepancies between research spikes (per-scene vs per-candidate counting) are a recurring, unreconciled risk class; whatever cost basis an ADR decides on should be reconciled against the prompt library before a backfill runs.
 4. Whether output tokens scale with pixel count (and therefore whether the smaller candidate canvas is a real saving) is unknown until the two-size probe runs (ADR-0002 decision 5 defines the probe; the answer is pending).
-5. Batch synthesis eligibility for the chosen voice model is unverified and unneeded by this design; recorded only so a future wall-clock optimization does not assume it exists (ADR-0003 grounding).
+5. Batch synthesis eligibility for the chosen voice model is unverified and unneeded by this design; recorded only so a future wall-clock optimization does not assume it exists.
 
 &lt;!-- safety-scan-worked-example:start -->
 
@@ -139,7 +139,7 @@ The bulk (Flash-class) variant of the image model is the designed bulk arm, stri
 Everything above is the general methodology. This section restates the one real, deployed instance it was built and measured against, as proof the pattern works in production.
 
 - **Real resources:** the image deployment `mai-image-25` runs on the shared AI Services account `aif-<workload>-<env>-<region>-01` (resource group `rg-<workload>-<env>-<region>-01`, region East US), matching the CAF pattern in section 2 exactly.
-- **Real capacity envelope:** the primary account observed Tier 5 (10 RPM) live; the fallback subscription default is Tier 1 (2 RPM), which is why keeping the primary subscription's Tier 5 mattered concretely (ADR-0002 consequence).
+- **Real capacity envelope:** the primary account observed Tier 5 (10 RPM) live; the fallback subscription default is Tier 1 (2 RPM), which is why keeping the primary subscription's Tier 5 mattered concretely.
 - **Real full-catalog backfill:** the ADR-0006 cost basis is about 170 scenes x 2 candidates = 340 images. At Tier 5, that is 340 calls x 6 seconds = 34 minutes of API floor; at Tier 6, about 28 minutes (6 minutes saved, not worth a quota request); at the fallback Tier 1, about 170 minutes, which is the concrete reason Tier 5 mattered.
 - **The catalog-discrepancy gap, as it actually occurred:** SPIKE-01 phrased the same backfill as "roughly 340 scenes at 2 candidates each (about 680 calls)," while SPIKE-05 and the ADR-0006 cost bands use about 170 scenes x 2 candidates = 340 images. This design carried 340 images, the basis of the decided 17 to 68 USD cost band. If the catalog truly held 340 scenes, time and cost would double (68 minutes, 34 to 136 USD), which is why section 5.1's reconciliation practice exists as a named methodology step, not just a footnote.
 - **Real cost bands (ADR-0006, measured via the two-call cost probe before use):** 0.05 to 0.20 USD per image on the primary model (17 to 68 USD for 340 images), 0.03 to 0.14 USD on the Flash variant (10 to 48 USD for 340 images); the Flash saving on this catalog is about 5 to 20 USD.

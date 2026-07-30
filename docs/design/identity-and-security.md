@@ -12,7 +12,7 @@ operations. Compare all three on [Deployment targets](../targets/).
 - Date: 2026-07-11 (rewritten brand-neutral 2026-07-21, per D-03)
 - Author: foundry-architect
 - WAF pillar: **Security** (with the responsible-AI posture that ADR-0007 attaches to it)
-- Grounded in: **ADR-0005** (identity, roles, secrets), **ADR-0007** (content safety and responsible AI), plus ADR-0001 (tenant), ADR-0004 (topology and custom subdomain); research base SPIKE-04 and SPIKE-06
+- Grounded in: **[ADR-0005](../adr/ADR-0005-identity-and-secrets)** (identity, roles, secrets), **[ADR-0007](../adr/ADR-0007-content-safety-and-responsible-ai)** (content safety and responsible AI), plus [ADR-0001](../adr/ADR-0001-target-tenant) (tenant), [ADR-0004](../adr/ADR-0004-foundry-topology-and-region) (topology and custom subdomain); research base SPIKE-04 and SPIKE-06
 - Designs only what the ADRs decided; anything an ADR left open is listed under "ADR gaps" at the end
 
 ## Scope
@@ -36,7 +36,7 @@ CAF naming note: each name is `<caf-type-abbreviation>-<workload>-<environment>-
 
 ## 1. Identity architecture
 
-### 1.1 Two auth models, chosen per surface (ADR-0005 decision)
+### 1.1 Two auth models, chosen per surface
 
 | Surface | Auth model | Mechanism | Stored secret |
 | --- | --- | --- | --- |
@@ -49,7 +49,7 @@ Both surfaces accept either Entra or key; the split is deliberate. The image cal
 
 - On the developer workstation, `DefaultAzureCredential` resolves to the signed-in `az login` user token. Nothing is stored anywhere.
 - In CI (if the publish pipeline ever moves there), use a service principal with OIDC workload-identity federation so no long-lived client secret exists. If no CI job runs this pipeline yet, the design records the pattern and provisions nothing (see ADR gaps).
-- Managed identity is not applicable: it authenticates Azure-hosted compute only, and this pipeline runs outside Azure. It becomes the preferred option only if the pipeline is later rehosted onto Azure compute (ADR-0005 alternative).
+- Managed identity is not applicable: it authenticates Azure-hosted compute only, and this pipeline runs outside Azure. It becomes the preferred option only if the pipeline is later rehosted onto Azure compute.
 - Token scope for every request: `https://cognitiveservices.azure.com/.default`.
 - Endpoint host: the account custom subdomain, `https://<foundry-account>.services.ai.azure.com` (the subdomain defaults to the account name at create time; verify at deploy). The `model` field in the request body is the chosen image deployment name.
 
@@ -65,9 +65,9 @@ Both surfaces accept either Entra or key; the split is deliberate. The image cal
 
 Provisioning flow: the human holding Cognitive Services Contributor retrieves the account key once and writes it straight into `<vault>` as `<workload>-speech-key`; the developer reads it from the vault at build time into `.dev.vars`. The key never appears in a committed file, a log line, or a chat transcript.
 
-Forward path (ADR-0005 follow-up): the account keeps its custom subdomain (the AIServices default) so an Entra-for-Speech migration stays cheap. A later implementation spike tests the Node Speech SDK `fromAuthorizationToken` path with the `aad#` token form and refresh; if it integrates cleanly into the pipeline's TTS tool, Speech moves to Entra, the `<workload>-speech-key` secret is retired, and local (key) authentication is disabled on the account so any leaked key is inert.
+Forward path: the account keeps its custom subdomain (the AIServices default) so an Entra-for-Speech migration stays cheap. A later implementation spike tests the Node Speech SDK `fromAuthorizationToken` path with the `aad#` token form and refresh; if it integrates cleanly into the pipeline's TTS tool, Speech moves to Entra, the `<workload>-speech-key` secret is retired, and local (key) authentication is disabled on the account so any leaked key is inert.
 
-### 1.4 The two-resource key split (ADR-0004)
+### 1.4 The two-resource key split
 
 The new account is additive to any pre-existing per-brand Speech resource. If a brand already runs a narrator or read-along track on an older resource, that resource stays untouched; only new listen-voice variants and image calls hit the shared Foundry account.
 
@@ -81,7 +81,7 @@ Because the image path is Entra, the equivalent `<workload>-image-key` secret is
 
 ## 2. Authorization: least-privilege RBAC
 
-Control plane and data plane are disjoint on these services, and the split differs per surface: Cognitive Services Contributor can deploy a model but cannot make Entra inference calls; Cognitive Services User can make Entra image inference calls but cannot deploy; and for Speech the generic Owner, Contributor, and Cognitive Services roles grant no data-plane access at all, so the Speech-named role is required (ADR-0005).
+Control plane and data plane are disjoint on these services, and the split differs per surface: Cognitive Services Contributor can deploy a model but cannot make Entra inference calls; Cognitive Services User can make Entra image inference calls but cannot deploy; and for Speech the generic Owner, Contributor, and Cognitive Services roles grant no data-plane access at all, so the Speech-named role is required.
 
 | Role | Principal | Scope | Purpose | Can list keys |
 | --- | --- | --- | --- | --- |
@@ -103,7 +103,7 @@ Notes:
 3. **Values live in exactly two places:** the vault, and the gitignored `.dev.vars` (or CI secret store) on the publish machine.
 4. **Endpoint and region are not secrets.** `MAI_SPEECH_REGION`, and the image endpoint host, may live in `.dev.vars`, a brand config file, or the vault for one-stop retrieval, at the implementer's convenience.
 5. **Rotation:** the key is regenerated on any suspicion of exposure (Contributor holder regenerates, re-writes the vault secret, developers re-pull `.dev.vars`). The key retires entirely at the Entra-for-Speech migration. No fixed cadence is set by any ADR (see ADR gaps).
-6. **Disable local auth per surface once its Entra path is proven** (ADR-0005), so keys stop being an attack surface at all.
+6. **Disable local auth per surface once its Entra path is proven**, so keys stop being an attack surface at all.
 
 ## 4. Network posture (ADR-0005 follow-up, SPIKE-04 Q5)
 

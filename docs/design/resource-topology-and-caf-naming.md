@@ -11,7 +11,7 @@ operations. Compare all three on [Deployment targets](../targets/).
 - Status: draft for review
 - Date: 2026-07-11 (main body rewritten brand-neutral 2026-07-21, per D-03 and D-16; see the closing worked-example section for the real deployed instance)
 - Author: foundry-architect
-- Grounded in: ADR-0001 (target tenant and region), ADR-0004 (topology and naming intent), ADR-0006 (budget and tag scheme); supporting reference to ADR-0005 for the reused Key Vault and secret names
+- Grounded in: [ADR-0001](../adr/ADR-0001-target-tenant) (target tenant and region), [ADR-0004](../adr/ADR-0004-foundry-topology-and-region) (topology and naming intent), [ADR-0006](../adr/ADR-0006-cost-governance) (budget and tag scheme); supporting reference to [ADR-0005](../adr/ADR-0005-identity-and-secrets) for the reused Key Vault and secret names
 - Companion docs: `architecture-overview.md`, `reliability-and-operations.md`, `performance-efficiency.md`
 
 This document finalizes the exact Cloud Adoption Framework names, the resource topology, and the tag scheme that ADR-0004 deferred to the design phase. These strings are canonical for a given deployment: once fixed, every later phase (diagrams, implementation guide, deployment, as-built) uses them verbatim. WAF pillar for naming and tagging discipline throughout: Operational Excellence (consistent identification across portal, CLI, billing, and automation) and Cost Optimization (tag-driven cost attribution).
@@ -123,11 +123,11 @@ az cognitiveservices account deployment create \
   --sku-capacity 1
 ```
 
-The version string should be re-queried from `az cognitiveservices model list --location <region>` at deploy time and never hardcoded, for any model in active preview (ADR-0002 pattern); re-verify on whatever cadence the model's own preview lifecycle warrants. Not every model in scope needs a deployment row: a model selected per call by name (for example, a voice selected by SSML voice name) has no deployment resource at all (ADR-0004 pattern).
+The version string should be re-queried from `az cognitiveservices model list --location <region>` at deploy time and never hardcoded, for any model in active preview; re-verify on whatever cadence the model's own preview lifecycle warrants. Not every model in scope needs a deployment row: a model selected per call by name (for example, a voice selected by SSML voice name) has no deployment resource at all.
 
 ### 3.4 The reused Key Vault
 
-REUSE, do not create, do not rename, whenever a platform Key Vault already exists in the tenant: Azure names are immutable, and CAF brownfield practice is to keep existing names and bring new resources into the convention around them. Secret names for this initiative's own material, values never in git (ADR-0005 pattern):
+REUSE, do not create, do not rename, whenever a platform Key Vault already exists in the tenant: Azure names are immutable, and CAF brownfield practice is to keep existing names and bring new resources into the convention around them. Secret names for this initiative's own material, values never in git:
 
 | Secret name pattern | Holds | Created? |
 | --- | --- | --- |
@@ -146,7 +146,7 @@ REUSE, do not create, do not rename, whenever a platform Key Vault already exist
 | Action | One action group emailing the owner | ADR-0006 pattern |
 | Nature | Notify-only backstop, evaluated roughly daily; a synchronous cap belongs in the pipeline itself, not in the budget alert | ADR-0006 pattern |
 
-Create before any spend (environment-readiness deployment prerequisite). A companion subscription-scoped credit budget, plus scheduled Cost Analysis emails, covers credit burn-down wherever automated credit alerts are not available at the subscription's commercial tier (ADR-0006 pattern). WAF Cost Optimization.
+Create before any spend (environment-readiness deployment prerequisite). A companion subscription-scoped credit budget, plus scheduled Cost Analysis emails, covers credit burn-down wherever automated credit alerts are not available at the subscription's commercial tier. WAF Cost Optimization.
 
 ### 3.6 Adjacent estate: name-check but do not change
 
@@ -160,7 +160,7 @@ Every deployment tends to sit next to pre-existing resources that this initiativ
 
 ## 4. Tag scheme
 
-Applied to the resource group and the Foundry account before any backfill runs (tags are not retroactive), with tag inheritance enabled so resource-group tags flow into cost records (ADR-0006 pattern). WAF Cost Optimization.
+Applied to the resource group and the Foundry account before any backfill runs (tags are not retroactive), with tag inheritance enabled so resource-group tags flow into cost records. WAF Cost Optimization.
 
 | Tag key | Value | Purpose |
 | --- | --- | --- |
@@ -169,14 +169,14 @@ Applied to the resource group and the Foundry account before any backfill runs (
 | `owner` | Owner alias, set at deploy time | Accountability; a name only, never a credential or ID |
 | `costCenter` | Set at deploy time, optional | Chargeback rollups |
 
-Two boundaries worth stating so nobody over-promises: an auto-applied Foundry `project` tag (where a project exists) gives per-project cost with zero manual tagging, but Azure tags generally cannot split spend below whatever granularity the platform's own auto-tagging supports; if the initiative needs a finer split (for example, per downstream consumer of a shared account), that ledger has to be built and reconciled by the pipeline itself, not assumed from Azure tags alone (ADR-0006 pattern).
+Two boundaries worth stating so nobody over-promises: an auto-applied Foundry `project` tag (where a project exists) gives per-project cost with zero manual tagging, but Azure tags generally cannot split spend below whatever granularity the platform's own auto-tagging supports; if the initiative needs a finer split (for example, per downstream consumer of a shared account), that ledger has to be built and reconciled by the pipeline itself, not assumed from Azure tags alone.
 
 ## 5. What deliberately has no new name
 
 - No storage account, when assets live entirely outside Azure (for example, in the site repos or third-party object storage) (ADR-0008-style topology).
 - No second instance of a shared account or a second region, when one shared account is the decided topology and a split is a failure mode to avoid, not a design.
 - No Log Analytics workspace or diagnostic-settings resource, until an ADR decides one is needed (a gap worth recording explicitly in `reliability-and-operations.md` if it applies).
-- No new Key Vault, when an existing platform vault is reused (ADR-0005 pattern).
+- No new Key Vault, when an existing platform vault is reused.
 
 ## 6. Design-phase decisions and deltas: how to record them
 
@@ -218,7 +218,7 @@ This section restates the real, already-deployed instance of the pattern above, 
 | Action group (budget email) | `Microsoft.Insights/actionGroups` | `ag` | `<workload>` | `prod` | `eus` | `01` | `ag-<workload>-<env>-<region>-01` | Proposed (ADR-0006 decided one owner-email action group; string not canonicalized) |
 | Budget (credit burn-down) | `Microsoft.Consumption/budgets` (subscription scope, amount = monthly credit) | none defined by CAF | `<workload>` | n/a | n/a | `01` | `budget-<workload>-credit-sub-01` | Proposed (ADR-0006 decided a subscription-scoped credit budget; string not canonicalized) |
 
-Real notes: `mai-image-25` is deliberately version-free (ADR-0002: current version 2026-06-02, re-check around 2026-09-01), so preview version churn is absorbed by redeploying under the same name with no caller change. `proj-<workload>-media-01` carries the purpose token `media` since it is scoped inside the account; it exists for the Foundry playground voice audition (reading the deployed narrator's voice identifier and the `excited` style token, ADR-0003 follow-up) and for the auto-applied `project` cost tag on Models-sold-by-Azure usage (ADR-0006).
+Real notes: `mai-image-25` is deliberately version-free (ADR-0002: current version 2026-06-02, re-check around 2026-09-01), so preview version churn is absorbed by redeploying under the same name with no caller change. `proj-<workload>-media-01` carries the purpose token `media` since it is scoped inside the account; it exists for the Foundry playground voice audition (reading the deployed narrator's voice identifier and the `excited` style token, ADR-0003 follow-up) and for the auto-applied `project` cost tag on Models-sold-by-Azure usage.
 
 No abbreviation deviation in the real deployment: the account is `aif-<workload>-<env>-<region>-01`, matching the current Learn mapping for kind `AIServices` exactly. An `ais` deviation was discussed during design and review (`ai/REVIEW.md`'s pre-deployment HOLD item), but the owner directed following the current `aif` mapping before the resource was created (see `docs/implementation/as-built.md`). This section previously stated the opposite - that `ais` was retained - which was a documentation error, not what was actually deployed; corrected 2026-07-23.
 
@@ -238,7 +238,7 @@ the MVP tenant (by name only)
 
 Subscription and tenant are recorded by display name only; no subscription IDs or tenant GUIDs appear in any committed file (hard rule; ADR-0005 secret posture).
 
-The Foundry account (`aif-<workload>-<env>-<region>-01`): kind `AIServices` (hosts a Foundry model deployment while also serving Speech, ADR-0004); SKU `S0` (F0 eligibility for MAI voices unverified, and the image deployment needs S0 regardless; S0 also carries the 200 transactions-per-second default Speech throughput, ADR-0004); region `eastus` (the one region satisfying both models plus the preview-styles flag, ADR-0001, ADR-0004); custom subdomain enabled, matching the account name (AIServices default; prerequisite for a later Entra-for-Speech move, ADR-0004, ADR-0005); public network access enabled (the publish pipeline runs outside Azure; private endpoints would break it, ADR-0005 record); data plane endpoints `https://aif-<workload>-<env>-<region>-01.services.ai.azure.com/mai/v1/images/generations` and `/edits`, plus the Speech key path via `https://eastus.tts.speech.microsoft.com/cognitiveservices/v1` (ADR-0004; regional Speech endpoint per ADR-0005 key decision); residency note: the image deployment is Global Standard so transient processing may leave East US, at-rest data stays in the US geography, and real-time TTS stays in-region and stores nothing (ADR-0004).
+The Foundry account (`aif-<workload>-<env>-<region>-01`): kind `AIServices` (hosts a Foundry model deployment while also serving Speech, ADR-0004); SKU `S0` (F0 eligibility for MAI voices unverified, and the image deployment needs S0 regardless; S0 also carries the 200 transactions-per-second default Speech throughput, ADR-0004); region `eastus` (the one region satisfying both models plus the preview-styles flag, ADR-0001, ADR-0004); custom subdomain enabled, matching the account name (AIServices default; prerequisite for a later Entra-for-Speech move, ADR-0004, ADR-0005); public network access enabled (the publish pipeline runs outside Azure; private endpoints would break it, ADR-0005 record); data plane endpoints `https://aif-<workload>-<env>-<region>-01.services.ai.azure.com/mai/v1/images/generations` and `/edits`, plus the Speech key path via `https://eastus.tts.speech.microsoft.com/cognitiveservices/v1` (ADR-0004; regional Speech endpoint per ADR-0005 key decision); residency note: the image deployment is Global Standard so transient processing may leave East US, at-rest data stays in the US geography, and real-time TTS stays in-region and stores nothing.
 
 ### Real Key Vault secrets (`kv-<workload>-<env>-01`, reused, not created)
 

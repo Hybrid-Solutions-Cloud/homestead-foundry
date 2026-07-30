@@ -114,7 +114,7 @@ Expected: `Registered` (confirmed in `ai/verification/environment-readiness.md` 
 
 **P3. Re-check the current version string of every preview model in scope. Never hardcode it.**
 
-Any model still in active preview churns its version string over time, and its CLI metadata may carry an inference-deprecation date, read as a version-churn signal, not model end-of-life, unless the model is separately listed on the published retirement schedule (ADR-0002 pattern). The deploy step uses whatever the catalog says on deploy day, so run this READ now and again immediately before W3:
+Any model still in active preview churns its version string over time, and its CLI metadata may carry an inference-deprecation date, read as a version-churn signal, not model end-of-life, unless the model is separately listed on the published retirement schedule. The deploy step uses whatever the catalog says on deploy day, so run this READ now and again immediately before W3:
 
 ```sh
 # READ: current catalog entry for the primary model in the target region
@@ -122,7 +122,7 @@ az cognitiveservices model list --location "<region>" \
   --query "[?model.name=='<primary-model-name>'].{name:model.name, version:model.version, lifecycle:model.lifecycleStatus, format:model.format}" -o table
 ```
 
-Expected: at least one row, `format` `Microsoft`, `lifecycle` `Preview` (or later). If several dated versions appear, choose the newest and record the chosen string for as-built. If the model is absent from the catalog, STOP: do not substitute a different, soon-to-retire sibling model (for example, an older generation lacking an edits endpoint) without checking its own retirement date and confirming the substitution against an ADR update (ADR-0002 pattern).
+Expected: at least one row, `format` `Microsoft`, `lifecycle` `Preview` (or later). If several dated versions appear, choose the newest and record the chosen string for as-built. If the model is absent from the catalog, STOP: do not substitute a different, soon-to-retire sibling model (for example, an older generation lacking an edits endpoint) without checking its own retirement date and confirming the substitution against an ADR update.
 
 **P4. SKU offerability and quota headroom (optional re-check).**
 
@@ -148,7 +148,7 @@ The identity design assumes the owner already holds data-plane secret rights on 
 
 **P6. Names validated.** Validate the canonical names in section 0.2 against the governance MCP `validate` check (per the topology design, section 1). If the MCP is unreachable, the names in the committed design docs are the validated fallback.
 
-**P7. Azure spending limit is ON.** Portal READ: Cost Management + Billing, confirm the spending limit is in force on this credit subscription, wherever a credit subscription is in play. It stays ON for the entire runbook; removing it is the one write this guide forbids outright (ADR-0006 layer 3 pattern).
+**P7. Azure spending limit is ON.** Portal READ: Cost Management + Billing, confirm the spending limit is in force on this credit subscription, wherever a credit subscription is in play. It stays ON for the entire runbook; removing it is the one write this guide forbids outright.
 
 **Gate 1:** all seven pass. If P1 fails because the subscription is disabled or unreachable long-term, this runbook does not proceed; the fallback path (section 10) is an owner decision, never an automatic switch.
 
@@ -200,7 +200,7 @@ Notes:
 - `--yes` accepts the Responsible AI terms non-interactively. If the CLI still errors on terms (possible on the first account of a kind in a subscription), acknowledge them once in the portal and re-run.
 - `--assign-identity` enables the system-assigned managed identity. It is forward-looking and harmless; the pipeline authenticates as the operator's Entra user, not as this identity, whenever the pipeline runs outside Azure (identity design section 1.2).
 - Public network access stays **Enabled** (the default) whenever the publish pipeline runs on a workstation outside Azure. Do not disable it and do not add private endpoints in that case: the only endorsed hardening is the optional IP allowlist, **C8**, owner opt-in O7, off by default.
-- Local (key) authentication stays enabled for as long as the Speech path needs it, until an Entra-for-Speech migration lands (ADR-0005 pattern).
+- Local (key) authentication stays enabled for as long as the Speech path needs it, until an Entra-for-Speech migration lands.
 
 Verification:
 
@@ -257,7 +257,7 @@ az cognitiveservices account deployment show \
 
 Notes:
 
-- A model selected per call by name (for example, a voice model selected via SSML voice name against the account's Speech surface) has **no deployment step by design** (ADR-0004 pattern). This repo's own MAI-Voice-2 surface works exactly this way; nothing to create for it here.
+- A model selected per call by name (for example, a voice model selected via SSML voice name against the account's Speech surface) has **no deployment step by design**. This repo's own MAI-Voice-2 surface works exactly this way; nothing to create for it here.
 - **C2 (optional WRITE, CONFIRMATION POINT if taken): the Foundry project `proj-<workload>-<purpose>-<instance>`.** The design creates one for a playground audition and the auto-applied `project` cost tag whenever no pipeline call depends on it, so it may be deferred without blocking the hold gate (topology design section 6, decision 2). Create it in the Foundry portal on the account, or via ARM (`Microsoft.CognitiveServices/accounts/projects`, current api-version at deploy time) with the locked region and a system-assigned identity. If deferred, record that in as-built.
 
 ---
@@ -279,7 +279,7 @@ AIS_ID=$(az cognitiveservices account show \
   --query id -o tsv)
 ```
 
-**W4 (WRITE, CONFIRMATION POINT): Cognitive Services User to the pipeline identity**, account scope. This is the Entra data-plane role for the image generations and edits endpoints; it cannot deploy models or list keys (ADR-0005 pattern).
+**W4 (WRITE, CONFIRMATION POINT): Cognitive Services User to the pipeline identity**, account scope. This is the Entra data-plane role for the image generations and edits endpoints; it cannot deploy models or list keys.
 
 ```sh
 # WRITE W4: image data plane
@@ -289,7 +289,7 @@ az role assignment create \
   --scope "$AIS_ID"
 ```
 
-**W5 (WRITE, CONFIRMATION POINT): Cognitive Services Speech User to the same identity**, account scope. Granted now, active once Entra-for-Speech lands; the generic Owner and Contributor roles grant no Speech data-plane access, which is why the Speech-named role is required (ADR-0005 pattern).
+**W5 (WRITE, CONFIRMATION POINT): Cognitive Services Speech User to the same identity**, account scope. Granted now, active once Entra-for-Speech lands; the generic Owner and Contributor roles grant no Speech data-plane access, which is why the Speech-named role is required.
 
 ```sh
 # WRITE W5: Speech data plane
@@ -316,7 +316,7 @@ az role assignment list --scope "$AIS_ID" -o table
 
 ## 6. Step 6: secrets (one key, into the existing vault)
 
-**Do not create a vault.** `<vault>` is the pre-existing platform vault, reused by name (ADR-0005 pattern). One secret is stored, total. The image path is keyless Entra, so **`<workload>-image-key` is never created** (identity design rule: if a surface uses Entra, its `*_KEY` secret simply does not exist).
+**Do not create a vault.** `<vault>` is the pre-existing platform vault, reused by name. One secret is stored, total. The image path is keyless Entra, so **`<workload>-image-key` is never created** (identity design rule: if a surface uses Entra, its `*_KEY` secret simply does not exist).
 
 **W6 (WRITE, CONFIRMATION POINT): retrieve the Speech key and write it straight into the vault.** Single command so the value never lands in a file, the terminal, or history; `--output none` matters because `az keyvault secret set` echoes the value back otherwise.
 
@@ -363,7 +363,7 @@ Post-step notes (no Azure writes): on the publish machine, the developer pulls t
 
 ## 7. Step 7: budget, action group, and cost governance
 
-The budget is layer 2 of three: a notify-only backstop, evaluated roughly daily, after the spend. The real cap is the pipeline's own budget guard, and the invoice stop is the spending limit staying ON (ADR-0006 pattern). Nothing in this step is a hard spend cap and nothing here may be treated as one.
+The budget is layer 2 of three: a notify-only backstop, evaluated roughly daily, after the spend. The real cap is the pipeline's own budget guard, and the invoice stop is the spending limit staying ON. Nothing in this step is a hard spend cap and nothing here may be treated as one.
 
 **W7 (WRITE, CONFIRMATION POINT): the action group.** Requires O3. The name is Proposed status (section 0.2); use the reviewer-confirmed string.
 
@@ -471,7 +471,7 @@ Also at this milestone (READs, owner-facing, from the cost design deploy checkli
 
 This is the definition-of-done probe: one real image and one real audio clip from the deployed endpoints with auth confirmed. It is deliberately tiny; a fuller cost-probe micro-batch and every bulk run are later, owner-authorized work, not part of this runbook.
 
-**W10 (WRITE, CONFIRMATION POINT, metered): one image generation, Entra keyless.** Use the deployment's standardized canvas (this repo's own instance uses 1248x832, ADR-0002 pattern); the prompt keeps whatever non-photorealistic, hand-drawn-style framing habit this deployment's content calls for and contains no trademark tokens (ADR-0007 pattern). Estimated cost is small, typically a fraction of a US dollar at the conservative per-image token assumption the cost design carries until measured.
+**W10 (WRITE, CONFIRMATION POINT, metered): one image generation, Entra keyless.** Use the deployment's standardized canvas (this repo's own instance uses 1248x832, ADR-0002 pattern); the prompt keeps whatever non-photorealistic, hand-drawn-style framing habit this deployment's content calls for and contains no trademark tokens. Estimated cost is small, typically a fraction of a US dollar at the conservative per-image token assumption the cost design carries until measured.
 
 ```sh
 # WRITE W10: single generations call (bounded spend)
@@ -639,7 +639,7 @@ az group delete --name "rg-<workload>-<env>-<region>-<instance>"
 
 (What-if catches Deny effects that evaluate at preflight; it does not reveal Modify or DeployIfNotExists mutation, which is why pre-check 2 remains mandatory.)
 
-**The regional-availability caveat for the primary model (a real constraint, not a preference).** If pre-check 1 finds an Allowed-locations assignment forcing a region the deployment's primary model is not offered in: **STOP.** This repo's own MAI-Image-2.5 deployment hits exactly this case: the model's Global Standard tier is offered in seven regions, and `eastus2` is not one of them (a real, current constraint, ADR-0002 pattern); MAI-Voice-2 would work there but the image model would not deploy, which breaks a one-shared-resource design. Proceeding then requires an owner decision on a region-exemption request or a resource split, neither of which is pre-approved by any ADR (ADR-0001 pattern). A different primary model in scope would need this same regional-availability constraint re-derived against its own current model catalog.
+**The regional-availability caveat for the primary model (a real constraint, not a preference).** If pre-check 1 finds an Allowed-locations assignment forcing a region the deployment's primary model is not offered in: **STOP.** This repo's own MAI-Image-2.5 deployment hits exactly this case: the model's Global Standard tier is offered in seven regions, and `eastus2` is not one of them (a real, current constraint, ADR-0002 pattern); MAI-Voice-2 would work there but the image model would not deploy, which breaks a one-shared-resource design. Proceeding then requires an owner decision on a region-exemption request or a resource split, neither of which is pre-approved by any ADR. A different primary model in scope would need this same regional-availability constraint re-derived against its own current model catalog.
 
 Further fallback caveats to surface to the owner before proceeding:
 

@@ -12,7 +12,7 @@ operations. Compare all three on [Deployment targets](../targets/).
 - Date: 2026-07-11
 - Author: foundry-architect
 - WAF pillars: **Operational Excellence** (reconcile-then-extend change management, provenance), **Reliability** (immutable content-hashed keys, additive manifest schema, manifest-last upload), **Performance Efficiency** (publish-time pre-render, tier-aware pacing), with cost hooks cross-referenced to `cost-and-governance.md`
-- Grounded in: **ADR-0008** (pipeline integration), **ADR-0003** (voice model and voice set), **ADR-0002** (image model and canvas), plus ADR-0005 (auth, cross-referenced) and ADR-0007 (prompt hygiene); research base SPIKE-06
+- Grounded in: **[ADR-0008](../adr/ADR-0008-publish-pipeline-integration)** (pipeline integration), **[ADR-0003](../adr/ADR-0003-voice-model-and-voice-set)** (voice model and voice set), **[ADR-0002](../adr/ADR-0002-image-model-and-access)** (image model and canvas), plus [ADR-0005](../adr/ADR-0005-identity-and-secrets) (auth, cross-referenced) and [ADR-0007](../adr/ADR-0007-content-safety-and-responsible-ai) (prompt hygiene); research base SPIKE-06
 - Code claims below were re-verified against a reference deployment during this design phase; line references are illustrative of the pattern (the exact instance verified is recorded in the worked example)
 
 ## Scope
@@ -59,7 +59,7 @@ The pipeline is duplicated in both consumer repos (each carries full `tools/`, `
 | Site Repo's `public/images/provenance.json` | n/a | n/a | Does not exist; net-new |
 | Prompt-Source Repo's `resources/` | n/a | n/a | Exists and holds `Illustration_Prompts_All_Stories.md`, `Branding_Illustration_Prompts.md`, `Character_Bible.md` (the prompt sources ADR-0008 names) |
 
-Pipeline invariants that every change below preserves (ADR-0008): ffmpeg stitching happens on the publish machine, the apps stay offline-first, no key ever reaches the worker or browser, and a publish-time budget guard runs before metered calls.
+Pipeline invariants that every change below preserves: ffmpeg stitching happens on the publish machine, the apps stay offline-first, no key ever reaches the worker or browser, and a publish-time budget guard runs before metered calls.
 
 ## 1. STEP ONE: reconcile the drifted pipeline copies (blocking, before any MAI work)
 
@@ -157,7 +157,7 @@ The existing `audio`, `timings`, `hasAudio`, and `audioDurationMs` fields keep m
 }
 ```
 
-Same listen-voice set for every brand per the owner-locked ADR-0003 decision; the narrator voice for a brand not covered by this design's listen-voice set stays on its existing non-MAI narrator voice, unchanged. The exact en-AU identifier for Lisa and the exact `excited` token spelling are read off the Foundry playground at the voice spike before these strings are committed (ADR-0003 decision 5).
+Same listen-voice set for every brand per the owner-locked ADR-0003 decision; the narrator voice for a brand not covered by this design's listen-voice set stays on its existing non-MAI narrator voice, unchanged. The exact en-AU identifier for Lisa and the exact `excited` token spelling are read off the Foundry playground at the voice spike before these strings are committed.
 
 ### 2.6 Ledger and hard stop (cost hooks)
 
@@ -167,7 +167,7 @@ Same listen-voice set for every brand per the owner-locked ADR-0003 decision; th
 
 Hook point verified in `app/src/lib/player.ts`: `startPlayback` resolves the track and calls `audioController.load(contentUrl(chapter.audio), ...)` when `chapter.hasAudio && chapter.audio`, then `setReadAlongMode`.
 
-- **Whenever read-along (or the combined mode) is active, always load the narrator `chapter.audio` plus `chapter.timings`.** The highlight never leaves the proven WordBoundary track (ADR-0003 decision 3).
+- **Whenever read-along (or the combined mode) is active, always load the narrator `chapter.audio` plus `chapter.timings`.** The highlight never leaves the proven WordBoundary track.
 - In pure listen mode, if `settings.listenVoice` matches a variant slug present in `chapter.audioVariants`, load that variant; fall back to the narrator when absent.
 - New `setListenVoice(slug)` swaps the audio source preserving position by fraction (narration pace differs per voice).
 - `NowPlayingItem` gains the available variants so `NowPlaying.tsx` renders the voice picker; `Settings.tsx` gains a "Listen voice" select with the read-along note; `downloads.ts` fetches the selected variant and records it.
@@ -194,7 +194,7 @@ The Site Repo has no `tools/` directory today; this creates it. The tool lives h
 
 Prompts are read from the separate Prompt-Source Repo (verified present: `resources/Illustration_Prompts_All_Stories.md` keyed by scene, `Branding_Illustration_Prompts.md`, `Character_Bible.md`), not from the Site Repo, which has no `resources/` directory (ADR-0008 decision 4; the source plan's site-repo path was stale). The tool takes the checkout location from a `--prompts <path>` flag or an env var, since it is a sibling working copy. Trademark genericization is applied in the canonical prompt files themselves (one edit, per ADR-0007), with the tool's warning as the safety net. `promptRef` in provenance points back at the exact heading.
 
-### 3.3 Provenance: the committed index (ADR-0008 decision 5)
+### 3.3 Provenance: the committed index
 
 Site Repo's `public/images/provenance.json`, committed, mapping repo-relative image path to a record; `mai-image.mjs` writes a record on every successful call:
 
@@ -214,7 +214,7 @@ Site Repo's `public/images/provenance.json`, committed, mapping repo-relative im
 }
 ```
 
-Seed is recorded as none (the API has no seed). For covers only, an optional `artProvenance` echo (`generator`, `modelVersion`, `promptHash`) is stamped into the story frontmatter, because the cover is the one asset that is a frontmatter field; scene art stays in the index only (it is body-referenced). `modelVersion` is read from the deployment at run time, never hardcoded (ADR-0002 decision 1). This closes the unknown-generator gap permanently and satisfies the ADR-0007 transparency ask at the data layer, independent of whether MAI embeds C2PA (UNKNOWN).
+Seed is recorded as none (the API has no seed). For covers only, an optional `artProvenance` echo (`generator`, `modelVersion`, `promptHash`) is stamped into the story frontmatter, because the cover is the one asset that is a frontmatter field; scene art stays in the index only (it is body-referenced). `modelVersion` is read from the deployment at run time, never hardcoded. This closes the unknown-generator gap permanently and satisfies the ADR-0007 transparency ask at the data layer, independent of whether MAI embeds C2PA (UNKNOWN).
 
 ### 3.4 How generated art reaches readers (two distinct paths, verified in code)
 
@@ -264,7 +264,7 @@ Image tooling for the brand without a Site Repo is explicitly out of scope for t
 
 1. **Reconciliation commit in each consumer repo** (section 1). Blocking; no MAI code rides along. Gate: dry-run parity and byte-identical `tools/*.mjs` across repos.
 2. **Provisioning** (owner-gated per repo policy): the AIServices account, the image model deployment, the Foundry project, budget and tags per the companion designs.
-3. **Voice spike, about 30 minutes, against the new account** (ADR-0003 and ADR-0004 follow-up): WordBoundary behavior, `Audio48Khz96KBitRateMonoMp3` acceptance, the exact en-AU voice identifier, the exact `excited` token, and key auth against the regional endpoint. Gate for sections 2.1 and 2.5 landing in `brand.json`.
+3. **Voice spike, about 30 minutes, against the new account**: WordBoundary behavior, `Audio48Khz96KBitRateMonoMp3` acceptance, the exact en-AU voice identifier, the exact `excited` token, and key auth against the regional endpoint. Gate for sections 2.1 and 2.5 landing in `brand.json`.
 4. **Voice variant implementation** in both consumer repos (sections 2.1, 2.2, 2.6), then app-side work (section 2.7).
 5. **Image tool** in the Site Repo (section 3), with the **cost probe as its first metered calls** (gate defined in `cost-and-governance.md` section 7), then the first pilot batch.
 6. **Backfills** (full-voice catalog, full image catalog) are owner-driven, budgeted separately, and out of scope for this plan per the master plan.
@@ -280,10 +280,10 @@ Image tooling for the brand without a Site Repo is explicitly out of scope for t
 
 1. **`r2-upload.mjs` has drifted too** (Consumer Repo A carries the wrangler retry loop; Consumer Repo B does not), which ADR-0008 and SPIKE-06 both recorded as identical. This design folds the convergence into the reconciliation commit as a one-way port; the reviewer should confirm that widening the reconciliation scope this way is acceptable.
 2. **Tool language tension, recorded as settled.** ADR-0008 names `tools/mai-image.mjs`, settling the SPIKE-06 flag about the HCS PowerShell-first scripting standard; this design follows the ADR and records the tension for the owner rather than reopening it.
-3. **One listen voice's exact voice id and the `excited` token spelling are UNKNOWN until the voice spike** (ADR-0003 decision 5). `brand.json` entries land only after the spike confirms both strings.
+3. **One listen voice's exact voice id and the `excited` token spelling are UNKNOWN until the voice spike**. `brand.json` entries land only after the spike confirms both strings.
 4. **The image tool's state-file location** (`tools/.state/mai-image.json`) is a design elaboration; no ADR specifies where its ledger persists. It mirrors the publish pipeline's `.state` pattern.
 5. **Candidate-file workflow** (`<scene>.cand-<n>.png` plus prune) is a design elaboration of ADR-0008's "human review" requirement; the ADR does not prescribe the on-disk shape.
-6. **Pipeline deduplication is deferred by decision** (ADR-0008): the two repos keep converged copies rather than a shared package; the drift risk returns over time and is accepted.
+6. **Pipeline deduplication is deferred by decision**: the two repos keep converged copies rather than a shared package; the drift risk returns over time and is accepted.
 
 ## Sources
 
