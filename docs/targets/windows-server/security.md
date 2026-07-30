@@ -19,11 +19,20 @@ first-party research. Treat it as a design, not an as-built record.
 - No inbound ports are opened. The Arc agent dials out.
 - One scoped, time-boxed exception to ADR-0005: Arc run command cannot authenticate to blob storage with a managed identity, so a shared access signature of 24 hours or less is permitted for the optional blob staging path. The default path uses no blob and has no secret surface.
 - The running inference endpoint has no Azure RBAC, no Entra authentication, no Key Vault path, no budget, and no Azure Monitor.
+- **The endpoint has no authentication of any kind.** It listens locally and
+  anyone who can reach it can call it. There is therefore no caller identity to
+  log, which is why "who called the endpoint" is unanswerable on this target
+  ([SPIKE-31](../../research/SPIKE-31-cross-track-feature-parity)).
+- **No content filter or responsible-AI guardrail is documented for this target.**
+  Nothing [ADR-0007](../../adr/ADR-0007-content-safety-and-responsible-ai) relies
+  on travels here. If content safety is required, it must be built in the
+  application layer.
 
 ## What is still open
 
 This page is filled out as the research and decisions below land. Until then, the
-[comparison hub](../) marks the corresponding cells `UNKNOWN` rather than guessing.
+[comparison hub](../) carries the sourced answers for this target, including the
+findings that corrected earlier claims on this page.
 
 - [ADR-0013](../../adr/ADR-0013-foundry-local-windows-server-install), ADR-0013
 - **SPIKE-23**, the Foundry Local install-artifacts spike

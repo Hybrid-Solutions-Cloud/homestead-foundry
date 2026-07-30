@@ -23,7 +23,8 @@ first-party research. Treat it as a design, not an as-built record.
 ## What is still open
 
 This page is filled out as the research and decisions below land. Until then, the
-[comparison hub](../) marks the corresponding cells `UNKNOWN` rather than guessing.
+[comparison hub](../) carries the sourced answers for this target, including the
+findings that corrected earlier claims on this page.
 
 - [ADR-0014](../../adr/ADR-0014-foundry-local-azure-local-deployment-layers), ADR-0014
 - **SPIKE-30**, the AKS Arc Bicep feasibility spike

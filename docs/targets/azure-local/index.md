@@ -67,7 +67,7 @@ ADR-0014 calls that wrapper a first-class deliverable rather than glue.
 | [Models](./models) | Foundry Local catalog via `ModelDeployment`, explicit resources always |
 | [Features](./features) | Concurrent serving, Agentic Retrieval, disconnected operation |
 | [Deployment](./deployment) | Ordered install across three layers, preview access required |
-| [Consumption](./consumption) | Entra ID token authentication, no API key at all |
+| [Consumption](./consumption) | Two mandatory auth modes, Entra ID token or API key. The API-key path bypasses Azure RBAC. |
 | [Cost](./cost) | Fixed, per physical core per month, regardless of usage |
 | [Security](./security) | Full Azure governance via Arc, no exception to ADR-0005 needed |
 | [Operations](./operations) | Drift detection split three ways, sixty-plus free infrastructure metrics |

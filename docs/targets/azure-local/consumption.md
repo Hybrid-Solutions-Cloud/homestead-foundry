@@ -14,13 +14,26 @@ first-party research. Treat it as a design, not an as-built record.
 
 ## What is decided today
 
-- Entra ID token authentication. There is no API key at all, which removes the secret entirely.
-- Ingress is via the Gateway API. A real certificate-authority certificate is required; self-signed is not accepted.
+- **Two authentication modes, and both are mandatory:** an Entra ID token, or an
+  API key. Earlier revisions of this page said there was no API key at all; that
+  was wrong. It matters because **the API-key path bypasses Azure RBAC**, so
+  choosing it gives up the governance that makes this target attractive
+  ([SPIKE-31](../../research/SPIKE-31-cross-track-feature-parity)).
+- Ingress is via the Gateway API. **Self-signed is the default and mandatory
+  mechanism for all internal traffic:** cert-manager mints a self-signed cluster
+  root CA on first deployment and every model sidecar presents a certificate
+  chained to it. A real certificate-authority certificate is required **only**
+  for the external LoadBalancer Gateway, and only when off-cluster clients cannot
+  be made to trust the cluster CA. Earlier revisions had this backwards
+  ([SPIKE-28](../../research/SPIKE-28-azure-local-networking-storage-certificates)).
+- `exposure: external` additionally needs a working LoadBalancer implementation,
+  which an AKS Arc cluster does not have by default.
 
 ## What is still open
 
 This page is filled out as the research and decisions below land. Until then, the
-[comparison hub](../) marks the corresponding cells `UNKNOWN` rather than guessing.
+[comparison hub](../) carries the sourced answers for this target, including the
+findings that corrected earlier claims on this page.
 
 - **SPIKE-28**, the Azure Local Foundry networking, storage, and certificates spike
 - **SPIKE-31**, the cross-track feature parity spike

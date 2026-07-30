@@ -21,7 +21,8 @@ first-party research. Treat it as a design, not an as-built record.
 ## What is still open
 
 This page is filled out as the research and decisions below land. Until then, the
-[comparison hub](../) marks the corresponding cells `UNKNOWN` rather than guessing.
+[comparison hub](../) carries the sourced answers for this target, including the
+findings that corrected earlier claims on this page.
 
 - **SPIKE-26**, the local-track cost spike
 - **ADR-0021**, the local-track cost governance ADR

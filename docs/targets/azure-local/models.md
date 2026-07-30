@@ -22,7 +22,8 @@ first-party research. Treat it as a design, not an as-built record.
 ## What is still open
 
 This page is filled out as the research and decisions below land. Until then, the
-[comparison hub](../) marks the corresponding cells `UNKNOWN` rather than guessing.
+[comparison hub](../) carries the sourced answers for this target, including the
+findings that corrected earlier claims on this page.
 
 - **SPIKE-22**, the Foundry Local model catalog spike
 - **ADR-0019**, the per-target model roster ADR

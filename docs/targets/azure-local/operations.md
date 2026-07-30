@@ -17,12 +17,29 @@ first-party research. Treat it as a design, not an as-built record.
 - Drift detection is split three ways, because `what-if` sees only the middle of the three layers.
 - More than sixty standard Azure Local infrastructure metrics are available at no extra cost.
 - Managed Prometheus is deliberately deferred until a Prometheus-capable workload exists.
-- Upgrade ordering carries the same load-bearing constraint as the install.
+- Upgrade ordering carries the same load-bearing constraint as the install, and
+  **only the install half is documented.** An AKS Arc upgrade is a rolling node
+  replacement that necessarily restarts `istiod`, which is the exact event
+  Microsoft's own install warning calls flaky
+  ([SPIKE-29](../../research/SPIKE-29-local-track-lifecycle-and-upgrade)).
+- **No Azure Monitor or Prometheus metric is documented for a `ModelDeployment`.**
+  The infrastructure is richly instrumented and the model serving on it is not:
+  no request count, no latency, no token count. Neither on-premises target can
+  alert on a model, and
+  [ADR-0016](../../adr/ADR-0016-foundry-model-usage-observability) cannot be met
+  here ([SPIKE-27](../../research/SPIKE-27-local-track-observability) Q6).
+- **No preview-to-GA migration path is published** and in-place migration is not
+  promised. A breaking change has already landed inside the preview: three
+  deprecated `ModelDeployment` endpoint fields plus an nginx-to-Gateway-API
+  annotation migration table.
+- Teardown leaves residue, some of it by design. Certificate material and
+  disconnected-operations artifacts are the parts that are not simply rebuildable.
 
 ## What is still open
 
 This page is filled out as the research and decisions below land. Until then, the
-[comparison hub](../) marks the corresponding cells `UNKNOWN` rather than guessing.
+[comparison hub](../) carries the sourced answers for this target, including the
+findings that corrected earlier claims on this page.
 
 - **SPIKE-27**, the local-track observability spike
 - **SPIKE-29**, the local-track lifecycle and upgrade spike
