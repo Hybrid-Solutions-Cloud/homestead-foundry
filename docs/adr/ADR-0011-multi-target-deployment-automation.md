@@ -293,6 +293,25 @@ measured against; it is not re-decided.
 
 ### The three tracks at a glance
 
+::: warning Amended 2026-07-25. Read this before the table.
+The table below is preserved as decided on 2026-07-24. Five cells have since been
+superseded or corrected by later records, and are listed here rather than edited
+in place, because an ADR is a historical record.
+
+| Cell | Correction | Record |
+|---|---|---|
+| Track 2, automation form and install step | `winget install Microsoft.FoundryLocal` cannot produce a machine-wide install. Microsoft documents that winget blocks MSIX machine-scope installs. The install step is `Add-AppxProvisionedPackage -Online`. | ADR-0013 decision 1 |
+| Track 2, governance plane | Over-stated. Arc governs installing and managing the host, not the running inference endpoint. That endpoint has no Azure RBAC, no Entra authentication, no Key Vault path, no budget, and no Azure Monitor. Track 2 is a genuine single-host capability and a proof of the Arc automation pattern, not a governance-equivalent sibling of tracks 1 and 3. | ADR-0013 decision 10 |
+| Track 2, gate | No longer the open SPIKE-08 unknowns as written. The gate is two read-only resolutions followed by one owner-authorized install test on a disposable Windows Server build VM. | ADR-0013 decision 11 |
+| Track 3, IaC and control surface | Not a two-layer split. Mandatory Gateway API and Istio prerequisites sit underneath the ARM extension and cannot be expressed in ARM. Bicep owns a middle platform layer of exactly two extensions; an ordering wrapper owns the sequence and is a first-class deliverable. Bicep for the AKS Arc cluster itself is provisional pending a `what-if` test. | ADR-0014 decisions 1 and 8 |
+| Track 3, gate | ADR-0009's preconditions are no longer inherited unchanged. Precondition (a) is amended from a blanket GPU gate to a per-workload one, so the first increment is CPU-only. | ADR-0014 decision 3 |
+
+A current, decision-neutral comparison across all three targets, covering models,
+features, cost, identity, observability, and operations as well as automation,
+lives at [Deployment targets](../targets/). That hub, not this table, is the page
+to send a reader to.
+:::
+
 | Track | Target | Automation form | IaC / control surface | Governance plane | Gate |
 |---|---|---|---|---|---|
 | 1 | Azure cloud Foundry (AIServices) | Declarative | Bicep, subscription scope, single RG (`infra/`) | Full Azure (RBAC, Policy, Monitor, Cost, Key Vault by name) | Owner-gated deploy (proven) |

@@ -23,7 +23,7 @@ Scope: the owner asked whether a better-fit voice/TTS path exists on any Azure s
 
 ### 1. The established inventory: three subscriptions across two tenants, two Speech-capable resources
 
-SPIKE-03 and the environment check already inventoried the subscriptions reachable read-only by the logged-in owner identity, spanning two tenants. This spike takes that inventory as given rather than re-enumerating it ([SPIKE-03](./SPIKE-03-tenant-readiness.md); [environment-readiness](../verification/environment-readiness.md)):
+SPIKE-03 and the environment check already inventoried the subscriptions reachable read-only by the logged-in owner identity, spanning two tenants. This spike takes that inventory as given rather than re-enumerating it ([SPIKE-03](./SPIKE-03-tenant-readiness.md); [environment-readiness](https://github.com/Hybrid-Solutions-Cloud/homestead-foundry/blob/main/ai/verification/environment-readiness.md)):
 
 | Subscription / scope | Tenant | Speech-capable resource already present | Kind / tier / region |
 |---|---|---|---|

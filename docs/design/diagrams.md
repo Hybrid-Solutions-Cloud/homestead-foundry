@@ -9,7 +9,7 @@ The reference diagrams are authored and maintained in Lucid. They live in the
 maintainer's own Lucid account and are not publicly shareable, so no links are
 published here. The table below is the specification: it tells you what to draw.
 The `foundry-diagrammer` and `foundry-diagram-qa` agents in
-[`AGENTS.md`](../../AGENTS.md) author and verify this set automatically through
+[`AGENTS.md`](https://github.com/Hybrid-Solutions-Cloud/homestead-foundry/blob/main/AGENTS.md) author and verify this set automatically through
 the Lucid MCP if you want to generate your own.
 
 - Source of truth: the seven design docs in `docs/design/` (architecture-overview,

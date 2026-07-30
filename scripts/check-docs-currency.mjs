@@ -7,13 +7,22 @@
 // private, all weeks after none of it was true. Nothing caught any of it,
 // because nothing was looking. This is what looks.
 //
-// Four checks, none of which need Azure:
+// Six checks, none of which need Azure:
 //   1. No published page uses language that asserts an undeployed or private state.
 //   2. The root CHANGELOG.md and the docs site changelog agree on the latest release.
 //   3. Every registry entry marked deployed appears in the model catalog as deployed.
 //   4. Guides point at the starter registry, not the placeholder one.
+//   5. Published spike and ADR counts match the number of files on disk.
+//   6. Every spike and ADR is reachable from the site sidebar and its own index.
 //
-// With --live it adds a fifth check, comparing the registry against the model
+// Checks 5 and 6 exist because both failure modes had already happened. The
+// landing page claimed seventeen spikes and twelve ADRs, the roadmap claimed
+// nineteen and fourteen, and there were twenty-one and sixteen. Separately,
+// ADR-0013 through ADR-0016 were authored, indexed, and left out of the sidebar,
+// so the two records defining deployment tracks 2 and 3 could not be navigated
+// to. Both are cheap to catch and expensive to notice by eye. See ADR-0017.
+//
+// With --live it adds a seventh check, comparing the registry against the model
 // deployments that actually exist on an account. That one needs the Azure CLI.
 //
 // Point --live at the registry you actually deployed from. Comparing your own
@@ -26,7 +35,7 @@
 //     --live --account <name> --resource-group <rg> --skip <ids-with-no-deployment-resource>
 
 import { execFileSync } from 'node:child_process'
-import { readFileSync, existsSync } from 'node:fs'
+import { readFileSync, existsSync, readdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 function arg(name, fallback) {
@@ -162,7 +171,106 @@ for (const path of ['docs/guide/deployment.md', 'README.md']) {
 }
 
 // ---------------------------------------------------------------------------
-// 5. Optional: compare the registry against a real account.
+// 5. Published spike and ADR counts must match the files on disk.
+// ---------------------------------------------------------------------------
+// A landing page that miscounts its own evidence is the cheapest possible tell
+// that nobody re-read it. Both of the pages checked here were wrong, in
+// different directions, at the same time.
+const ls = (dir, prefix) =>
+  existsSync(resolve(dir))
+    ? readdirSync(resolve(dir)).filter((f) => f.startsWith(prefix) && f.endsWith('.md'))
+    : []
+
+const spikeFiles = ls('docs/research', 'SPIKE-')
+const adrFiles = ls('docs/adr', 'ADR-')
+
+const ONES = [
+  'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
+  'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
+  'seventeen', 'eighteen', 'nineteen',
+]
+const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety']
+
+function spell(n) {
+  if (n < 20) return ONES[n]
+  if (n > 99) return String(n)
+  const t = TENS[Math.floor(n / 10)]
+  const o = n % 10
+  return o === 0 ? t : `${t}-${ONES[o]}`
+}
+
+// Both the spelled form and the digits are accepted, so a page may say
+// "twenty-one research spikes" or "21 research spikes".
+const COUNTED = [
+  { label: 'research spikes', actual: spikeFiles.length, pattern: /([\w-]+)\s+research spikes/gi },
+  {
+    label: 'ADRs',
+    actual: adrFiles.length,
+    pattern: /([\w-]+)\s+(?:Architecture Decision Records|ADRs)\b/gi,
+  },
+]
+
+for (const path of ['docs/index.md', 'docs/roadmap.md', 'README.md']) {
+  const text = read(path)
+  if (!text) continue
+  for (const { label, actual, pattern } of COUNTED) {
+    const expected = spell(actual).toLowerCase()
+    for (const m of text.matchAll(pattern)) {
+      const claimed = m[1].toLowerCase()
+      // Only judge tokens that are actually a number. "the research spikes" and
+      // "several ADRs" are prose, not claims, and are none of this check's business.
+      const isNumeric = /^\d+$/.test(claimed)
+      const isSpelled = /^(?:[a-z]+)(?:-[a-z]+)?$/.test(claimed) && spellIsNumber(claimed)
+      if (!isNumeric && !isSpelled) continue
+      if (claimed !== expected && claimed !== String(actual)) {
+        const line = text.slice(0, m.index).split('\n').length
+        fail(
+          'count-drift',
+          `${path}:${line} says "${m[1]} ${label}" but there are ${actual} (${expected}) on disk`
+        )
+      }
+    }
+  }
+}
+
+function spellIsNumber(word) {
+  if (ONES.includes(word)) return true
+  const [tens, ones] = word.split('-')
+  return TENS.includes(tens) && tens !== '' && (ones === undefined || ONES.slice(1, 10).includes(ones))
+}
+
+// ---------------------------------------------------------------------------
+// 6. Every spike and ADR must be reachable: sidebar plus its own index.
+// ---------------------------------------------------------------------------
+// A document nobody can navigate to is not published. ADR-0013 through ADR-0016
+// were authored, indexed, and omitted from the sidebar, which left the two
+// records defining deployment tracks 2 and 3 unreachable from the site.
+const siteConfig = read('docs/.vitepress/config.ts')
+const adrIndex = read('docs/adr/index.md')
+const researchIndex = read('docs/research/index.md')
+
+if (!siteConfig) fail('config-missing', 'docs/.vitepress/config.ts does not exist')
+
+const reachability = [
+  { files: adrFiles, dir: 'docs/adr', index: adrIndex, indexPath: 'docs/adr/index.md' },
+  { files: spikeFiles, dir: 'docs/research', index: researchIndex, indexPath: 'docs/research/index.md' },
+]
+
+for (const { files, dir, index, indexPath } of reachability) {
+  if (index === null) fail('index-missing', `${indexPath} does not exist`)
+  for (const file of files) {
+    const slug = file.replace(/\.md$/, '')
+    if (siteConfig && !siteConfig.includes(slug)) {
+      fail('unreachable-doc', `${dir}/${file} is not in the docs/.vitepress/config.ts sidebar`)
+    }
+    if (index && !index.includes(slug)) {
+      fail('unlinked-doc', `${dir}/${file} is not linked from ${indexPath}`)
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 7. Optional: compare the registry against a real account.
 // ---------------------------------------------------------------------------
 if (has('live')) {
   const account = arg('account')

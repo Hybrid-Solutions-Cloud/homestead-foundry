@@ -12,6 +12,9 @@ hero:
       text: Get started
       link: /guide/getting-started
     - theme: alt
+      text: Compare the three targets
+      link: /targets/
+    - theme: alt
       text: Read the methodology
       link: /guide/methodology
     - theme: alt
@@ -19,7 +22,7 @@ hero:
       link: /adr/
 features:
   - title: Knowledge center
-    details: Seventeen research spikes and twelve Architecture Decision Records, every claim grounded in a first-party Microsoft source, covering model selection, topology, identity, cost governance, content safety, and deployment automation.
+    details: Twenty-one research spikes and seventeen Architecture Decision Records, every claim grounded in a first-party Microsoft source, covering model selection, topology, identity, cost governance, content safety, observability, and deployment automation across all three Foundry deployment targets.
   - title: Automation center
     details: Parameterized Bicep that deploys a whole Foundry environment from a model registry, plus a custom Claude Code agent roster (research, architecture, diagramming, review, verification, implementation) that drives the methodology itself.
   - title: Proven in production

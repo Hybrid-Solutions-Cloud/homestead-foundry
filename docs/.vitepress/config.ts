@@ -6,13 +6,19 @@ export default defineConfig({
   // GitHub Pages serves a project site under /<repo-name>/, a custom domain serves it at the root.
   base: process.env.GITHUB_PAGES_BASE ?? "/",
   cleanUrls: true,
-  // Don't fail the build on any stray relative link inside the canonical
-  // architecture content that now lives under docs/.
-  ignoreDeadLinks: true,
+  // Dead links now fail the build. This was `true` while the canonical
+  // architecture content was being moved under docs/, which meant a broken
+  // internal link produced a green build and nobody found out. The ten links it
+  // was hiding all pointed at real repository files that are not site pages
+  // (AGENTS.md, ai/verification/, ai/plans/source/, a .drawio source); those are
+  // now absolute repository links. Link to a page by relative path, or to a
+  // repository file by its GitHub URL. See ADR-0017.
+  ignoreDeadLinks: false,
   themeConfig: {
     nav: [
       { text: "Guide", link: "/guide/getting-started" },
       { text: "Architecture", link: "/design/architecture-overview" },
+      { text: "Deployment targets", link: "/targets/" },
       { text: "ADRs", link: "/adr/" },
       { text: "Research", link: "/research/" },
       { text: "Models", link: "/reference/model-catalog" },
@@ -74,6 +80,62 @@ export default defineConfig({
             { text: "ADR-0010 FLUX adoption (superseded)", link: "/adr/ADR-0010-flux-image-model-adoption" },
             { text: "ADR-0011 Multi-target deployment automation", link: "/adr/ADR-0011-multi-target-deployment-automation" },
             { text: "ADR-0012 Agent MCP gateway governance", link: "/adr/ADR-0012-agent-mcp-gateway-governance" },
+            { text: "ADR-0013 Track 2 install, identity, governance scope", link: "/adr/ADR-0013-foundry-local-windows-server-install" },
+            { text: "ADR-0014 Track 3 deployment layers and auth", link: "/adr/ADR-0014-foundry-local-azure-local-deployment-layers" },
+            { text: "ADR-0015 Cost-first observability boundaries", link: "/adr/ADR-0015-cost-first-observability-boundaries" },
+            { text: "ADR-0016 Foundry model-usage observability", link: "/adr/ADR-0016-foundry-model-usage-observability" },
+            { text: "ADR-0017 Deployment-target docs and repo structure", link: "/adr/ADR-0017-deployment-target-documentation-structure" },
+          ],
+        },
+      ],
+      "/targets/": [
+        {
+          text: "Overview",
+          items: [
+            { text: "Compare the three targets", link: "/targets/" },
+            { text: "Choosing a target", link: "/targets/choosing" },
+          ],
+        },
+        {
+          text: "Azure cloud (track 1)",
+          items: [
+            { text: "Overview", link: "/targets/azure-cloud/" },
+            { text: "Architecture", link: "/targets/azure-cloud/architecture" },
+            { text: "Models", link: "/targets/azure-cloud/models" },
+            { text: "Features", link: "/targets/azure-cloud/features" },
+            { text: "Deployment", link: "/targets/azure-cloud/deployment" },
+            { text: "Consumption", link: "/targets/azure-cloud/consumption" },
+            { text: "Cost", link: "/targets/azure-cloud/cost" },
+            { text: "Security", link: "/targets/azure-cloud/security" },
+            { text: "Operations", link: "/targets/azure-cloud/operations" },
+          ],
+        },
+        {
+          text: "Windows Server (track 2)",
+          items: [
+            { text: "Overview", link: "/targets/windows-server/" },
+            { text: "Architecture", link: "/targets/windows-server/architecture" },
+            { text: "Models", link: "/targets/windows-server/models" },
+            { text: "Features", link: "/targets/windows-server/features" },
+            { text: "Deployment", link: "/targets/windows-server/deployment" },
+            { text: "Consumption", link: "/targets/windows-server/consumption" },
+            { text: "Cost", link: "/targets/windows-server/cost" },
+            { text: "Security", link: "/targets/windows-server/security" },
+            { text: "Operations", link: "/targets/windows-server/operations" },
+          ],
+        },
+        {
+          text: "Azure Local (track 3)",
+          items: [
+            { text: "Overview", link: "/targets/azure-local/" },
+            { text: "Architecture", link: "/targets/azure-local/architecture" },
+            { text: "Models", link: "/targets/azure-local/models" },
+            { text: "Features", link: "/targets/azure-local/features" },
+            { text: "Deployment", link: "/targets/azure-local/deployment" },
+            { text: "Consumption", link: "/targets/azure-local/consumption" },
+            { text: "Cost", link: "/targets/azure-local/cost" },
+            { text: "Security", link: "/targets/azure-local/security" },
+            { text: "Operations", link: "/targets/azure-local/operations" },
           ],
         },
       ],
@@ -81,7 +143,8 @@ export default defineConfig({
         {
           text: "Reference",
           items: [
-            { text: "Model catalog", link: "/reference/model-catalog" },
+            { text: "Reference index", link: "/reference/" },
+            { text: "Model catalog (Azure cloud)", link: "/reference/model-catalog" },
           ],
         },
       ],

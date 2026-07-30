@@ -25,7 +25,7 @@ next. Every box links to the guide or check that explains that step in detail.
   <area shape="rect" coords="1020,1000,1380,1109" href="./building-agents" alt="Build an agent" />
 </map>
 
-The map is maintained as an editable [draw.io source file](../assets/diagrams/foundry-onboarding-map.drawio).
+The map is maintained as an editable [draw.io source file](https://github.com/Hybrid-Solutions-Cloud/homestead-foundry/blob/main/docs/assets/diagrams/foundry-onboarding-map.drawio).
 
 ### The one rule to remember
 
@@ -42,7 +42,7 @@ or [build agents](./building-agents).
 - **[Methodology](./methodology)** - how a build moves through this repo's phase-gated process: research spike, then Architecture Decision Record, then design doc, then diagram, then implementation, then review.
 - **[Model registry](./model-registry)** - the schema this repo uses to track which models are deployed, planned, or rejected, and why, so a consuming project can resolve a model id to a usable endpoint without hardcoding a deployment name.
 - **[Deployment](./deployment)** - how the Bicep automation stands up (and tears down) the actual Azure resources.
-- **[Architecture](../architecture/architecture-overview)** - the full Well-Architected design docs (topology and CAF naming, identity, reliability, performance, cost, pipeline integration) rendered on this site.
+- **[Architecture](../design/architecture-overview)** - the full Well-Architected design docs (topology and CAF naming, identity, reliability, performance, cost, pipeline integration) rendered on this site.
 - **[ADRs](../adr/)** - every locked architecture decision, rendered in full, each tracing back to the research spike that justified it.
 - **[Research spikes](../research/)** - the grounded research behind every decision.
 - **[Implementation](../implementation/implementation-guide)** - the deployment runbook and as-built record.

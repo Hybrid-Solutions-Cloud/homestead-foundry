@@ -20,3 +20,4 @@ Every Architecture Decision Record this project has locked, in decision order. E
 | [ADR-0014](./ADR-0014-foundry-local-azure-local-deployment-layers) | Track 3 deployment layers, GPU scope, and authentication (supersedes part of ADR-0011, amends ADR-0009) |
 | [ADR-0015](./ADR-0015-cost-first-observability-boundaries) | Cost-first observability package boundaries and activation gates |
 | [ADR-0016](./ADR-0016-foundry-model-usage-observability) | Native Foundry metrics for model usage observability |
+| [ADR-0017](./ADR-0017-deployment-target-documentation-structure) | Deployment-target documentation and repository structure (the `docs/targets/` tree, two model catalogs, the `infra/` subtree layout) |
