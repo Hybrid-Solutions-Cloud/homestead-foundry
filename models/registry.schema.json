@@ -38,8 +38,8 @@
       },
       "kind": {
         "type": "string",
-        "enum": ["image", "voice", "video", "reasoning", "text", "speech-to-text"],
-        "description": "Add new values here as new modalities are adopted; keep this enum authoritative and in sync with the union in infra/types.bicep. Do not let consumers infer kind from id or provider. text and speech-to-text were added in v2 because the on-premises rosters are text, reasoning, code, and speech-to-text only: neither on-premises target has an image, voice, or video model at all (SPIKE-22)."
+        "enum": ["image", "voice", "video", "reasoning", "text", "speech-to-text", "embedding"],
+        "description": "Add new values here as new modalities are adopted; keep this enum authoritative and in sync with the union in infra/types.bicep. Do not let consumers infer kind from id or provider. text and speech-to-text were added in v2 because the on-premises rosters are text, reasoning, code, and speech-to-text only: neither on-premises target has an image, voice, or video model at all (SPIKE-22). embedding was added on 2026-08-02 when the worked-example account deployed text-embedding-3-large and -small to close the semantic-mapping gap; it is a distinct modality because an embedding deployment answers on the embeddings route, not chat completions, so a consumer that treats it as text will call the wrong endpoint."
       },
       "provider": {
         "type": "string",

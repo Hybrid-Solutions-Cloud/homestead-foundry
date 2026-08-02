@@ -10,7 +10,7 @@ type registryEntry = {
   target: ('azure-cloud' | 'windows-server' | 'azure-local')[]?
 
   @description('Modality. Authoritative enum lives in models/registry.schema.json.')
-  kind: 'image' | 'voice' | 'video' | 'reasoning' | 'text' | 'speech-to-text'
+  kind: 'image' | 'voice' | 'video' | 'reasoning' | 'text' | 'speech-to-text' | 'embedding'
 
   @description('Vendor name, for example Microsoft. Used as the default model format when the catalog entry omits one.')
   provider: string
