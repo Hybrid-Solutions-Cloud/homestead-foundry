@@ -21,6 +21,10 @@ type registryEntry = {
   @description('Deployment SKU, for example GlobalStandard. AZURE-CLOUD ONLY; the schema forbids it on an on-premises entry, so it is optional here.')
   sku: string?
 
+  @description('Provisioned SKU capacity for this one deployment. AZURE-CLOUD ONLY and optional; omit to inherit the stack-wide modelDeploymentCapacity. Per-entry because capacity units are not comparable across models, and one stack-wide value pins every deployment to the smallest sensible number.')
+  @minValue(1)
+  capacity: int?
+
   @description('Region the entry targets. AZURE-CLOUD ONLY; optional here for the same reason as sku. Informational for consumers; deployment resources are children of the account and always land in the account region.')
   region: string?
 

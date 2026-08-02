@@ -56,6 +56,11 @@
         "minLength": 1,
         "description": "AZURE-CLOUD ONLY, and required there. For example GlobalStandard, S0. Forbidden on an on-premises entry: neither on-premises target has a SKU, and a value here would be silently meaningless rather than merely unused."
       },
+      "capacity": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "AZURE-CLOUD ONLY, optional. Provisioned SKU capacity for this one deployment. Omit to inherit the stack-wide modelDeploymentCapacity parameter. Per-entry because capacity units are NOT comparable across models and a single stack-wide value throttles the whole account to the smallest sensible number: on the worked-example account every deployment sat at capacity 1, which measured as 1 request per minute and made agentic tooling unusable. Raising capacity does not itself cost anything on a GlobalStandard deployment; billing is per token consumed, so this raises the rate ceiling rather than creating spend."
+      },
       "region": {
         "type": "string",
         "minLength": 1,
@@ -134,7 +139,11 @@
     "else": {
       "required": ["variant", "executionProvider"],
       "not": {
-        "anyOf": [{ "required": ["sku"] }, { "required": ["region"] }]
+        "anyOf": [
+          { "required": ["sku"] },
+          { "required": ["region"] },
+          { "required": ["capacity"] }
+        ]
       }
     }
   }

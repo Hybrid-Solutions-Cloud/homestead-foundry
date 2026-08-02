@@ -63,9 +63,17 @@ resource modelDeployments 'Microsoft.CognitiveServices/accounts/deployments@2025
   for m in models: {
     parent: account
     name: m.deploymentName
+    // Per-entry capacity wins, and the stack-wide parameter is only the
+    // fallback. A single value for every model is what produced the
+    // capacity-1 account recorded in the worked example, where every
+    // deployment measured 1 request per minute. Capacity units are not
+    // comparable across models, so one number cannot be right for all of them.
+    // sku is optional on the type because the schema forbids it on an
+    // on-premises entry, but it is required on every azure-cloud entry and
+    // only azure-cloud entries reach here, so the fallback is unreachable.
     sku: {
-      name: m.sku
-      capacity: capacity
+      name: m.?sku ?? 'GlobalStandard'
+      capacity: m.?capacity ?? capacity
     }
     properties: {
       raiPolicyName: raiPolicyName
