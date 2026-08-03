@@ -9,6 +9,8 @@ operations. Compare all three on [Deployment targets](../targets/).
 
 
 > **If you want to deploy, read the [deployment guide](../guide/deployment.md) instead.** That is the current, tested, Bicep-driven runbook. This document is the longer-form reference behind it: the ordered manual procedure, the reasoning for each step, and the confirmation and owner-input registers. It was followed to build the first version of the environment recorded in [as-built](./as-built.md), which has since been rebuilt from `infra/`.
+>
+> **Capacity correction, 2026-08-02.** The `--sku-capacity 1` values below are historical, from that first single-image-model build. Capacity is now set per model in the registry and the live account runs real capacities. Capacity 1 is not a cost control: it measures at roughly one request per minute while `GlobalStandard` still bills per token. Do not copy those values.
 
 - Status: executed. Followed in full to stand up the environment in [as-built](./as-built.md); retained as the reference procedure and the source the Bicep automates.
 - Date: 2026-07-11 (original authoring), status corrected 2026-07-25

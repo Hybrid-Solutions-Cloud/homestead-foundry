@@ -1,5 +1,11 @@
 # Environment readiness: methodology
 
+**Correction, 2026-08-02:** the `--sku-capacity 1` values in this document are
+historical, from the original single-image-model build. Capacity is now set per
+model in the registry and the live account runs real capacities. Capacity 1 is
+not a cost control; it measures at roughly one request per minute while
+`GlobalStandard` still bills per token. Do not copy those values.
+
 Status: read-only verification methodology. No Azure resources should be created, updated, or deleted while running this check.
 Author: foundry-env-verifier
 

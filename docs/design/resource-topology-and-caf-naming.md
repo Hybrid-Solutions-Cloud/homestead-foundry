@@ -1,5 +1,14 @@
 # Design: resource topology and CAF naming
 
+::: warning Capacity values on this page are historical
+The `capacity 1` and `--sku-capacity 1` figures below record the original
+single-image-model build. They are not current guidance and must not be copied.
+Capacity is now set per model in the registry, and the live account runs real
+capacities. Capacity 1 is not a cost control: it measures at roughly one request
+per minute while `GlobalStandard` still bills per token. See
+[the deployment guide](../guide/deployment). Corrected 2026-08-02.
+:::
+
 ::: info Scope: Azure AI Foundry
 This page describes the **Azure AI Foundry** target, the hosted-cloud target of
 [ADR-0011](../adr/ADR-0011-multi-target-deployment-automation). Foundry Local and

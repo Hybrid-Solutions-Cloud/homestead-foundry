@@ -1,5 +1,10 @@
 # MAI-Image-2.5 art-match research and pilot plan
 
+**Correction, 2026-08-02:** the `--sku-capacity 1` value in this plan is
+historical. Capacity is now set per model in the registry and the live account
+runs real capacities. Capacity 1 is not a cost control; it measures at roughly
+one request per minute while `GlobalStandard` still bills per token.
+
 Status: research complete, pilot NOT started. No Azure resources created, no spend, no images generated.
 Date: 2026-07-11
 Scope: research and plan only. Every claim below is cited; anything Microsoft has not documented is marked UNKNOWN.

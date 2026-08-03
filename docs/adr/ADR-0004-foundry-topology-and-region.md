@@ -2,6 +2,14 @@
 
 - Status: Accepted (owner approved 2026-07-24)
 - Date: 2026-07-11
+- Amended: 2026-08-02, capacity guidance superseded
+
+> **Capacity amendment, 2026-08-02.** The `--sku-capacity 1` in the deployment
+> command below is superseded. Capacity is now a per-model registry field
+> (ADR-0018) and the live account runs real per-model capacities. Capacity 1 is
+> not a cost control: it measures at roughly one request per minute while
+> `GlobalStandard` still bills per token, so it breaks agentic callers without
+> reducing spend. The topology and region decisions in this ADR are unchanged.
 
 > This ADR records a reusable topology-and-region decision for Azure AI Foundry
 > builds on this platform. The concrete detail of the first proven build (real
