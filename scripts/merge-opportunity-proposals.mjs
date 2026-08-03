@@ -21,8 +21,13 @@
  *      gapMeasurement with occurrences > 0 for an entry whose recorded gap was
  *      0, the gap has closed and the entry is FLAGGED for review rather than
  *      silently altered.
- *   5. Nothing is deleted. An entry that stops being confirmed ages via
- *      provenance.lastConfirmed and is proposed for retirement by a human.
+ *   5. Nothing is deleted, and nothing decays. A run that finds LESS evidence
+ *      than the last one still counts as a confirmation. A low score is a
+ *      snapshot of one run against the sources readable that day, not a verdict
+ *      on the topic, and letting it age a candidate toward retirement would
+ *      bake today's blind spots into a permanent decision. Every run appends to
+ *      demandHistory and provenance.peakSourceCount keeps the best reading ever
+ *      seen, so a topic is never judged on its worst day. Only a human retires.
  *
  * Usage:
  *   node merge-opportunity-proposals.mjs \
@@ -77,7 +82,7 @@ const DISCOVERY_SETTABLE = new Set(['candidate']);
 export function mergeProposals(registry, proposals, now) {
   const report = {
     added: [], refreshed: [], blockedByRejection: [], statusProtected: [],
-    gapClosed: [], unchanged: [], invalid: [],
+    gapClosed: [], unchanged: [], invalid: [], demandGrew: [],
   };
 
   const byId = new Map();
@@ -103,7 +108,13 @@ export function mergeProposals(registry, proposals, now) {
           firstSeen: proposal.provenance?.firstSeen ?? now,
           lastConfirmed: now,
           confirmCount: 1,
+          peakSourceCount: (proposal.provenance?.suggestedBy ?? []).length,
         },
+        demandHistory: [{
+          observedOn: now,
+          sourceCount: (proposal.provenance?.suggestedBy ?? []).length,
+          supplyOccurrences: proposal.gapMeasurement?.occurrences ?? null,
+        }],
       };
       registry.opportunities.push(created);
       byId.set(created.id, created);
@@ -139,19 +150,49 @@ export function mergeProposals(registry, proposals, now) {
       changed = true;
     }
 
-    // RULE 5: age it, never delete it.
+    // RULE 5: accumulate, never delete and never decay.
+    //
+    // A low score is a snapshot of one run against the sources that were
+    // readable that day. It is NOT a verdict on the topic. Sources that refuse
+    // us today may open up; a subject barely taught this quarter may be taught
+    // widely next. Ageing a candidate toward retirement because it scored low
+    // would bake today's blind spots into a permanent decision, and would do it
+    // silently.
+    //
+    // So a run that finds LESS evidence than the last one still counts as a
+    // confirmation, and every run appends to demandHistory. The history is the
+    // point: it is the only way to see a topic gaining traction, and a single
+    // reading can never show that. Only a human retires a candidate.
+    const suggestedBy = [
+      ...new Set([
+        ...(existing.provenance?.suggestedBy ?? []),
+        ...(proposal.provenance?.suggestedBy ?? []),
+      ]),
+    ];
+
+    const history = [...(existing.demandHistory ?? [])];
+    const sourceCount = (proposal.provenance?.suggestedBy ?? []).length;
+    history.push({
+      observedOn: now,
+      sourceCount,
+      supplyOccurrences: proposal.gapMeasurement?.occurrences ?? null,
+    });
+
+    existing.demandHistory = history;
     existing.provenance = {
       ...(existing.provenance ?? {}),
       firstSeen: existing.provenance?.firstSeen ?? now,
       lastConfirmed: now,
       confirmCount: (existing.provenance?.confirmCount ?? 0) + 1,
-      suggestedBy: [
-        ...new Set([
-          ...(existing.provenance?.suggestedBy ?? []),
-          ...(proposal.provenance?.suggestedBy ?? []),
-        ]),
-      ],
+      // The best reading ever recorded, so a topic is never judged on its worst
+      // day. A source outage must not quietly downgrade a real opportunity.
+      peakSourceCount: Math.max(existing.provenance?.peakSourceCount ?? 0, sourceCount),
+      suggestedBy,
     };
+
+    if (sourceCount > (existing.provenance?.peakSourceCount ?? 0)) {
+      report.demandGrew.push({ id: existing.id, from: existing.provenance?.peakSourceCount ?? 0, to: sourceCount });
+    }
 
     (changed ? report.refreshed : report.unchanged).push(existing.id);
   }
@@ -189,6 +230,7 @@ function main() {
   line('UNCHANGED', report.unchanged);
   line('BLOCKED, previously rejected', report.blockedByRejection);
   line('STATUS PROTECTED, human-owned', report.statusProtected);
+  line('DEMAND GREW since the last peak', report.demandGrew);
   line('GAP CLOSED, needs review', report.gapClosed);
   line('INVALID, dropped', report.invalid);
 
