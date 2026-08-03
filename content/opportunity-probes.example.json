@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0",
+  "description": "Topic probes for a discovery pass. Each is measured with WORD BOUNDARIES against both the local corpus and the surveyed market text. Supply your own; these are the ones that found real gaps in a real curriculum and are kept as a worked example.",
+  "probes": [
+    { "id": "retrieval-augmented-generation", "term": "RAG", "regex": "\\bRAG\\b|retrieval[- ]augmented", "title": "Retrieval-augmented generation, embeddings, and vector search", "level": "intermediate" },
+    { "id": "vector-search-and-embeddings", "term": "vector", "regex": "\\bvector (search|database|store)\\b|\\bembeddings?\\b", "title": "Embeddings and vector stores", "level": "intermediate" },
+    { "id": "orchestration-frameworks", "term": "LangChain", "regex": "\\bLangChain\\b|\\bLlamaIndex\\b|\\bSemantic Kernel\\b", "title": "Agent orchestration frameworks and portability", "level": "intermediate" },
+    { "id": "executive-and-leader-track", "term": "executive", "regex": "\\bexecutives?\\b|\\bboard[- ]level\\b", "title": "AI for executives, leaders, and decision makers", "level": "beginner" },
+    { "id": "fine-tuning-and-distillation", "term": "distillation", "regex": "\\bdistillation\\b|\\bLoRA\\b|\\badapters?\\b", "title": "Fine-tuning, adapters, distillation, and when not to train", "level": "advanced" },
+    { "id": "voice-agents-and-instructors", "term": "voice agent", "regex": "\\bvoice agents?\\b|\\bspeech[- ]to[- ]text\\b|\\btext[- ]to[- ]speech\\b", "title": "Voice agents, virtual instructors, and accessible media", "level": "intermediate" },
+    { "id": "model-context-protocol", "term": "MCP", "regex": "\\bMCP\\b|Model Context Protocol", "title": "Model Context Protocol and tool interoperability", "level": "intermediate" },
+    { "id": "prompt-injection-defence", "term": "prompt injection", "title": "Prompt injection and untrusted content handling", "level": "intermediate" },
+    { "id": "agent-evaluation", "term": "evaluation", "regex": "\\bagent evaluation\\b|\\btrajectory\\b", "title": "Agent evaluation and trajectory scoring", "level": "advanced" },
+    { "id": "cost-and-capacity-management", "term": "cost", "regex": "\\bcost (control|ceiling|management)\\b|\\btokens? per minute\\b", "title": "Cost, capacity, and spend control for AI systems", "level": "intermediate" }
+  ]
+}
