@@ -33,7 +33,28 @@ param modelCatalog = {
     version: '2026-01-01'
     format: 'Microsoft'
   }
+  'example-text-model-01': {
+    name: 'Example-Text-Model'
+    version: '2026-01-01'
+    format: 'ExampleVendor'
+  }
+  'example-speech-to-text-model-01': {
+    name: 'Example-Speech-To-Text-Model'
+    version: '2026-01-01'
+    format: 'ExampleVendor'
+  }
+  'example-embedding-model-01': {
+    name: 'Example-Embedding-Model'
+    version: '2026-01-01'
+    format: 'ExampleVendor'
+  }
 }
+
+// Left at its default of 1 on purpose here, because this file deploys nothing.
+// Do NOT copy that into a real parameter file: capacity belongs on each registry
+// entry, and anything that inherits this fallback is listed in the
+// inheritedCapacityRegistryIds output.
+param modelDeploymentCapacity = 1
 
 // Two Entra security groups (created outside ARM, for example:
 //   az ad group create --display-name sg-contosoai-image-users-prod-eus-01 ...).

@@ -74,7 +74,7 @@ param skipDeploymentModelIds string[] = []
 @description('Deploy-time model name, version, and format per registry id (ADR-0002: re-query with az cognitiveservices model list at deploy time, never hardcode a preview version).')
 param modelCatalog modelCatalogMap
 
-@description('Capacity for every model deployment (ADR-0004: capacity 1).')
+@description('FALLBACK capacity, used only for a deployable registry entry that carries no capacity of its own. A per-entry capacity in models/registry*.json always wins. The default of 1 exists so an old registry file still deploys, not because 1 is a sensible number: capacity 1 measures at roughly 1 request per minute, which is a throughput floor rather than a cost control. Set capacity per entry in the registry and treat any id listed in the inheritedCapacityRegistryIds output as unfinished.')
 @minValue(1)
 param modelDeploymentCapacity int = 1
 
@@ -173,6 +173,13 @@ var deployableModels = filter(cloudModels, m => m.status == 'deployed' && !conta
 // practice and exists only to satisfy the now-optional type.
 var regionMismatchedRegistryIds = map(filter(deployableModels, m => (m.?region ?? location) != location), m => m.id)
 
+// Same idea as the region mismatch above, for capacity. An entry that omits
+// capacity silently inherits modelDeploymentCapacity, whose default of 1
+// measures at roughly 1 request per minute and breaks any agentic caller on its
+// second call. That is a decision nobody made, so it is surfaced as an output
+// and shows up in every what-if instead of arriving later as a 429.
+var inheritedCapacityRegistryIds = map(filter(deployableModels, m => m.?capacity == null), m => m.id)
+
 // -------------------------------- modules ----------------------------------
 
 module rg 'modules/resource-group.bicep' = {
@@ -257,3 +264,6 @@ output suggestedSecurityGroupNames string[] = [
 
 @description('Deployable registry ids whose declared region differs from the location parameter. Should be empty; reconcile the registry if not.')
 output regionMismatchedRegistryIds string[] = regionMismatchedRegistryIds
+
+@description('Deployable registry ids that declare no capacity of their own and therefore inherit modelDeploymentCapacity. Should be empty on a considered roster; set a capacity per entry in the registry if not. Anything listed here deploys at the fallback, which defaults to 1 and throttles to roughly 1 request per minute.')
+output inheritedCapacityRegistryIds string[] = inheritedCapacityRegistryIds

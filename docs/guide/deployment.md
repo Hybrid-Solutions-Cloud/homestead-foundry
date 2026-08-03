@@ -35,13 +35,14 @@ Copy the starter registry and edit it:
 cp models/registry.starter.json models/registry.mine.json
 ```
 
-`registry.starter.json` is a real 26-model roster: six image models, two voice entries, fourteen reasoning models, and four `rejected` entries kept so their decisions are not re-researched. Delete what you do not need. Keep `rejected` entries rather than deleting them; they cost nothing and they stop a future reader from re-litigating a closed question.
+`registry.starter.json` is a real 28-model roster: six image models, two voice entries, fourteen reasoning models and two embedding models marked `deployed`, plus one `planned` and three `rejected` entries kept so their decisions are not re-researched. Delete what you do not need. Keep `rejected` entries rather than deleting them; they cost nothing and they stop a future reader from re-litigating a closed question.
 
 Only entries with `status: "deployed"` produce a deployment resource. See [the model registry guide](./model-registry) for the field reference.
 
-Two notes that catch people out:
+Three notes that catch people out:
 
-- **Voice models need no deployment resource.** A voice model reached through the Speech endpoint by SSML voice name is not a `Microsoft.CognitiveServices/accounts/deployments` resource. List those ids in `skipDeploymentModelIds` or the deployment fails looking for a catalog entry that cannot exist.
+- **Set `capacity` on every entry you leave marked `deployed`.** It is per entry, because capacity units are not comparable between models. An entry that omits it inherits `modelDeploymentCapacity`, which defaults to **1**, and capacity 1 measures at roughly **one request per minute**. Every deployed entry in the starter registry already carries a realistic number; the ones to revisit are entries you promote from `planned` yourself. This is a throughput decision, not a cost decision: `GlobalStandard` bills per token consumed, so raising capacity raises the rate ceiling without creating spend.
+- **Voice models need no deployment resource.** A voice model reached through the Speech endpoint by SSML voice name is not a `Microsoft.CognitiveServices/accounts/deployments` resource. List those ids in `skipDeploymentModelIds` or the deployment fails looking for a catalog entry that cannot exist. They carry no `capacity` for the same reason.
 - **Idle deployments of pay-as-you-go base models cost nothing.** Billing is per token. Deploying twenty models you rarely call does not create a standing charge. The exceptions are fine-tuned models and provisioned throughput, neither of which this template uses.
 
 ## 2. Create the two security groups
@@ -77,6 +78,16 @@ node scripts/build-model-catalog.mjs \
 
 This writes `infra/params/model-catalog.json`. If it reports models that are not available in your region, fix your registry before continuing: remove them, set their status to `planned`, or choose a different region. A deployable registry entry with no catalog entry fails the deployment fast, by design.
 
+### Check your quota before you deploy
+
+Availability and quota are different questions, and the catalog only answers the first. Capacity is drawn from a per-subscription, per-region, per-model TPM quota, and a deployment that asks for more than you have left fails at deployment time. `what-if` does not catch this, because it does not validate quota.
+
+```bash
+az cognitiveservices usage list --location eastus -o table
+```
+
+**The capacities in `registry.starter.json` assume a raised quota tier.** They are real numbers from a working account, not defaults. On a new subscription the ceilings are much lower, so lower the `capacity` values to fit what the command above reports before your first deployment. Raising quota is a support request, not a template change.
+
 ## 4. Fill in your parameters
 
 ```bash
@@ -84,6 +95,15 @@ cp infra/params/starter.bicepparam infra/params/prod.local.bicepparam
 ```
 
 `*.local.bicepparam` is gitignored, so your real values never get committed. Replace every value marked `REPLACE`: the CAF name segments, your owner alias, the two group object ids, your Key Vault name, your monthly budget cap, and your alert email. Point `modelRegistry` at `registry.mine.json` if you renamed it.
+
+**Leave `modelDeploymentCapacity` alone and set capacity in the registry instead.** The parameter is only a fallback for an entry that declares no `capacity` of its own, and its default of `1` exists so a pre-capacity registry file still deploys, not because `1` is a sensible number to run. Go back to `registry.mine.json` now and give every entry you left marked `deployed` a capacity that matches what it actually has to serve. Two ways to confirm you did:
+
+```bash
+# Every deployed entry that is still missing a capacity
+node -e "for (const e of require('./models/registry.mine.json')) if (e.status === 'deployed' && e.capacity === undefined) console.log(e.id)"
+```
+
+and, after the `what-if` in step 5, the `inheritedCapacityRegistryIds` output. Anything either one names is about to deploy at the fallback. The expected exceptions are the voice entries in `skipDeploymentModelIds`, which never become deployment resources.
 
 Then check it compiles:
 
@@ -103,6 +123,11 @@ az deployment sub what-if \
 ```
 
 Read the output. On a greenfield deployment everything should be a **Create**. Any **Modify** or **Delete** against a resource you did not expect is a stop-and-investigate, not a warning to click past. This preview has caught real damage before: an earlier reconcile run was about to strip the content-safety policy and the version-upgrade setting off live model deployments, and the fix went into the template rather than into a deployment nobody reviewed.
+
+Two things to look for specifically:
+
+- **`sku.capacity` changes against a live account.** If you are redeploying over an existing environment and your registry entries carry no `capacity`, every one of them resolves to the `modelDeploymentCapacity` fallback, and `what-if` will propose **lowering** the live capacity to it. That reads as an unremarkable `Modify` and it is the change most likely to be waved through. Compare the proposed `sku.capacity` against what is actually running before you accept it. Other deltas in the preview, such as `currentCapacity`, are read-only noise; `sku.capacity` is the real signal.
+- **The two drift outputs.** `regionMismatchedRegistryIds` should be empty, and so should `inheritedCapacityRegistryIds`. The second one names every deployable entry that is about to inherit the fallback.
 
 When the preview is what you want:
 

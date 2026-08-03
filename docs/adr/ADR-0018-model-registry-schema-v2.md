@@ -1,15 +1,18 @@
 # ADR-0018: Model registry schema v2, with a target discriminator
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-07-30
+- Accepted: 2026-08-02, after v2 shipped and deployed. Decisions 9 and 10 were
+  added at acceptance and carry that date.
 
 ## Context
 
-`models/registry.schema.json` describes one deployment shape: an Azure AI Foundry
-model deployment, with a SKU, a capacity, and a version. It predates the
-three-target split and cannot express a model that runs on Foundry Local or on
-Azure Local Foundry, because those have no SKU, no capacity, and no Azure
-deployment resource at all.
+Schema v1 of `models/registry.schema.json` described one deployment shape: an
+Azure AI Foundry model deployment, with a SKU, a single stack-wide capacity, and a
+version. Its `kind` enum held four values: `image`, `voice`, `video`, `reasoning`.
+It predated the three-target split and could not express a model that runs on
+Foundry Local or on Azure Local Foundry, because those have no SKU, no capacity,
+and no Azure deployment resource at all.
 
 [ADR-0017](./ADR-0017-deployment-target-documentation-structure) decision 7
 committed to "one schema with an optional target discriminator" rather than three
@@ -48,14 +51,19 @@ would be a lie.
    single unit of change. This was found by running the build gate, not by
    reading the docs.
 
-3. **The Azure-only fields become conditionally required.** `sku` and `region`
-   are required when `target` resolves to `azure-cloud` and **forbidden**
-   otherwise; `variant` and `executionProvider` are required on an on-premises
-   entry and forbidden on a cloud one. Expressed as a JSON Schema
-   `if`/`then`/`else`. A SKU on a Foundry Local entry is meaningless and must
-   fail validation rather than be silently ignored, and a `region` on an
+3. **The Azure-only fields become conditionally required, and `capacity` is one
+   of them.** `sku` and `region` are required when `target` resolves to
+   `azure-cloud` and **forbidden** otherwise; `capacity` is optional there and
+   likewise **forbidden** otherwise; `variant` and `executionProvider` are
+   required on an on-premises entry and forbidden on a cloud one. Expressed as a
+   JSON Schema `if`/`then`/`else`. A SKU on a Foundry Local entry is meaningless
+   and must fail validation rather than be silently ignored; a `region` on an
    on-premises entry would imply inference runs in an Azure region, which it does
-   not.
+   not; and a `capacity` there would imply a provisioned rate ceiling that no
+   on-premises target has, since throughput is a property of the hardware you own.
+   `capacity` is optional rather than required on the cloud branch only so that a
+   pre-v2 registry file still validates, and decision 9 covers why that is not a
+   licence to omit it.
 
 4. **On-premises entries carry `variant` and `executionProvider` instead.**
    `variant` is the catalog entry name (`Phi-4-mini-instruct-generic-cpu`), and
@@ -79,7 +87,11 @@ would be a lie.
    `az bicep build` succeeding and on the deployed resource graph being provably
    unchanged.** v2 is additive and must be inert.
 
-   **Gate result, 2026-07-30: passed.** `az bicep build` exits 0.
+   **Gate result, 2026-07-30: passed.** This result covers the original v2
+   landing only. It **predates** the per-entry `capacity` field (decision 9) and
+   the `kind` enum change (decision 10), both of which shipped later and were
+   gated separately; it is kept because it is the record for what it tested, not
+   because it certifies anything added after it. `az bicep build` exits 0.
    The inertness test is a **before-and-after `what-if` diff**: the same
    subscription and the same parameter file, run once against v1 and once against
    v2. Both returned **byte-for-byte identical output**, 26 `Create` operations
@@ -95,6 +107,53 @@ would be a lie.
    generating deployments.** The Bicep must ignore on-premises entries rather
    than fail on them, because a single registry now legitimately contains rows it
    cannot deploy.
+
+9. **`capacity` is per entry, and the stack-wide parameter is demoted to a
+   fallback.** *(Added 2026-08-02.)* Schema v1 had one capacity for the whole
+   deployment, `main.bicep`'s `modelDeploymentCapacity`. That is wrong on its
+   face: **capacity units are not comparable between models**, so a single number
+   pins every deployment to the smallest sensible value. On the worked-example
+   account it pinned all of them to **1**, which measured at roughly **one
+   request per minute** and made agentic tooling unusable. Resolution is
+   `m.?capacity ?? capacity` in `modules/foundry-account.bicep`: the entry wins,
+   the parameter is the fallback.
+
+   The field is **optional**, not required, purely so a pre-v2 registry file
+   still validates. That leaves it possible to omit it and inherit `1` silently,
+   which is exactly how the original mistake happened, so two things compensate:
+   `main.bicep` emits an **`inheritedCapacityRegistryIds`** output naming every
+   deployable entry that declared none, and both shipped example registries carry
+   a realistic `capacity` on every deployed entry so that copying an example does
+   not reproduce the fault.
+
+   Recorded plainly, because the documentation previously claimed the opposite:
+   **capacity is not a cost control.** A `GlobalStandard` deployment bills per
+   token consumed, so raising capacity raises the rate ceiling without creating
+   spend, and throttling a caller that retries costs the same tokens over a longer
+   wall clock. Cost control is the budget and its alerts (ADR-0006) plus a cap in
+   the caller.
+
+10. **The `kind` enum is authoritative, closed, and extended by ADR.**
+    *(Added 2026-08-02.)* v1 held four values: `image`, `voice`, `video`,
+    `reasoning`. v2 holds seven. `text` and `speech-to-text` were added with v2
+    because the on-premises rosters are text, reasoning, code, and speech-to-text
+    only: neither on-premises target carries an image, voice, or video model at
+    all ([SPIKE-22](../research/SPIKE-22-foundry-local-model-catalog)).
+    **`embedding` was added on 2026-08-02**, when the worked-example account
+    deployed `text-embedding-3-large` and `text-embedding-3-small`.
+
+    `embedding` is a distinct modality rather than a flavour of `text` because an
+    embedding deployment answers on the **embeddings route, not chat
+    completions**: a consumer that treats it as text calls the wrong endpoint.
+    That is the test for any future value. Add one when a model cannot be routed
+    correctly by an existing value, not when it merely feels like a different
+    category.
+
+    The enum lives in `models/registry.schema.json` and is mirrored by the union
+    in `infra/types.bicep`, so it is subject to the same single-unit-of-change
+    rule as every other field here (decisions 6 and 7). A consumer must switch on
+    `kind` and must never infer modality from an `id`, a `deploymentName`, or a
+    `provider`.
 
 ## Consequences
 

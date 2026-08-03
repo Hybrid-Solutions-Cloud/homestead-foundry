@@ -76,6 +76,16 @@ try {
 // Index the live catalog by lowercased model name, keeping the highest version
 // Azure reports for each. Azure returns one current version per model, but
 // guarding against duplicates keeps this stable if that ever changes.
+//
+// format is left undefined when the catalog row omits it, deliberately. Azure's
+// model format is the PUBLISHER (OpenAI, Black Forest Labs, Microsoft,
+// Mistral AI, MoonshotAI), never the modality and never the account kind, so
+// the only correct fallback is the registry entry's provider. That fallback is
+// applied once, below, which is what keeps this script agreeing with
+// infra/modules/foundry-account.bicep (`format: modelCatalog[m.id].?format ?? m.provider`).
+// Substituting anything here would shadow that and the two would silently
+// disagree, which is masked only for as long as every live catalog row happens
+// to carry an explicit format.
 const live = new Map()
 for (const entry of available) {
   const m = entry.model ?? entry
@@ -83,7 +93,7 @@ for (const entry of available) {
   const key = m.name.toLowerCase()
   const existing = live.get(key)
   if (!existing || String(m.version) > String(existing.version)) {
-    live.set(key, { name: m.name, version: m.version, format: m.format ?? entry.kind })
+    live.set(key, { name: m.name, version: m.version, format: m.format })
   }
 }
 
@@ -135,6 +145,8 @@ for (const entry of registry) {
     continue
   }
 
+  // The single format fallback, matching the Bicep. See the note above the
+  // live-catalog index for why provider and not kind.
   catalog[entry.id] = {
     name: match.name,
     version: String(match.version),

@@ -5,11 +5,12 @@
     "provider": "Microsoft",
     "deploymentName": "example-image-model-01",
     "sku": "GlobalStandard",
+    "capacity": 10,
     "region": "eastus",
     "status": "deployed",
     "accessGating": "none",
     "capabilities": ["text-to-image", "image-edit"],
-    "notes": "Placeholder entry demonstrating a deployed image model. See docs/research/SPIKE-01-image-model.md for the real methodology this generalizes from.",
+    "notes": "Placeholder entry demonstrating a deployed image model. Note the explicit capacity: omit it and the entry inherits modelDeploymentCapacity, which defaults to 1 and throttles to roughly one request per minute. See docs/research/SPIKE-01-image-model.md for the real methodology this generalizes from.",
     "sourceRef": "docs/research/SPIKE-01-image-model.md"
   },
   {
@@ -35,7 +36,7 @@
     "status": "deployed",
     "accessGating": "none",
     "capabilities": ["text-to-speech"],
-    "notes": "Placeholder entry demonstrating a deployed voice model without word-level timestamps. See docs/research/SPIKE-02-voice-model.md.",
+    "notes": "Placeholder entry demonstrating a deployed voice model without word-level timestamps. Carries no capacity on purpose: a voice model reached through the Speech endpoint by SSML voice name produces no deployment resource, so list its id in skipDeploymentModelIds and capacity never applies. See docs/research/SPIKE-02-voice-model.md.",
     "sourceRef": "docs/research/SPIKE-02-voice-model.md"
   },
   {
@@ -76,5 +77,47 @@
     "capabilities": ["long-context"],
     "notes": "Placeholder rejected entry demonstrating why a text-only model was passed over for a vision-required reviewer role, kept so the candidate is not re-researched later.",
     "sourceRef": "models/README.md"
+  },
+  {
+    "id": "example-text-model-01",
+    "kind": "text",
+    "provider": "ExampleVendor",
+    "deploymentName": "example-text-model-01",
+    "sku": "GlobalStandard",
+    "capacity": 250,
+    "region": "eastus",
+    "status": "deployed",
+    "accessGating": "none",
+    "capabilities": ["chat-completion", "long-context"],
+    "notes": "Placeholder entry for a general chat-completion model, the kind used for drafting and summarizing rather than for a reasoning pass. kind text is distinct from reasoning so a consumer can pick on cost rather than on model name.",
+    "sourceRef": "models/README.md"
+  },
+  {
+    "id": "example-speech-to-text-model-01",
+    "kind": "speech-to-text",
+    "provider": "ExampleVendor",
+    "deploymentName": "example-speech-to-text-model-01",
+    "sku": "GlobalStandard",
+    "capacity": 20,
+    "region": "eastus",
+    "status": "deployed",
+    "accessGating": "none",
+    "capabilities": ["automatic-speech-recognition"],
+    "notes": "Placeholder transcription entry. kind speech-to-text exists because transcription is neither text nor voice: it consumes audio and returns text, so a consumer that treats it as either will call the wrong route.",
+    "sourceRef": "docs/adr/ADR-0018-model-registry-schema-v2.md"
+  },
+  {
+    "id": "example-embedding-model-01",
+    "kind": "embedding",
+    "provider": "ExampleVendor",
+    "deploymentName": "example-embedding-model-01",
+    "sku": "GlobalStandard",
+    "capacity": 100,
+    "region": "eastus",
+    "status": "deployed",
+    "accessGating": "none",
+    "capabilities": ["text-embedding"],
+    "notes": "Placeholder embedding entry. An embedding deployment answers on the embeddings route rather than chat completions, which is why it is its own kind rather than a flavour of text.",
+    "sourceRef": "docs/adr/ADR-0018-model-registry-schema-v2.md"
   }
 ]

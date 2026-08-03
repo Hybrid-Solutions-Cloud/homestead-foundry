@@ -159,10 +159,10 @@ Agents are the highest-risk consumer of these endpoints, by a wide margin:
 
 Practical protections, in order of usefulness:
 
-1. **Leave deployment capacity at 1 while developing.** The resulting throttling is an accidental circuit breaker and it has saved people real money. Raise it only when you know your call volume.
-2. **Cap iterations in the agent itself.** A hard maximum on loop turns is the only reliable stop, because nothing in the Azure deployment provides one.
-3. **Develop against your cheapest deployment**, then move to the expensive one once the loop terminates reliably.
-4. **Watch Cost Management daily for the first week** rather than trusting alert thresholds to arrive in time.
+1. **Cap iterations in the agent itself.** A hard maximum on loop turns is the only reliable stop, because nothing in the Azure deployment provides one. Cap tokens per task as well if your framework allows it.
+2. **Develop against your cheapest deployment**, then move to the expensive one once the loop terminates reliably.
+3. **Watch Cost Management daily for the first week** rather than trusting alert thresholds to arrive in time.
+4. **Do not use deployment capacity as the brake.** Throttling is not a cost control. A deployment left at capacity 1 serves roughly one request per minute, and an agent that meets it does not stop, it retries: same tokens, more wall clock, plus a class of `429` failure that is easy to misread as a bug in your agent. Set `capacity` deliberately per model in your registry and put the spend limit where it belongs, in the loop cap above and in the budget alert.
 
 ## Next
 

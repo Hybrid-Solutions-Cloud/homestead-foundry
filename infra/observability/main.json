@@ -1,0 +1,1540 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "languageVersion": "2.0",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.44.1.10279",
+      "templateHash": "1416159295939261117"
+    }
+  },
+  "parameters": {
+    "workload": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 24,
+      "metadata": {
+        "description": "Lowercase workload token used in CAF-derived resource names."
+      }
+    },
+    "environment": {
+      "type": "string",
+      "allowedValues": [
+        "dev",
+        "stg",
+        "prd",
+        "prod"
+      ],
+      "metadata": {
+        "description": "Deployment environment token. prod is retained for compatibility with established CAF-named workloads."
+      }
+    },
+    "regionCode": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 5,
+      "metadata": {
+        "description": "CAF region token used in resource names."
+      }
+    },
+    "instance": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2,
+      "metadata": {
+        "description": "Zero-padded CAF instance identifier."
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure region for regional observability resources."
+      }
+    },
+    "ownerAlias": {
+      "type": "string",
+      "metadata": {
+        "description": "Accountable owner or team alias for the Owner tag."
+      }
+    },
+    "project": {
+      "type": "string",
+      "metadata": {
+        "description": "Foundry product or workload value for the Project tag."
+      }
+    },
+    "costCenter": {
+      "type": "string",
+      "metadata": {
+        "description": "Allocation code for the CostCenter tag."
+      }
+    },
+    "lifecycle": {
+      "type": "string",
+      "allowedValues": [
+        "permanent",
+        "temporary",
+        "sandbox"
+      ],
+      "metadata": {
+        "description": "Lifecycle tag for package-created resources."
+      }
+    },
+    "expiresOn": {
+      "type": "string",
+      "metadata": {
+        "description": "ISO 8601 expiry date for temporary or sandbox resources. Supply an empty string only for permanent resources."
+      }
+    },
+    "managedBy": {
+      "type": "string",
+      "metadata": {
+        "description": "Provisioning authority for the ManagedBy tag."
+      }
+    },
+    "operationsEmails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minLength": 1,
+      "metadata": {
+        "description": "Private action-group recipient addresses. Keep real addresses in a private overlay."
+      }
+    },
+    "actionGroupShortName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 12,
+      "metadata": {
+        "description": "Short display name in action-group notifications."
+      }
+    },
+    "actionGroupLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure-supported action-group location."
+      }
+    },
+    "monthlyBudgetUsd": {
+      "type": "int",
+      "minValue": 1,
+      "metadata": {
+        "description": "Monthly subscription budget in USD. This is an alert threshold, not a spending cap."
+      }
+    },
+    "budgetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Subscription budget resource name. Existing deployments must supply their current budget name to preserve it."
+      }
+    },
+    "budgetStartDate": {
+      "type": "string",
+      "metadata": {
+        "description": "First day of the monthly budget period in yyyy-MM-01 form."
+      }
+    },
+    "budgetEndDate": {
+      "type": "string",
+      "metadata": {
+        "description": "Inclusive end of the budget period in ISO 8601 UTC form."
+      }
+    },
+    "budgetActualAlertThresholds": {
+      "type": "object",
+      "metadata": {
+        "description": "Actual-cost budget notifications. Object keys: low, medium, high. Values are percentages."
+      }
+    },
+    "enableBudgetForecastNotifications": {
+      "type": "bool",
+      "metadata": {
+        "description": "Whether forecast budget notifications are enabled."
+      }
+    },
+    "budgetForecastAlertThresholds": {
+      "type": "object",
+      "metadata": {
+        "description": "Forecast budget notifications. Object keys: low, medium, high. Values are percentages."
+      }
+    },
+    "logAnalyticsSkuName": {
+      "type": "string",
+      "metadata": {
+        "description": "Log Analytics SKU name selected by the consumer."
+      }
+    },
+    "azureMonitorWorkspacePublicNetworkAccess": {
+      "type": "string",
+      "allowedValues": [
+        "Enabled",
+        "Disabled"
+      ],
+      "metadata": {
+        "description": "Azure Monitor Workspace public-network-access setting."
+      }
+    },
+    "logAnalyticsRetentionInDays": {
+      "type": "int",
+      "minValue": 30,
+      "metadata": {
+        "description": "Log Analytics interactive retention in days."
+      }
+    },
+    "logAnalyticsDailyQuotaGb": {
+      "type": "int",
+      "minValue": 1,
+      "metadata": {
+        "description": "Log Analytics daily quota safety value in GB."
+      }
+    },
+    "deployGrafanaDashboardShell": {
+      "type": "bool",
+      "metadata": {
+        "description": "Whether to create the native Azure Monitor dashboard with Grafana shell."
+      }
+    },
+    "deployGrafanaDashboardDefinitionPreview": {
+      "type": "bool",
+      "metadata": {
+        "description": "Whether to deploy the preview native Grafana dashboard-definition resource."
+      }
+    },
+    "grafanaDashboardDefinitionName": {
+      "type": "string",
+      "allowedValues": [
+        "default"
+      ],
+      "metadata": {
+        "description": "Dashboard-definition child-resource name. Azure Monitor dashboards require the literal value default."
+      }
+    },
+    "grafanaDashboardDefinitionSerializedData": {
+      "type": "string",
+      "metadata": {
+        "description": "Serialized source-controlled dashboard JSON. It must contain no credentials, private URLs, prompts, responses, or personal data."
+      }
+    },
+    "alertRuleLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure-supported location for Foundry alert rule resources."
+      }
+    },
+    "enableActivityLogAlerts": {
+      "type": "bool",
+      "metadata": {
+        "description": "Whether to deploy selected Activity Log alerts for Foundry deployment failures, Service Health, Resource Health, or high-risk resource changes."
+      }
+    },
+    "activityLogAlertDefinitions": {
+      "type": "array",
+      "metadata": {
+        "description": "Activity Log alert definitions. Each item contains name, description, enabled, scopes, and conditionAllOf."
+      }
+    },
+    "enableMetricAlerts": {
+      "type": "bool",
+      "metadata": {
+        "description": "Whether to deploy Azure Monitor metric alerts for existing Foundry resources. Enable only metrics supported by the target account or project."
+      }
+    },
+    "metricAlertDefinitions": {
+      "type": "array",
+      "metadata": {
+        "description": "Foundry metric alert definitions. Each item contains name and full metric-alert properties except actions."
+      }
+    },
+    "enableAlertProcessingRules": {
+      "type": "bool",
+      "metadata": {
+        "description": "Whether to deploy Foundry alert-processing rules for approved maintenance or response routing scenarios."
+      }
+    },
+    "alertProcessingRuleDefinitions": {
+      "type": "array",
+      "metadata": {
+        "description": "Alert-processing rule definitions. Each item contains name, location, and full properties."
+      }
+    },
+    "enableFoundryDiagnosticSetting": {
+      "type": "bool",
+      "metadata": {
+        "description": "Whether to deploy selected diagnostic categories to an existing Microsoft Foundry account."
+      }
+    },
+    "foundryDiagnosticSetting": {
+      "type": "object",
+      "metadata": {
+        "description": "Foundry diagnostic-setting configuration. Required keys when enabled: targetSubscriptionId, targetResourceGroupName, targetFoundryAccountName, name, logs, metrics, optional logAnalyticsDestinationType."
+      }
+    },
+    "enableApplicationInsights": {
+      "type": "bool",
+      "metadata": {
+        "description": "Whether to create workspace-based Application Insights for an approved Foundry application, API, or agent telemetry scenario."
+      }
+    },
+    "applicationInsightsConfiguration": {
+      "type": "object",
+      "metadata": {
+        "description": "Application Insights configuration. Required keys when enabled are documented in docs/implementation/foundry-observability.md."
+      }
+    },
+    "enableAvailabilityTests": {
+      "type": "bool",
+      "metadata": {
+        "description": "Whether to create approved Application Insights availability tests. This requires Application Insights and a safe, non-destructive health endpoint."
+      }
+    },
+    "availabilityTestDefinitions": {
+      "type": "array",
+      "metadata": {
+        "description": "Availability-test definitions. Each item contains name, kind, properties, and optional tags. No secret-bearing request data is allowed."
+      }
+    },
+    "enableScheduledQueryAlerts": {
+      "type": "bool",
+      "metadata": {
+        "description": "Whether to create scheduled query alerts against approved Foundry diagnostics or application telemetry."
+      }
+    },
+    "scheduledQueryAlertDefinitions": {
+      "type": "array",
+      "metadata": {
+        "description": "Scheduled query alert definitions. Each item contains name and full alert properties."
+      }
+    }
+  },
+  "variables": {
+    "observabilityBaseName": "[format('{0}-obs-{1}-{2}-{3}', parameters('workload'), parameters('environment'), parameters('regionCode'), parameters('instance'))]",
+    "names": {
+      "resourceGroup": "[format('rg-{0}', variables('observabilityBaseName'))]",
+      "logAnalytics": "[format('log-{0}', variables('observabilityBaseName'))]",
+      "azureMonitorWorkspace": "[format('amw-{0}', variables('observabilityBaseName'))]",
+      "actionGroup": "[format('ag-{0}', variables('observabilityBaseName'))]",
+      "dashboard": "[format('dash-{0}-{1}-{2}-{3}', parameters('workload'), parameters('environment'), parameters('regionCode'), parameters('instance'))]"
+    },
+    "requiredTags": {
+      "Owner": "[parameters('ownerAlias')]",
+      "Project": "[parameters('project')]",
+      "Environment": "[parameters('environment')]",
+      "CostCenter": "[parameters('costCenter')]",
+      "ManagedBy": "[parameters('managedBy')]",
+      "Lifecycle": "[parameters('lifecycle')]"
+    },
+    "tags": "[if(empty(parameters('expiresOn')), variables('requiredTags'), union(variables('requiredTags'), createObject('ExpiresOn', parameters('expiresOn'))))]",
+    "deployActivityAlerts": "[and(parameters('enableActivityLogAlerts'), not(empty(parameters('activityLogAlertDefinitions'))))]",
+    "deployMetricAlertDefinitions": "[and(parameters('enableMetricAlerts'), not(empty(parameters('metricAlertDefinitions'))))]",
+    "deployAlertProcessingRules": "[and(parameters('enableAlertProcessingRules'), not(empty(parameters('alertProcessingRuleDefinitions'))))]",
+    "deployAvailability": "[and(and(parameters('enableApplicationInsights'), parameters('enableAvailabilityTests')), not(empty(parameters('availabilityTestDefinitions'))))]",
+    "deployScheduledQueries": "[and(parameters('enableScheduledQueryAlerts'), not(empty(parameters('scheduledQueryAlertDefinitions'))))]"
+  },
+  "resources": {
+    "observabilityResourceGroup": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('deploy-{0}', variables('names').resourceGroup)]",
+      "location": "[deployment().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[variables('names').resourceGroup]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "6264271175147136237"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/resourceGroups",
+              "apiVersion": "2024-11-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]"
+            }
+          ],
+          "outputs": {
+            "id": {
+              "type": "string",
+              "value": "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('name'))]"
+            }
+          }
+        }
+      }
+    },
+    "logAnalytics": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('deploy-{0}', variables('names').logAnalytics)]",
+      "resourceGroup": "[variables('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[variables('names').logAnalytics]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          },
+          "skuName": {
+            "value": "[parameters('logAnalyticsSkuName')]"
+          },
+          "retentionInDays": {
+            "value": "[parameters('logAnalyticsRetentionInDays')]"
+          },
+          "dailyQuotaGb": {
+            "value": "[parameters('logAnalyticsDailyQuotaGb')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "5322155748724711476"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "skuName": {
+              "type": "string"
+            },
+            "retentionInDays": {
+              "type": "int"
+            },
+            "dailyQuotaGb": {
+              "type": "int"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces",
+              "apiVersion": "2023-09-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "sku": {
+                  "name": "[parameters('skuName')]"
+                },
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "workspaceCapping": {
+                  "dailyQuotaGb": "[parameters('dailyQuotaGb')]"
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('name'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "observabilityResourceGroup"
+      ]
+    },
+    "azureMonitorWorkspace": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('deploy-{0}', variables('names').azureMonitorWorkspace)]",
+      "resourceGroup": "[variables('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[variables('names').azureMonitorWorkspace]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          },
+          "publicNetworkAccess": {
+            "value": "[parameters('azureMonitorWorkspacePublicNetworkAccess')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "12538727583144948317"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "publicNetworkAccess": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Monitor/accounts",
+              "apiVersion": "2023-04-03",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "publicNetworkAccess": "[parameters('publicNetworkAccess')]"
+              }
+            }
+          ],
+          "outputs": {
+            "id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Monitor/accounts', parameters('name'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "observabilityResourceGroup"
+      ]
+    },
+    "actionGroup": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('deploy-{0}', variables('names').actionGroup)]",
+      "resourceGroup": "[variables('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[variables('names').actionGroup]"
+          },
+          "location": {
+            "value": "[parameters('actionGroupLocation')]"
+          },
+          "shortName": {
+            "value": "[parameters('actionGroupShortName')]"
+          },
+          "emailAddresses": {
+            "value": "[parameters('operationsEmails')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "languageVersion": "2.0",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "6576796856047317798"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "shortName": {
+              "type": "string"
+            },
+            "emailAddresses": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "tags": {
+              "type": "object"
+            }
+          },
+          "resources": {
+            "actionGroup": {
+              "type": "Microsoft.Insights/actionGroups",
+              "apiVersion": "2023-01-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "copy": [
+                  {
+                    "name": "emailReceivers",
+                    "count": "[length(parameters('emailAddresses'))]",
+                    "input": {
+                      "name": "[format('operations-{0}', add(copyIndex('emailReceivers'), 1))]",
+                      "emailAddress": "[parameters('emailAddresses')[copyIndex('emailReceivers')]]",
+                      "useCommonAlertSchema": true
+                    }
+                  }
+                ],
+                "groupShortName": "[parameters('shortName')]",
+                "enabled": true
+              }
+            }
+          },
+          "outputs": {
+            "id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Insights/actionGroups', parameters('name'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "observabilityResourceGroup"
+      ]
+    },
+    "subscriptionBudget": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('deploy-{0}', parameters('budgetName'))]",
+      "location": "[deployment().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[parameters('budgetName')]"
+          },
+          "amountUsd": {
+            "value": "[parameters('monthlyBudgetUsd')]"
+          },
+          "startDate": {
+            "value": "[parameters('budgetStartDate')]"
+          },
+          "endDate": {
+            "value": "[parameters('budgetEndDate')]"
+          },
+          "actionGroupResourceId": {
+            "value": "[reference('actionGroup').outputs.id.value]"
+          },
+          "contactEmails": {
+            "value": "[parameters('operationsEmails')]"
+          },
+          "actualAlertThresholds": {
+            "value": "[parameters('budgetActualAlertThresholds')]"
+          },
+          "enableForecastNotifications": {
+            "value": "[parameters('enableBudgetForecastNotifications')]"
+          },
+          "forecastAlertThresholds": {
+            "value": "[parameters('budgetForecastAlertThresholds')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "languageVersion": "2.0",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "16951933412099653471"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "amountUsd": {
+              "type": "int"
+            },
+            "startDate": {
+              "type": "string"
+            },
+            "endDate": {
+              "type": "string"
+            },
+            "actionGroupResourceId": {
+              "type": "string"
+            },
+            "contactEmails": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "actualAlertThresholds": {
+              "type": "object"
+            },
+            "enableForecastNotifications": {
+              "type": "bool"
+            },
+            "forecastAlertThresholds": {
+              "type": "object"
+            }
+          },
+          "variables": {
+            "actualNotifications": {
+              "actualLow": {
+                "enabled": true,
+                "operator": "GreaterThanOrEqualTo",
+                "threshold": "[parameters('actualAlertThresholds').low]",
+                "thresholdType": "Actual",
+                "contactGroups": [
+                  "[parameters('actionGroupResourceId')]"
+                ],
+                "contactEmails": "[parameters('contactEmails')]"
+              },
+              "actualMedium": {
+                "enabled": true,
+                "operator": "GreaterThanOrEqualTo",
+                "threshold": "[parameters('actualAlertThresholds').medium]",
+                "thresholdType": "Actual",
+                "contactGroups": [
+                  "[parameters('actionGroupResourceId')]"
+                ],
+                "contactEmails": "[parameters('contactEmails')]"
+              },
+              "actualHigh": {
+                "enabled": true,
+                "operator": "GreaterThanOrEqualTo",
+                "threshold": "[parameters('actualAlertThresholds').high]",
+                "thresholdType": "Actual",
+                "contactGroups": [
+                  "[parameters('actionGroupResourceId')]"
+                ],
+                "contactEmails": "[parameters('contactEmails')]"
+              }
+            },
+            "forecastNotifications": "[if(not(parameters('enableForecastNotifications')), createObject(), createObject('forecastLow', createObject('enabled', true(), 'operator', 'GreaterThanOrEqualTo', 'threshold', parameters('forecastAlertThresholds').low, 'thresholdType', 'Forecasted', 'contactGroups', createArray(parameters('actionGroupResourceId')), 'contactEmails', parameters('contactEmails')), 'forecastMedium', createObject('enabled', true(), 'operator', 'GreaterThanOrEqualTo', 'threshold', parameters('forecastAlertThresholds').medium, 'thresholdType', 'Forecasted', 'contactGroups', createArray(parameters('actionGroupResourceId')), 'contactEmails', parameters('contactEmails')), 'forecastHigh', createObject('enabled', true(), 'operator', 'GreaterThanOrEqualTo', 'threshold', parameters('forecastAlertThresholds').high, 'thresholdType', 'Forecasted', 'contactGroups', createArray(parameters('actionGroupResourceId')), 'contactEmails', parameters('contactEmails'))))]"
+          },
+          "resources": {
+            "budget": {
+              "type": "Microsoft.Consumption/budgets",
+              "apiVersion": "2021-10-01",
+              "name": "[parameters('name')]",
+              "properties": {
+                "category": "Cost",
+                "amount": "[parameters('amountUsd')]",
+                "timeGrain": "Monthly",
+                "timePeriod": {
+                  "startDate": "[parameters('startDate')]",
+                  "endDate": "[parameters('endDate')]"
+                },
+                "notifications": "[union(variables('actualNotifications'), variables('forecastNotifications'))]"
+              }
+            }
+          },
+          "outputs": {
+            "id": {
+              "type": "string",
+              "value": "[subscriptionResourceId('Microsoft.Consumption/budgets', parameters('name'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "actionGroup"
+      ]
+    },
+    "grafanaDashboard": {
+      "condition": "[parameters('deployGrafanaDashboardShell')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('deploy-{0}', variables('names').dashboard)]",
+      "resourceGroup": "[variables('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[variables('names').dashboard]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          },
+          "deployDashboardDefinitionPreview": {
+            "value": "[parameters('deployGrafanaDashboardDefinitionPreview')]"
+          },
+          "dashboardDefinitionName": {
+            "value": "[parameters('grafanaDashboardDefinitionName')]"
+          },
+          "dashboardDefinitionSerializedData": {
+            "value": "[parameters('grafanaDashboardDefinitionSerializedData')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "4366485271033858183"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            },
+            "deployDashboardDefinitionPreview": {
+              "type": "bool"
+            },
+            "dashboardDefinitionName": {
+              "type": "string"
+            },
+            "dashboardDefinitionSerializedData": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Dashboard/dashboards",
+              "apiVersion": "2025-08-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {}
+            },
+            {
+              "condition": "[and(parameters('deployDashboardDefinitionPreview'), not(empty(parameters('dashboardDefinitionSerializedData'))))]",
+              "type": "Microsoft.Dashboard/dashboards/dashboardDefinitions",
+              "apiVersion": "2025-09-01-preview",
+              "name": "[format('{0}/{1}', parameters('name'), parameters('dashboardDefinitionName'))]",
+              "properties": {
+                "serializedData": "[parameters('dashboardDefinitionSerializedData')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Dashboard/dashboards', parameters('name'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Dashboard/dashboards', parameters('name'))]"
+            },
+            "dashboardDefinitionId": {
+              "type": "string",
+              "value": "[if(and(parameters('deployDashboardDefinitionPreview'), not(empty(parameters('dashboardDefinitionSerializedData')))), resourceId('Microsoft.Dashboard/dashboards/dashboardDefinitions', parameters('name'), parameters('dashboardDefinitionName')), '')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "observabilityResourceGroup"
+      ]
+    },
+    "activityAlerts": {
+      "condition": "[variables('deployActivityAlerts')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('deploy-{0}-activity-alerts-{1}', parameters('workload'), parameters('instance'))]",
+      "resourceGroup": "[variables('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "alertDefinitions": {
+            "value": "[parameters('activityLogAlertDefinitions')]"
+          },
+          "actionGroupResourceId": {
+            "value": "[reference('actionGroup').outputs.id.value]"
+          },
+          "alertLocation": {
+            "value": "[parameters('alertRuleLocation')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "14415053187780499810"
+            }
+          },
+          "parameters": {
+            "alertDefinitions": {
+              "type": "array"
+            },
+            "actionGroupResourceId": {
+              "type": "string"
+            },
+            "alertLocation": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            }
+          },
+          "resources": [
+            {
+              "copy": {
+                "name": "activityLogAlerts",
+                "count": "[length(parameters('alertDefinitions'))]"
+              },
+              "type": "Microsoft.Insights/activityLogAlerts",
+              "apiVersion": "2026-01-01",
+              "name": "[parameters('alertDefinitions')[copyIndex()].name]",
+              "location": "[parameters('alertLocation')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "enabled": "[parameters('alertDefinitions')[copyIndex()].enabled]",
+                "description": "[parameters('alertDefinitions')[copyIndex()].description]",
+                "scopes": "[parameters('alertDefinitions')[copyIndex()].scopes]",
+                "condition": {
+                  "allOf": "[parameters('alertDefinitions')[copyIndex()].conditionAllOf]"
+                },
+                "actions": {
+                  "actionGroups": [
+                    {
+                      "actionGroupId": "[parameters('actionGroupResourceId')]"
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "ids": {
+              "type": "array",
+              "copy": {
+                "count": "[length(parameters('alertDefinitions'))]",
+                "input": "[resourceId('Microsoft.Insights/activityLogAlerts', parameters('alertDefinitions')[copyIndex()].name)]"
+              }
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "actionGroup"
+      ]
+    },
+    "metricAlerts": {
+      "condition": "[variables('deployMetricAlertDefinitions')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('deploy-{0}-metric-alerts-{1}', parameters('workload'), parameters('instance'))]",
+      "resourceGroup": "[variables('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "alertDefinitions": {
+            "value": "[parameters('metricAlertDefinitions')]"
+          },
+          "actionGroupResourceId": {
+            "value": "[reference('actionGroup').outputs.id.value]"
+          },
+          "alertLocation": {
+            "value": "[parameters('alertRuleLocation')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "17632258327778956435"
+            }
+          },
+          "parameters": {
+            "alertDefinitions": {
+              "type": "array"
+            },
+            "actionGroupResourceId": {
+              "type": "string"
+            },
+            "alertLocation": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            }
+          },
+          "resources": [
+            {
+              "copy": {
+                "name": "metricAlerts",
+                "count": "[length(parameters('alertDefinitions'))]"
+              },
+              "type": "Microsoft.Insights/metricAlerts",
+              "apiVersion": "2018-03-01",
+              "name": "[parameters('alertDefinitions')[copyIndex()].name]",
+              "location": "[parameters('alertLocation')]",
+              "tags": "[parameters('tags')]",
+              "properties": "[union(parameters('alertDefinitions')[copyIndex()].properties, createObject('actions', createArray(createObject('actionGroupId', parameters('actionGroupResourceId')))))]"
+            }
+          ],
+          "outputs": {
+            "ids": {
+              "type": "array",
+              "copy": {
+                "count": "[length(parameters('alertDefinitions'))]",
+                "input": "[resourceId('Microsoft.Insights/metricAlerts', parameters('alertDefinitions')[copyIndex()].name)]"
+              }
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "actionGroup"
+      ]
+    },
+    "alertProcessingRules": {
+      "condition": "[variables('deployAlertProcessingRules')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('deploy-{0}-alert-processing-{1}', parameters('workload'), parameters('instance'))]",
+      "resourceGroup": "[variables('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "ruleDefinitions": {
+            "value": "[parameters('alertProcessingRuleDefinitions')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "9421890098969225505"
+            }
+          },
+          "parameters": {
+            "ruleDefinitions": {
+              "type": "array",
+              "metadata": {
+                "description": "Alert-processing rules for reviewed routing or maintenance suppression. Each item contains name, location, and full rule properties."
+              }
+            }
+          },
+          "resources": [
+            {
+              "copy": {
+                "name": "alertProcessingRules",
+                "count": "[length(parameters('ruleDefinitions'))]"
+              },
+              "type": "Microsoft.AlertsManagement/actionRules",
+              "apiVersion": "2021-08-08",
+              "name": "[parameters('ruleDefinitions')[copyIndex()].name]",
+              "location": "[parameters('ruleDefinitions')[copyIndex()].location]",
+              "properties": "[parameters('ruleDefinitions')[copyIndex()].properties]"
+            }
+          ],
+          "outputs": {
+            "ids": {
+              "type": "array",
+              "copy": {
+                "count": "[length(parameters('ruleDefinitions'))]",
+                "input": "[resourceId('Microsoft.AlertsManagement/actionRules', parameters('ruleDefinitions')[copyIndex()].name)]"
+              }
+            }
+          }
+        }
+      }
+    },
+    "foundryDiagnostics": {
+      "condition": "[parameters('enableFoundryDiagnosticSetting')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('deploy-{0}-foundry-diagnostics-{1}', parameters('workload'), parameters('instance'))]",
+      "subscriptionId": "[parameters('foundryDiagnosticSetting').targetSubscriptionId]",
+      "resourceGroup": "[parameters('foundryDiagnosticSetting').targetResourceGroupName]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "targetFoundryAccountName": {
+            "value": "[parameters('foundryDiagnosticSetting').targetFoundryAccountName]"
+          },
+          "name": {
+            "value": "[parameters('foundryDiagnosticSetting').name]"
+          },
+          "logAnalyticsWorkspaceResourceId": {
+            "value": "[reference('logAnalytics').outputs.id.value]"
+          },
+          "logs": {
+            "value": "[parameters('foundryDiagnosticSetting').logs]"
+          },
+          "metrics": {
+            "value": "[parameters('foundryDiagnosticSetting').metrics]"
+          },
+          "logAnalyticsDestinationType": {
+            "value": "[coalesce(tryGet(parameters('foundryDiagnosticSetting'), 'logAnalyticsDestinationType'), '')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "2785837707776375837"
+            }
+          },
+          "parameters": {
+            "targetFoundryAccountName": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "logAnalyticsWorkspaceResourceId": {
+              "type": "string"
+            },
+            "logs": {
+              "type": "array"
+            },
+            "metrics": {
+              "type": "array"
+            },
+            "logAnalyticsDestinationType": {
+              "type": "string"
+            }
+          },
+          "variables": {
+            "destinationType": "[if(empty(parameters('logAnalyticsDestinationType')), createObject(), createObject('logAnalyticsDestinationType', parameters('logAnalyticsDestinationType')))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Insights/diagnosticSettings",
+              "apiVersion": "2021-05-01-preview",
+              "scope": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('targetFoundryAccountName'))]",
+              "name": "[parameters('name')]",
+              "properties": "[union(createObject('workspaceId', parameters('logAnalyticsWorkspaceResourceId'), 'logs', parameters('logs'), 'metrics', parameters('metrics')), variables('destinationType'))]"
+            }
+          ],
+          "outputs": {
+            "id": {
+              "type": "string",
+              "value": "[extensionResourceId(resourceId('Microsoft.CognitiveServices/accounts', parameters('targetFoundryAccountName')), 'Microsoft.Insights/diagnosticSettings', parameters('name'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "logAnalytics"
+      ]
+    },
+    "applicationInsights": {
+      "condition": "[parameters('enableApplicationInsights')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('deploy-{0}-application-insights-{1}', parameters('workload'), parameters('instance'))]",
+      "resourceGroup": "[variables('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[parameters('applicationInsightsConfiguration').name]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "kind": {
+            "value": "[parameters('applicationInsightsConfiguration').kind]"
+          },
+          "applicationType": {
+            "value": "[parameters('applicationInsightsConfiguration').applicationType]"
+          },
+          "logAnalyticsWorkspaceResourceId": {
+            "value": "[reference('logAnalytics').outputs.id.value]"
+          },
+          "retentionInDays": {
+            "value": "[parameters('applicationInsightsConfiguration').retentionInDays]"
+          },
+          "samplingPercentage": {
+            "value": "[parameters('applicationInsightsConfiguration').samplingPercentage]"
+          },
+          "disableLocalAuth": {
+            "value": "[parameters('applicationInsightsConfiguration').disableLocalAuth]"
+          },
+          "publicNetworkAccessForIngestion": {
+            "value": "[parameters('applicationInsightsConfiguration').publicNetworkAccessForIngestion]"
+          },
+          "publicNetworkAccessForQuery": {
+            "value": "[parameters('applicationInsightsConfiguration').publicNetworkAccessForQuery]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "12764409183115030452"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            },
+            "applicationType": {
+              "type": "string"
+            },
+            "logAnalyticsWorkspaceResourceId": {
+              "type": "string"
+            },
+            "retentionInDays": {
+              "type": "int"
+            },
+            "samplingPercentage": {
+              "type": "int"
+            },
+            "disableLocalAuth": {
+              "type": "bool"
+            },
+            "publicNetworkAccessForIngestion": {
+              "type": "string"
+            },
+            "publicNetworkAccessForQuery": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Insights/components",
+              "apiVersion": "2020-02-02",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "kind": "[parameters('kind')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "Application_Type": "[parameters('applicationType')]",
+                "WorkspaceResourceId": "[parameters('logAnalyticsWorkspaceResourceId')]",
+                "RetentionInDays": "[parameters('retentionInDays')]",
+                "SamplingPercentage": "[parameters('samplingPercentage')]",
+                "DisableLocalAuth": "[parameters('disableLocalAuth')]",
+                "publicNetworkAccessForIngestion": "[parameters('publicNetworkAccessForIngestion')]",
+                "publicNetworkAccessForQuery": "[parameters('publicNetworkAccessForQuery')]"
+              }
+            }
+          ],
+          "outputs": {
+            "id": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Insights/components', parameters('name'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "logAnalytics"
+      ]
+    },
+    "availabilityTests": {
+      "condition": "[variables('deployAvailability')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('deploy-{0}-availability-tests-{1}', parameters('workload'), parameters('instance'))]",
+      "resourceGroup": "[variables('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "tests": {
+            "value": "[parameters('availabilityTestDefinitions')]"
+          },
+          "applicationInsightsResourceId": {
+            "value": "[reference('applicationInsights').outputs.id.value]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "10100357137856279190"
+            }
+          },
+          "parameters": {
+            "tests": {
+              "type": "array"
+            },
+            "applicationInsightsResourceId": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            }
+          },
+          "resources": [
+            {
+              "copy": {
+                "name": "availabilityTests",
+                "count": "[length(parameters('tests'))]"
+              },
+              "type": "Microsoft.Insights/webtests",
+              "apiVersion": "2022-06-15",
+              "name": "[parameters('tests')[copyIndex()].name]",
+              "location": "[parameters('location')]",
+              "kind": "[parameters('tests')[copyIndex()].kind]",
+              "tags": "[union(parameters('tags'), coalesce(tryGet(parameters('tests')[copyIndex()], 'tags'), createObject()), createObject(format('hidden-link:{0}', parameters('applicationInsightsResourceId')), 'Resource'))]",
+              "properties": "[parameters('tests')[copyIndex()].properties]"
+            }
+          ],
+          "outputs": {
+            "ids": {
+              "type": "array",
+              "copy": {
+                "count": "[length(parameters('tests'))]",
+                "input": "[resourceId('Microsoft.Insights/webtests', parameters('tests')[copyIndex()].name)]"
+              }
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "applicationInsights"
+      ]
+    },
+    "scheduledQueryAlerts": {
+      "condition": "[variables('deployScheduledQueries')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "[format('deploy-{0}-scheduled-query-alerts-{1}', parameters('workload'), parameters('instance'))]",
+      "resourceGroup": "[variables('names').resourceGroup]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "alertDefinitions": {
+            "value": "[parameters('scheduledQueryAlertDefinitions')]"
+          },
+          "actionGroupResourceId": {
+            "value": "[reference('actionGroup').outputs.id.value]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.44.1.10279",
+              "templateHash": "5665729776765444051"
+            }
+          },
+          "parameters": {
+            "alertDefinitions": {
+              "type": "array"
+            },
+            "actionGroupResourceId": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "object"
+            }
+          },
+          "resources": [
+            {
+              "copy": {
+                "name": "scheduledQueryAlerts",
+                "count": "[length(parameters('alertDefinitions'))]"
+              },
+              "type": "Microsoft.Insights/scheduledQueryRules",
+              "apiVersion": "2023-12-01",
+              "name": "[parameters('alertDefinitions')[copyIndex()].name]",
+              "location": "[parameters('location')]",
+              "kind": "LogAlert",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "displayName": "[parameters('alertDefinitions')[copyIndex()].displayName]",
+                "description": "[parameters('alertDefinitions')[copyIndex()].description]",
+                "enabled": "[parameters('alertDefinitions')[copyIndex()].enabled]",
+                "severity": "[parameters('alertDefinitions')[copyIndex()].severity]",
+                "scopes": "[parameters('alertDefinitions')[copyIndex()].scopes]",
+                "evaluationFrequency": "[parameters('alertDefinitions')[copyIndex()].evaluationFrequency]",
+                "windowSize": "[parameters('alertDefinitions')[copyIndex()].windowSize]",
+                "criteria": "[parameters('alertDefinitions')[copyIndex()].criteria]",
+                "autoMitigate": "[parameters('alertDefinitions')[copyIndex()].autoMitigate]",
+                "skipQueryValidation": "[parameters('alertDefinitions')[copyIndex()].skipQueryValidation]",
+                "actions": {
+                  "actionGroups": [
+                    "[parameters('actionGroupResourceId')]"
+                  ]
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "ids": {
+              "type": "array",
+              "copy": {
+                "count": "[length(parameters('alertDefinitions'))]",
+                "input": "[resourceId('Microsoft.Insights/scheduledQueryRules', parameters('alertDefinitions')[copyIndex()].name)]"
+              }
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "actionGroup"
+      ]
+    }
+  },
+  "outputs": {
+    "observabilityResourceGroupName": {
+      "type": "string",
+      "value": "[variables('names').resourceGroup]"
+    },
+    "logAnalyticsWorkspaceResourceId": {
+      "type": "string",
+      "value": "[reference('logAnalytics').outputs.id.value]"
+    },
+    "azureMonitorWorkspaceResourceId": {
+      "type": "string",
+      "value": "[reference('azureMonitorWorkspace').outputs.id.value]"
+    },
+    "actionGroupResourceId": {
+      "type": "string",
+      "value": "[reference('actionGroup').outputs.id.value]"
+    },
+    "capabilityStatus": {
+      "type": "object",
+      "value": {
+        "activityLogAlerts": "[variables('deployActivityAlerts')]",
+        "metricAlerts": "[variables('deployMetricAlertDefinitions')]",
+        "alertProcessingRules": "[variables('deployAlertProcessingRules')]",
+        "foundryDiagnosticSetting": "[parameters('enableFoundryDiagnosticSetting')]",
+        "applicationInsights": "[parameters('enableApplicationInsights')]",
+        "availabilityTests": "[variables('deployAvailability')]",
+        "scheduledQueryAlerts": "[variables('deployScheduledQueries')]",
+        "dashboardDefinitionPreview": "[and(and(parameters('deployGrafanaDashboardShell'), parameters('deployGrafanaDashboardDefinitionPreview')), not(empty(parameters('grafanaDashboardDefinitionSerializedData'))))]"
+      }
+    }
+  }
+}

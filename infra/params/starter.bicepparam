@@ -3,7 +3,7 @@
 // replace every value marked REPLACE below.
 //
 // This file differs from example.bicepparam in one important way: it is wired to
-// models/registry.starter.json, a real 26-model roster, rather than to the
+// models/registry.starter.json, a real 28-model roster, rather than to the
 // placeholder registry. Follow docs/guide/deployment.md and this deploys a
 // working environment.
 using '../main.bicep'
@@ -41,6 +41,13 @@ param skipDeploymentModelIds = ['mai-voice-2', 'azure-neural-standard']
 // That queries your subscription for the current name and version of every
 // model and writes infra/params/model-catalog.json.
 param modelCatalog = loadJsonContent('./model-catalog.json')
+
+// Fallback capacity only, for a registry entry that declares none of its own.
+// Every deployed entry in the starter registry declares its own capacity, so
+// nothing should reach this. Check the inheritedCapacityRegistryIds output after
+// what-if: any id listed there is deploying at the number below, and 1 measures
+// at roughly one request per minute.
+param modelDeploymentCapacity = 1
 
 // ---------------------------------------------------------------------------
 // Identity. Both groups are Entra objects created outside ARM. Create them

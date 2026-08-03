@@ -14,8 +14,9 @@ pattern for this public writeup. It is not a live private inventory, and it
 contains no subscription, tenant, group, or vault identifiers.
 
 **Built:** 2026-07-24, net-new, from `infra/main.bicep` in this repository.
+**Amended:** 2026-08-02, per-model capacity set and two embedding deployments added. See [Amendment, 2026-08-02](#amendment-2026-08-02).
 **Region:** East US, a single region for every resource.
-**Status:** deployment `Succeeded`. Twenty model deployments live, every one reporting `Succeeded`.
+**Status:** deployment `Succeeded`. Twenty-two model deployments live, every one reporting `Succeeded`.
 
 ## How this environment was built
 
@@ -41,7 +42,7 @@ demonstration rather than by assertion.
 | Resource group | `rg-<workload>-<env>-<region>-01` | East US. Tags: `initiative`, `env`, `owner`. |
 | AI Foundry account | `aif-<workload>-<env>-<region>-01` | Kind AIServices, SKU S0, custom subdomain, system-assigned managed identity, public network with Entra and RBAC, project management enabled. |
 | Foundry project | `proj-<workload>-<purpose>-01` | Scoped inside the account, which already fixes environment and region. |
-| Model deployments | twenty | Six image, fourteen reasoning. Each `GlobalStandard` at capacity 1, with the default content-safety policy and automatic version upgrade preserved. Generated from the model registry, not hand-written. |
+| Model deployments | twenty-two | Six image, fourteen reasoning, two embedding. Each `GlobalStandard`, with the default content-safety policy and automatic version upgrade preserved. Generated from the model registry, not hand-written. Capacity is set per registry entry, not once for the account: image 4 to 30, reasoning 100 to 1000, embedding 100. |
 | Security group | `sg-<workload>-image-users-<env>-<region>-01` | Cognitive Services User on the account scope. |
 | Security group | `sg-<workload>-speech-users-<env>-<region>-01` | Cognitive Services Speech User on the account scope. |
 | Key Vault | pre-existing platform vault | Reused by name only. Holds the Speech key under an initiative-prefixed secret name. Never created or destroyed by this template. |
@@ -49,9 +50,9 @@ demonstration rather than by assertion.
 
 ### The model roster
 
-Twenty deployments spanning five vendors: six image models and fourteen reasoning
-models. The exact roster is not duplicated here, because the registry is what
-actually drives the deployments. See `models/registry.starter.json` and the
+Twenty-two deployments: six image models, fourteen reasoning models, and two
+embedding models. The exact roster is not duplicated here, because the registry is
+what actually drives the deployments. See `models/registry.starter.json` and the
 [model registry guide](../guide/model-registry.md).
 
 Every deployment was verified against the live catalog at build time and found to
@@ -59,10 +60,10 @@ be running the current version, preview models included. Deployment names are
 deliberately version-free, so a version change is absorbed by redeploying under the
 same name instead of creating a parallel deployment.
 
-The voice model is reached through the Speech endpoint by SSML voice name and is
-therefore not a deployment resource at all. Its registry id is listed in
-`skipDeploymentModelIds`, which is why the registry marks twenty-two entries
-deployed while the account shows twenty deployments.
+The voice models are reached through the Speech endpoint by SSML voice name and are
+therefore not deployment resources at all. Their registry ids are listed in
+`skipDeploymentModelIds`, which is why the registry marks twenty-four entries
+deployed while the account shows twenty-two deployments.
 
 ## Endpoints
 
@@ -92,6 +93,35 @@ The rebuild produced a second finding: role assignments cannot be created
 idempotently over hand-made ones, because Azure deduplicates on principal, role and
 scope regardless of assignment name. That is what the `manageRoleAssignments`
 parameter exists for, and why reconciling deployers set it to false.
+
+## Amendment, 2026-08-02
+
+The environment as first built put **every** deployment on `GlobalStandard` at
+**capacity 1**, because the template had a single stack-wide capacity parameter
+and nothing per model. That was recorded here as if it were a deliberate cost
+control. It was not one, and the guidance built on it has been corrected
+throughout this documentation.
+
+**What capacity 1 actually did.** It measured at roughly **one request per
+minute** per deployment. Any agentic caller failed on its second call. It saved
+nothing: `GlobalStandard` bills per token consumed, so a throttled deployment
+that gets retried spends the same and takes longer. Capacity is a throughput
+ceiling. Cost control is the budget, its alerts, and a cap in the caller.
+
+**What changed.**
+
+| Change | Detail |
+|---|---|
+| Per-model capacity | The registry schema gained an optional per-entry `capacity`, and `modules/foundry-account.bicep` resolves `m.?capacity ?? capacity`. The stack-wide `modelDeploymentCapacity` is now only a fallback. |
+| Capacity raised | Image deployments 4 to 30, reasoning deployments 100 to 1000, sized per model rather than one number for the account. Capacity units are not comparable between models, which is why one number could never be right. |
+| Embedding modality | `embedding` was added to the registry `kind` enum, and two embedding deployments were added at capacity 100, taking the account from twenty deployments to twenty-two. |
+| Drift output | `main.bicep` now emits `inheritedCapacityRegistryIds`, listing any deployable entry that declared no capacity of its own and is therefore inheriting the fallback. It exists so this cannot happen silently again. |
+
+**Why it was silent.** The original template had exactly one capacity number, no
+output surfaced what each deployment resolved to, and every shipped example
+registry omitted capacity entirely. A deployer copying the examples got capacity
+1 without ever making a decision about it. Both example registries now carry
+realistic capacities on every deployed entry.
 
 ## Deviations from the design
 
@@ -134,7 +164,11 @@ Re-run all three after any rebuild. The commands are in the
 
 ## Known gaps
 
-None outstanding on this environment.
+**The raised capacities have not been re-measured.** The one-request-per-minute
+figure above was observed at capacity 1. No throughput measurement has been taken
+against the new per-model capacities, so the numbers in the registry are sized
+from expected use rather than from an observed rate. Treat them as a starting
+point and measure before relying on them for a latency or concurrency budget.
 
 ## Reproducing this
 

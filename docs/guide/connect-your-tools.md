@@ -131,9 +131,9 @@ Agentic tools (Cline, Roo, Cursor's agent mode, hosted agents) issue **many** mo
 Before you connect one:
 
 - Start with the cheapest deployment you have, not the largest.
-- Deployments in this methodology default to **capacity 1**, which throttles hard. That is a feature here: it is an accidental brake. Do not raise it until you know your call volume.
+- **Do not use deployment capacity as a cost control.** A model deployment left at capacity 1 throttles to roughly one request per minute, which does not save money, it just breaks the tool: an agentic client hits `429` on its second call and either stalls or retries the same work. On `GlobalStandard`, billing is per token consumed either way, so a throttled deployment can spend the same and deliver less. Set `capacity` deliberately per model in your registry, sized to what that model actually has to serve. On a provisioned SKU the arithmetic is different: there you pay per provisioned unit per hour, so capacity is the cost driver and this advice does not transfer.
 - Watch Cost Management for the first day of real use rather than trusting the alert thresholds to be timely.
-- If you need a hard stop, it has to live in the caller. Nothing in the deployment provides one.
+- If you need a hard stop, it has to live in the caller: a cap on iterations, a cap on tokens per task, or both. Nothing in the deployment provides one. The budget only emails, and deployment capacity only slows you down.
 
 ## Verify it, do not assume it
 
