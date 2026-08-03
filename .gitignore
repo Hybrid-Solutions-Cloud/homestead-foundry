@@ -30,6 +30,9 @@ local/
 *.local.json
 # Compiled Bicep ARM output (build artifact, regenerate with az bicep build)
 infra/*.json
+# Compiled ARM output from az bicep build and build-params, at any depth
+infra/**/main.json
+infra/params/*.json
 !infra/*.parameters.json
 
 docs/.vitepress/cache
