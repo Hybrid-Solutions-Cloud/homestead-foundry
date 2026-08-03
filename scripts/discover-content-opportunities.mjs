@@ -37,8 +37,8 @@
  * source at all (measurement still written, but demand is unverified).
  */
 
-import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
-import { join, extname, basename } from 'node:path';
+import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs';
+import { join, extname, basename, isAbsolute } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 function usage(message) {
@@ -74,7 +74,7 @@ function parseArgs(argv) {
  * occurrence was the registry entry describing RAG as absent. Discovery found
  * zero gaps and looked entirely healthy doing it.
  */
-export function readCorpus(root, { extensions = ['.json', '.md', '.mdx', '.txt'], exclude = [] } = {}) {
+export function readCorpus(root, { extensions = ['.json', '.md', '.mdx', '.txt', '.mmd', '.drawio', '.svg'], exclude = [] } = {}) {
   const excluded = new Set(exclude.map((name) => name.toLowerCase()));
   const parts = [];
   let skipped = 0;
@@ -142,6 +142,45 @@ async function survey(watchList, timeoutSeconds) {
     }
   }
   return results;
+}
+
+/**
+ * Measure each surface separately, because they are separate products.
+ *
+ * A topic can be thoroughly taught in the Learn corpus and entirely absent from
+ * the Field Guide, and vice versa. Measuring one merged corpus hides exactly
+ * that, and the merged view reports "covered" for a surface that covers
+ * nothing. Every surface a caller declares gets its own count and its own
+ * candidate.
+ */
+export function buildProposalsPerSurface({ probes, surfaces, surveyed, gapThreshold, now }) {
+  const proposals = [];
+  for (const surface of surfaces) {
+    const forSurface = buildProposals({
+      // A probe declares which kinds it applies to. A probe about diagram
+      // legibility has no meaning against a prose corpus, and a probe about
+      // citation practice has none against a diagram set.
+      probes: probes.filter((p) => !p.kinds || p.kinds.includes(surface.kind)),
+      corpusText: surface.text,
+      surveyed,
+      gapThreshold,
+      surface: surface.id,
+      now,
+    });
+    // Surface-qualified ids, so a Learn gap and a Field Guide gap in the same
+    // topic are two entries with two lifecycles rather than one that hides the
+    // other.
+    for (const proposal of forSurface) {
+      proposals.push({
+        ...proposal,
+        id: `${proposal.id}-${surface.id}`,
+        title: `${proposal.title} (${surface.label})`,
+        kind: surface.kind,
+        gapEvidence: `${surface.label} corpus: ${proposal.gapEvidence}`,
+      });
+    }
+  }
+  return proposals;
 }
 
 export function buildProposals({ probes, corpusText, surveyed, gapThreshold, surface, now }) {
@@ -228,15 +267,48 @@ async function main() {
     }
   }
 
+  // --surfaces id:subdir[:Label],... measures each publishing surface against
+  // its own subtree. Without it everything is measured as one corpus and every
+  // proposal is attributed to a single surface, which was the original defect:
+  // Field Guide gaps were invisible because Learn coverage masked them.
+  // id|path|Label|kind, pipe separated so a Windows drive letter in the path
+  // does not collide with the field separator. The path may be relative to
+  // --corpus or absolute: visual guides commonly live in a different repository
+  // from the written content, and a surface that cannot point outside the
+  // corpus root simply cannot be measured.
+  const surfaces = [];
+  if (args.surfaces) {
+    for (const spec of args.surfaces.split(',').map((s) => s.trim()).filter(Boolean)) {
+      const [id, dir, label, kind] = spec.split('|');
+      if (!id || !dir) usage(`--surfaces entry "${spec}" must be id|path[|Label][|kind]`);
+      const root = isAbsolute(dir) ? dir : join(args.corpus, dir);
+      if (!existsSync(root)) {
+        console.log(`  surface ${id}: SKIPPED, ${root} does not exist`);
+        continue;
+      }
+      const { text } = readCorpus(root, { exclude: [...selfNames, ...extraExcludes] });
+      surfaces.push({ id, label: label || id, kind: kind || id, text });
+      console.log(`  surface ${id} (kind ${kind || id}): ${text.length} characters from ${root}`);
+    }
+  }
+
   const now = new Date().toISOString();
-  const proposals = buildProposals({
-    probes: probes.probes,
-    corpusText,
-    surveyed,
-    gapThreshold: Number.parseInt(args['gap-threshold'], 10),
-    surface: args.surface,
-    now,
-  });
+  const proposals = surfaces.length
+    ? buildProposalsPerSurface({
+        probes: probes.probes,
+        surfaces,
+        surveyed,
+        gapThreshold: Number.parseInt(args['gap-threshold'], 10),
+        now,
+      })
+    : buildProposals({
+        probes: probes.probes,
+        corpusText,
+        surveyed,
+        gapThreshold: Number.parseInt(args['gap-threshold'], 10),
+        surface: args.surface,
+        now,
+      });
 
   writeFileSync(args.out, `${JSON.stringify({ generatedOn: now, opportunities: proposals }, null, 2)}\n`, 'utf8');
   console.log(`\nproposed ${proposals.length} opportunit${proposals.length === 1 ? 'y' : 'ies'} -> ${args.out}`);

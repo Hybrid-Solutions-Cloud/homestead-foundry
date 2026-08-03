@@ -1,6 +1,7 @@
 {
-  "schemaVersion": "1.0",
-  "description": "Topic probes for a discovery pass. Each is measured with WORD BOUNDARIES against both the local corpus and the surveyed market text. Supply your own; these are the ones that found real gaps in a real curriculum and are kept as a worked example.",
+  "schemaVersion": "1.1",
+  "description": "Topic probes for a discovery pass. Each is measured with WORD BOUNDARIES against both the local corpus and the surveyed market text. A probe may declare which kinds it applies to; a probe with no kinds applies to all of them. Supply your own; these found real gaps in a real curriculum and are kept as a worked example.",
+  "kinds": ["learn", "field-guide", "visual-guide"],
   "probes": [
     { "id": "retrieval-augmented-generation", "term": "RAG", "regex": "\\bRAG\\b|retrieval[- ]augmented", "title": "Retrieval-augmented generation, embeddings, and vector search", "level": "intermediate" },
     { "id": "vector-search-and-embeddings", "term": "vector", "regex": "\\bvector (search|database|store)\\b|\\bembeddings?\\b", "title": "Embeddings and vector stores", "level": "intermediate" },
@@ -11,6 +12,12 @@
     { "id": "model-context-protocol", "term": "MCP", "regex": "\\bMCP\\b|Model Context Protocol", "title": "Model Context Protocol and tool interoperability", "level": "intermediate" },
     { "id": "prompt-injection-defence", "term": "prompt injection", "title": "Prompt injection and untrusted content handling", "level": "intermediate" },
     { "id": "agent-evaluation", "term": "evaluation", "regex": "\\bagent evaluation\\b|\\btrajectory\\b", "title": "Agent evaluation and trajectory scoring", "level": "advanced" },
-    { "id": "cost-and-capacity-management", "term": "cost", "regex": "\\bcost (control|ceiling|management)\\b|\\btokens? per minute\\b", "title": "Cost, capacity, and spend control for AI systems", "level": "intermediate" }
+    { "id": "cost-and-capacity-management", "term": "cost", "regex": "\\bcost (control|ceiling|management)\\b|\\btokens? per minute\\b", "title": "Cost, capacity, and spend control for AI systems", "level": "intermediate" },
+
+    { "id": "agent-loop-anatomy-diagram", "kinds": ["visual-guide"], "term": "agent loop", "regex": "\\bagent loop\\b|perceive.{0,20}plan.{0,20}act", "title": "Agent loop anatomy and trust boundaries", "level": "intermediate" },
+    { "id": "autonomy-ladder-diagram", "kinds": ["visual-guide"], "term": "autonomy", "regex": "\\bautonomy (ladder|spectrum)\\b|\\bbounded delegation\\b", "title": "The autonomy ladder and approval patterns", "level": "beginner" },
+    { "id": "workflow-vs-agent-matrix", "kinds": ["visual-guide"], "term": "workflow versus agent", "regex": "workflow (vs\\.?|versus) agent", "title": "Workflow versus agent selection matrix", "level": "intermediate" },
+    { "id": "rag-pipeline-diagram", "kinds": ["visual-guide"], "term": "retrieval pipeline", "regex": "\\bretrieval pipeline\\b|\\bchunking\\b|\\bre[- ]?ranking\\b", "title": "Retrieval pipeline, from source to grounded answer", "level": "intermediate" },
+    { "id": "multi-agent-topology-diagram", "kinds": ["visual-guide"], "term": "multi-agent", "regex": "\\bmulti[- ]agent\\b|\\bagent[- ]to[- ]agent\\b", "title": "Multi-agent topologies and failure amplification", "level": "advanced" }
   ]
 }
