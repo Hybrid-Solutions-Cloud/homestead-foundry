@@ -305,20 +305,24 @@ async function main() {
     }
   }
 
+  // Number.parseInt(undefined, 10) is NaN, and `supply <= NaN` is false for
+  // every value, so omitting --gap-threshold used to make EVERY probe fail the
+  // gap test. The run then wrote an empty proposal set, printed "proposed 0
+  // opportunities" and exited 0, which is indistinguishable from a corpus with
+  // no gaps in it. Default explicitly instead.
+  const gapThreshold = Number.isInteger(Number.parseInt(args['gap-threshold'], 10))
+    ? Number.parseInt(args['gap-threshold'], 10)
+    : 0;
+  console.log(`  gap threshold: ${gapThreshold} occurrence(s)`);
+
   const now = new Date().toISOString();
   const proposals = surfaces.length
-    ? buildProposalsPerSurface({
-        probes: probes.probes,
-        surfaces,
-        surveyed,
-        gapThreshold: Number.parseInt(args['gap-threshold'], 10),
-        now,
-      })
+    ? buildProposalsPerSurface({ probes: probes.probes, surfaces, surveyed, gapThreshold, now })
     : buildProposals({
         probes: probes.probes,
         corpusText,
         surveyed,
-        gapThreshold: Number.parseInt(args['gap-threshold'], 10),
+        gapThreshold,
         surface: args.surface,
         now,
       });
