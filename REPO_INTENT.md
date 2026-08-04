@@ -25,10 +25,46 @@ organization's environment:
   history was intentionally NOT carried over, because it contains environment-specific
   detail. This copy must never import that history.
 
-## Status: PRIVATE, checklist mostly closed outside the private planning workspace - re-verified 2026-07-23
+## Status: PUBLIC. The flip happened, and this file said otherwise for weeks.
 
-**This repository must stay private until the checklist below is complete and the owner
-has verified it is clean. Only then may it be made public.**
+**This repository is public.** Verified against GitHub on 2026-08-03: MIT licensed,
+visibility PUBLIC.
+
+Until 2026-08-03 this section said the repository *must stay private* until the
+checklist below completed, while the repository was already public. **A document
+asserting a current state that the world disproves is worse than no document**,
+because a later reader gates a real decision on it. That has happened here more
+than once.
+
+The checklist below is therefore **a historical record of the pre-flip scrub, not
+a gate**. It is kept because the reasoning in it is still the reasoning that keeps
+this repository safe to publish, and because two of its items describe standing
+policy rather than one-time work.
+
+### What the scanner says today
+
+`node scripts/scan-public-safety.mjs --full` is the authoritative check, and it is
+**clean**: zero blocking findings across 34,663 lines of the full tracked tree,
+2026-08-03.
+
+That took a fix to the scanner, not to the repository. The scan had been reporting
+three blocking findings, and **all three were false positives**:
+
+- `log-analytics-workspace` and `log-alert-rule` were reported as malformed CAF
+  resource names. `log` is a CAF prefix *and* the first word of the Azure service
+  "Log Analytics", so every mention of the service tripped the lint.
+- `operations@example.invalid` was reported as a real identity. `.invalid` is
+  reserved by RFC 2606 precisely to guarantee a name never resolves. The rule
+  recognised only `example.com`, `.org` and `.net`.
+
+**A gate whose entire output is false positives is a gate nobody reads**, which is
+how it stayed red long enough to stop meaning anything. Both rules were narrowed
+with the reason recorded inline.
+
+One non-blocking warning remains and has been reviewed:
+`rg-foundryedge-prod-eus-01` in ADR-0011, which the ADR itself labels "example
+only, not a provisioning instruction". The real estate uses a different workload
+name entirely. **Safe to publish.**
 
 The repo's actual approach diverged from this file's original premise in two owner-
 approved ways (see the decision log D-14): (1) this is no longer a copy with reset
@@ -39,7 +75,7 @@ treats as non-blocking, per D-03 (the two publishing brands become an example-co
 appendix only). `node scripts/scan-public-safety.mjs --full` is the authoritative check
 behind every box below; re-run it before trusting this checklist on a later read.
 
-## What must happen before it can go open source
+## The pre-flip checklist, as a historical record
 
 - [x] **Tenant identity.** Removed outside the private planning workspace (full pre-public scrub, 2026-07-23).
       the private planning workspace intentionally excluded, see status note above.
@@ -77,11 +113,27 @@ behind every box below; re-run it before trusting this checklist on a later read
       `caf-shaped-non-placeholder` warnings above and the private planning workspace's own public-fate
       decision, before flipping visibility.
 
-**Everything else in this repository (Phases A/B/C/D/E/G/H/I) is done and verified as of
-2026-07-23** - see `CHANGELOG.md` and the project roadmap for the full breakdown. What
-remains before a public flip is the four unchecked/partial items above (resource
-names, brand content, history rebuild, owner review), all of which require an
-explicit owner decision - none are silently blocked on more agent work.
+### How the four open items resolved
+
+The flip happened with four items unclosed. Each is settled here so nobody has to
+guess again.
+
+| Item | Resolution |
+|---|---|
+| **Resource names** | **Closed.** The full scan is clean. The one CAF-shaped name left is `rg-foundryedge-prod-eus-01` in ADR-0011, which the ADR labels "example only", and which does not match the real estate's workload name. |
+| **Brand content** | **Standing policy, not a task.** Worked-example regions are a deliberate, owner-ratified design (D-03). The scanner downgrades brand tokens inside a marked region and blocks them everywhere else. Nothing to close. |
+| **History rebuild** | **Not done and not doing it.** The history from `bb867e5` forward is real, and rebuilding it is destructive and irreversible. It was a pre-flip option; the repository is public with that history intact, so the option has expired. Do not run it. |
+| **Owner review** | **Superseded by the flip itself.** Making the repository public was the decision this item was waiting for. |
+
+**Everything else in this repository (Phases A/B/C/D/E/G/H/I) is done and verified**;
+see `CHANGELOG.md` and the project roadmap.
+
+## What must never come back here
+
+`REPO-BOUNDARY.md` states this properly. The short version: **this repository
+describes how to build a Foundry and never describes what to do with one.** The
+content discovery tooling lived here until 2026-08-03 and was moved to
+`project42dev/orchard` under ADR-0017. It is not coming back.
 
 ## What to preserve (the point of the repo)
 

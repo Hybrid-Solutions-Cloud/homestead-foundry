@@ -61,7 +61,23 @@ const KNOWN_ENVS = ["dev", "test", "stage", "staging", "uat", "prod"];
 // in AGENTS.md's Key Facts table). Not a placeholder and not a leak, just a
 // name from an external naming convention - exempt from the malformed-shape
 // lint entirely rather than re-litigating this same false positive per file.
-const KNOWN_EXTERNAL_RESOURCE_NAMES = ["kv-hcs-vault-01"];
+// Tokens that trip the CAF lint without being resource names at all.
+//
+// `log` is both a CAF prefix and the first word of the Azure service "Log
+// Analytics", so every mention of the service, and of anything else written as
+// log-something-something, is reported as a malformed resource name. Three of
+// these were the entire blocking output of a --full scan on 2026-08-03, and a
+// gate whose output is all false positives is a gate nobody reads.
+const NOT_RESOURCE_NAMES = [
+  "log-analytics",
+  "log-analytics-workspace",
+  "log-analytics-workspaces",
+  "log-alert-rule",
+  "log-alert-rules",
+  "log-based-alert",
+  "log-based-metric",
+];
+const KNOWN_EXTERNAL_RESOURCE_NAMES = ["kv-hcs-vault-01", ...NOT_RESOURCE_NAMES];
 const PLACEHOLDER_MARKERS = [
   "example",
   "contoso",
@@ -208,7 +224,14 @@ function run() {
   const emDash = /—/;
   const lucidToken = /lucid\.app\/[^\s"')]*[?&](invitation|inviteToken|token)=/i;
   const email = /[\w.+-]+@[\w-]+\.[a-z]{2,}/i;
-  const placeholderEmailDomain = /@example\.(com|org|net)$/i;
+  // RFC 2606 and RFC 6761 reserve these for documentation and for names
+  // guaranteed never to resolve. An address at one of them cannot identify a
+  // person, which is the only thing this rule is protecting against. The
+  // original pattern covered only example.com/org/net, so the reserved TLDs
+  // .invalid, .test and .localhost were reported as real identities. Subdomains
+  // count too: docs@mail.example.com is still a documentation address.
+  const placeholderEmailDomain =
+    /@(?:[\w-]+\.)*(?:example\.(?:com|org|net)|invalid|test|example|localhost)$/i;
   const cafToken = /\b(?:rg|aif|ais|kv|sg|st|vnet|log|appi)(?:-[a-z0-9]+){2,}\b/gi;
   const brandRegex = new RegExp(`\\b(${brandTokens.join("|")})\\b`, "i");
 
