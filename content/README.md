@@ -39,6 +39,51 @@ node scripts/merge-opportunity-proposals.mjs \
 Dry run is the default on purpose. `--apply` is the only thing that writes, and it
 is the only thing that bumps `registryVersion`.
 
+### 3. Rank what is on the list
+
+```bash
+node scripts/score-opportunities.mjs \
+  --registry <path-to-registry.json> \
+  [--weights <path-to-weights.json>] [--json <path>] [--all]
+```
+
+Read-only. It never writes the registry, and it never removes anything.
+
+**There is no cutoff score.** The rank orders the queue you read; it does not
+decide what is eligible. A threshold would turn a temporary measurement into a
+permanent policy: breadth is capped by which sources allowed automated access
+that day, so a score understates a real topic for reasons that have nothing to
+do with the topic. Ranking is reversible, exclusion is not.
+
+`--all` also scores delivered, retired and rejected entries, which is how you
+check that a rejection still looks right instead of taking it on trust.
+
+### What the score is made of
+
+| Input | Points | What it is evidence of |
+|---|---|---|
+| Breadth | 35 | how many sources teach it. Independent agreement, so it carries the most weight |
+| Depth | 15 | total occurrences. Separates a passing mention from a taught subject |
+| Gap | 30 | occurrences in **your** corpus. The only input not measured on someone else's site |
+| Spread | 20 | how many of your surfaces lack it |
+| Strategic | multiplier | owner-set, default 1. The only subjective input, and it is explicit |
+
+Breadth and depth saturate: eight independent sources scores the same as eighty,
+because the difference is not ten times the confidence.
+
+**Breadth is read from the peak ever recorded**, not the latest run. A run that
+reached fewer sources is a fact about the run, so a source outage can never
+quietly downgrade a real opportunity.
+
+Attention tiers (`strong` / `worth a look` / `idea` / `unmeasured`) come from the
+source count and order your reading. They never gate anything.
+
+Override any weight with `--weights`, which is merged over the defaults:
+
+```json
+{ "points": { "breadth": 40, "depth": 10, "gap": 30, "spread": 20 } }
+```
+
 ## `--surfaces`, and why it is pipe separated
 
 ```
@@ -86,8 +131,10 @@ whole registry including rejected and retired entries.
 - **It will not write your registry.** Only the merge writes, and only with `--apply`.
 - **It will not overwrite a decision you made.** It may refresh evidence fields it
   owns; it may not move a status a human set.
-- **It will not delete anything.** A candidate that stops being confirmed ages through
-  `provenance.lastConfirmed` and is retired by a person.
+- **It will not delete anything, and nothing decays.** A run that finds less evidence
+  than the last one still counts as a confirmation. Every run appends to
+  `demandHistory`, and `provenance.peakSourceCount` keeps the best reading ever seen,
+  so a topic is never judged on its worst day. Only a person retires a candidate.
 - **It will not silently change a closed gap.** If a topic you were missing now scores
   above zero, the merge flags it for review rather than editing it.
 

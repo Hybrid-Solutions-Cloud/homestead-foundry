@@ -74,7 +74,9 @@ function readJson(path, label) {
 }
 
 /** Discovery owns these and may refresh them. Everything else is the human's. */
-const DISCOVERY_OWNED = ['gapEvidence', 'gapMeasurement', 'marketSignal', 'evidenceSources'];
+const DISCOVERY_OWNED = [
+  'gapEvidence', 'gapMeasurement', 'marketSignal', 'marketMeasurement', 'evidenceSources',
+];
 
 /** A status discovery is allowed to have set, and may therefore overwrite. */
 const DISCOVERY_SETTABLE = new Set(['candidate']);

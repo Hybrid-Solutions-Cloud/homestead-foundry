@@ -219,6 +219,19 @@ export function buildProposals({ probes, corpusText, surveyed, gapThreshold, sur
       marketSignal: demandProven
         ? `Present in ${suggestedBy.length} of ${surveyed.length} surveyed sources.`
         : 'Not established: the survey reached no source.',
+      // The same facts as marketSignal and gapEvidence, as numbers. Scoring must
+      // never parse prose: a regex over a sentence that later gets reworded
+      // fails silently and produces a plausible wrong number, which is worse
+      // than no number. sourcesReachable is recorded because it is the ceiling
+      // on sourceCount, and a score read without it looks like a verdict on the
+      // topic when it is partly a verdict on who let us in that day.
+      marketMeasurement: {
+        occurrences: demand,
+        sourceCount: suggestedBy.length,
+        sourcesSurveyed: surveyed.length,
+        sourcesReachable: surveyed.filter((s) => s.text).length,
+        measuredOn: now,
+      },
       provenance: { suggestedBy, firstSeen: now, lastConfirmed: now },
     });
   }
