@@ -34,6 +34,58 @@ Client tools change fast and their Azure handling varies. The configurations bel
 
 Two routes, depending on what you want.
 
+::: warning First, know which surface you are configuring
+VS Code has no single model list. **Each extension keeps its own, and a
+configuration written for one is invisible in the others.** Copilot Chat, Continue,
+Cline, Roo and Cursor are five separate configuration surfaces.
+
+This bites in a specific way: you configure Continue, open the **Copilot** picker,
+see none of your models, and conclude the endpoint is broken. It is not. You are
+reading a different list.
+
+Check what is actually installed before configuring anything:
+
+```bash
+code --list-extensions
+```
+
+Then configure the surface you actually use.
+:::
+
+### Telling your models apart from everything else in the picker
+
+A populated Copilot picker is crowded, and **most of what is in it is not yours.**
+A typical list contains:
+
+| What you see | Where it comes from | Yours? |
+|---|---|---|
+| Claude models | GitHub-hosted, billed by your Copilot subscription | no |
+| Two near-identical Copilot groups | GitHub-hosted | no |
+| A DeepSeek entry | often a third-party extension, for example `vizards.deepseek-v4-for-copilot` | no |
+| A second DeepSeek | GitHub-hosted | no |
+| A model with a **red X** and a fetch error | a hosted model failing to load | no |
+| An **"AI Foundry"** section | the `ms-azuretools.vscode-azure-github-copilot` extension | **yes, once you fill it in** |
+
+**An empty "AI Foundry" section is the normal state before configuration.** The
+extension has registered the provider and has no endpoint or key yet. That section,
+once populated, is the only place your own deployments appear.
+
+**In Continue you can prefix the display name and end the guessing.** Continue's
+`name` field is a free-text label, so a prefix such as `hcs-` sorts your
+deployments together and makes them unmistakable:
+
+```yaml
+models:
+  - name: hcs-<your-deployment-name> (<vendor>)   # label only, prefix freely
+    provider: openai
+    model: <your-deployment-name>                  # WIRE VALUE, never prefix this
+```
+
+**Never prefix `model`.** That value goes to Azure, and a decorated one returns
+`404 DeploymentNotFound`. Copilot, Cursor and Cline take their labels from the
+provider and cannot be renamed this way; renaming there means renaming the Azure
+deployments themselves, which changes the real identifier for every consumer.
+
 ### GitHub Copilot Chat, bring your own key
 
 Copilot Chat supports adding model providers with your own key. Choose the OpenAI-compatible or Azure provider option, then supply the base URL and key above. Open the model picker in the Chat view and select **Manage Models**, then follow the provider prompts.
