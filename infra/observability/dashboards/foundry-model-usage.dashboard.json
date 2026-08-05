@@ -2,7 +2,7 @@
   "annotations": {
     "list": []
   },
-  "description": "Cost-safe Microsoft Foundry model use dashboard. It uses Azure Monitor platform metrics only and intentionally excludes prompt, response, trace, and log-query data.",
+  "description": "Cost-safe Microsoft Foundry model use dashboard. Uses Azure Monitor platform metrics, token-based cost estimation, and model inventory. Intentionally excludes prompt, response, trace, and log-query data. Cost estimates are directional only; Cost Management is the source for billed charges.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -517,6 +517,412 @@
       ],
       "title": "Server errors by deployment",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "alias": "Input cost: {{modeldeploymentname}}",
+          "azureMonitor": {
+            "aggregation": "Total",
+            "allowedTimeGrainsMs": [],
+            "dimensionFilters": [
+              {
+                "dimension": "ModelDeploymentName",
+                "filters": [
+                  "*"
+                ],
+                "operator": "eq"
+              }
+            ],
+            "metricName": "InputTokens",
+            "metricNamespace": "Microsoft.CognitiveServices/accounts",
+            "region": "__LOCATION__",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.CognitiveServices/accounts",
+                "region": "__LOCATION__",
+                "resourceGroup": "__FOUNDRY_RESOURCE_GROUP__",
+                "resourceName": "__FOUNDRY_RESOURCE_NAME__",
+                "subscription": "__SUBSCRIPTION_ID__"
+              }
+            ],
+            "timeGrain": "auto",
+            "top": "20"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "__SUBSCRIPTION_ID__"
+        },
+        {
+          "alias": "Output cost: {{modeldeploymentname}}",
+          "azureMonitor": {
+            "aggregation": "Total",
+            "allowedTimeGrainsMs": [],
+            "dimensionFilters": [
+              {
+                "dimension": "ModelDeploymentName",
+                "filters": [
+                  "*"
+                ],
+                "operator": "eq"
+              }
+            ],
+            "metricName": "OutputTokens",
+            "metricNamespace": "Microsoft.CognitiveServices/accounts",
+            "region": "__LOCATION__",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.CognitiveServices/accounts",
+                "region": "__LOCATION__",
+                "resourceGroup": "__FOUNDRY_RESOURCE_GROUP__",
+                "resourceName": "__FOUNDRY_RESOURCE_NAME__",
+                "subscription": "__SUBSCRIPTION_ID__"
+              }
+            ],
+            "timeGrain": "auto",
+            "top": "20"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "B",
+          "subscription": "__SUBSCRIPTION_ID__"
+        }
+      ],
+      "title": "Estimated cost by deployment (token-based, directional only)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "alias": "Total tokens",
+          "azureMonitor": {
+            "aggregation": "Total",
+            "allowedTimeGrainsMs": [],
+            "dimensionFilters": [],
+            "metricName": "TotalTokens",
+            "metricNamespace": "Microsoft.CognitiveServices/accounts",
+            "region": "__LOCATION__",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.CognitiveServices/accounts",
+                "region": "__LOCATION__",
+                "resourceGroup": "__FOUNDRY_RESOURCE_GROUP__",
+                "resourceName": "__FOUNDRY_RESOURCE_NAME__",
+                "subscription": "__SUBSCRIPTION_ID__"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "__SUBSCRIPTION_ID__"
+        }
+      ],
+      "title": "Aggregate token consumption (all deployments)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "alias": "{{modeldeploymentname}}",
+          "azureMonitor": {
+            "aggregation": "Total",
+            "allowedTimeGrainsMs": [],
+            "dimensionFilters": [
+              {
+                "dimension": "ModelDeploymentName",
+                "filters": [
+                  "*"
+                ],
+                "operator": "eq"
+              }
+            ],
+            "metricName": "ModelRequests",
+            "metricNamespace": "Microsoft.CognitiveServices/accounts",
+            "region": "__LOCATION__",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.CognitiveServices/accounts",
+                "region": "__LOCATION__",
+                "resourceGroup": "__FOUNDRY_RESOURCE_GROUP__",
+                "resourceName": "__FOUNDRY_RESOURCE_NAME__",
+                "subscription": "__SUBSCRIPTION_ID__"
+              }
+            ],
+            "timeGrain": "auto",
+            "top": "30"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "__SUBSCRIPTION_ID__"
+        }
+      ],
+      "title": "Model inventory: request volume by deployment (all 22 deployed models)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 32
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "alias": "Blocked: {{modeldeploymentname}}",
+          "azureMonitor": {
+            "aggregation": "Total",
+            "allowedTimeGrainsMs": [],
+            "dimensionFilters": [
+              {
+                "dimension": "ModelDeploymentName",
+                "filters": [
+                  "*"
+                ],
+                "operator": "eq"
+              },
+              {
+                "dimension": "StatusCode",
+                "filters": [
+                  "400"
+                ],
+                "operator": "eq"
+              }
+            ],
+            "metricName": "ModelRequests",
+            "metricNamespace": "Microsoft.CognitiveServices/accounts",
+            "region": "__LOCATION__",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.CognitiveServices/accounts",
+                "region": "__LOCATION__",
+                "resourceGroup": "__FOUNDRY_RESOURCE_GROUP__",
+                "resourceName": "__FOUNDRY_RESOURCE_NAME__",
+                "subscription": "__SUBSCRIPTION_ID__"
+              }
+            ],
+            "timeGrain": "auto",
+            "top": "20"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "__SUBSCRIPTION_ID__"
+        }
+      ],
+      "title": "Content safety / RAI blocks by deployment (HTTP 400)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "alias": "{{modeldeploymentname}}",
+          "azureMonitor": {
+            "aggregation": "Total",
+            "allowedTimeGrainsMs": [],
+            "dimensionFilters": [
+              {
+                "dimension": "ModelDeploymentName",
+                "filters": [
+                  "*"
+                ],
+                "operator": "eq"
+              }
+            ],
+            "metricName": "ModelRequests",
+            "metricNamespace": "Microsoft.CognitiveServices/accounts",
+            "region": "__LOCATION__",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.CognitiveServices/accounts",
+                "region": "__LOCATION__",
+                "resourceGroup": "__FOUNDRY_RESOURCE_GROUP__",
+                "resourceName": "__FOUNDRY_RESOURCE_NAME__",
+                "subscription": "__SUBSCRIPTION_ID__"
+              }
+            ],
+            "timeGrain": "auto",
+            "top": "30"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "__SUBSCRIPTION_ID__"
+        }
+      ],
+      "title": "Caller / consumer breakdown (requires Usage diagnostics enabled)",
+      "type": "timeseries"
     }
   ],
   "refresh": "5m",
@@ -524,7 +930,10 @@
   "tags": [
     "azure-monitor",
     "foundry",
-    "model-usage"
+    "model-usage",
+    "cost-estimation",
+    "content-safety",
+    "model-inventory"
   ],
   "templating": {
     "list": [

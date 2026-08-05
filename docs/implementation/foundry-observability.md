@@ -99,3 +99,47 @@ abbreviation, because that would target a different set of resource names.
 
 No existing Azure resource changes because of this source update. A private parameter
 overlay is migrated and deployed only through a separately approved change.
+
+## Dashboard panels
+
+The `foundry-model-usage.dashboard.json` dashboard contains 11 panels across 5 rows:
+
+| Panel | ID | Row | Description |
+|---|---|---|---|
+| Model requests by deployment | 1 | y=0 | Request volume per `ModelDeploymentName` |
+| Total tokens by deployment | 2 | y=0 | Token consumption per deployment |
+| Input and output tokens by deployment | 3 | y=8 | Split input vs output tokens |
+| Model availability by deployment | 4 | y=8 | `ModelAvailabilityRate` per deployment |
+| Throttled requests by deployment | 5 | y=16 | HTTP 429 per deployment |
+| Server errors by deployment | 6 | y=16 | HTTP 5xx per deployment |
+| Estimated cost by deployment | 7 | y=24 | Directional token-based cost (currencyUSD) |
+| Aggregate token consumption | 8 | y=24 | All-deployment total tokens |
+| Model inventory: request volume | 9 | y=32 | All 22 deployed models, top 30 |
+| Content safety / RAI blocks | 10 | y=32 | HTTP 400 per deployment |
+| Caller / consumer breakdown | 11 | y=40 | Requires `AzureOpenAIRequestUsage` enabled |
+
+Panels 1-6 use the original 6-panel layout. Panels 7-11 were added for cost estimation,
+inventory, content safety, and caller tracking.
+
+## Usage diagnostics (caller identity)
+
+The `AzureOpenAIRequestUsage` diagnostic category writes request-usage logs to Log
+Analytics. Each log entry includes `callerIpAddress` and `operationName`, which
+identify which pipeline or agent invoked a model deployment. Enable this category in
+the private overlay's `foundryDiagnosticSetting.logs` array:
+
+```bicep
+{
+  category: 'AzureOpenAIRequestUsage'
+  enabled: true
+  retentionPolicy: {
+    enabled: false
+    days: 0
+  }
+}
+```
+
+This category produces log data and therefore incurs Log Analytics ingestion and
+retention cost. The private overlay should set `logAnalyticsDailyQuotaGb` to a value
+that accommodates the expected volume. Usage logs are not required for the core
+platform-metric panels (1-10); only panel 11 depends on them.

@@ -6,7 +6,21 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-Nothing pending.
+### Added
+
+- Dashboard panels 7-11: directional cost estimation by deployment, aggregate
+  token consumption, model inventory (all 22 deployed models), content safety /
+  RAI blocks (HTTP 400), and caller/consumer breakdown.
+- `AzureOpenAIRequestUsage` diagnostic category support for caller-identity
+  tracking via Usage diagnostics logs.
+- Updated dashboard README and implementation guide with panel descriptions
+  and Usage diagnostic configuration instructions.
+
+### Changed
+
+- Dashboard description updated to reflect cost estimation and inventory panels.
+- Dashboard tags expanded to include `cost-estimation`, `content-safety`, and
+  `model-inventory`.
 
 ## [0.2.0] - 2026-07-25
 
