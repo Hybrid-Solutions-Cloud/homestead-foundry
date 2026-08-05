@@ -48,6 +48,9 @@ param foundryAccountName string
 @description('Key Vault holding both secrets. Referenced, never created here.')
 param keyVaultName string
 
+@description('Resource group holding that vault. A platform vault is commonly shared and lives OUTSIDE the initiative resource group, so this cannot be assumed to match. Defaults to this module scope for the case where it does.')
+param keyVaultResourceGroupName string = resourceGroup().name
+
 @description('Vault secret holding the Foundry account key. An AIServices account key is account-wide, so one secret authenticates every modality.')
 param foundryKeySecretName string
 
@@ -137,22 +140,16 @@ resource gateway 'Microsoft.Web/sites@2023-12-01' = {
   }
 }
 
-// Read-only on secrets, and only the two it needs by way of the vault's RBAC.
-// Key Vault Secrets User carries get and list on secret VALUES and nothing else:
-// the identity cannot write a secret, cannot read a key or certificate, and
-// cannot change the vault.
-resource vault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
-  name: keyVaultName
-}
-
-resource gatewaySecretsRead 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: vault
-  name: guid(vault.id, gateway.id, '4633458b-17de-408a-b874-0445c86b69e6')
-  properties: {
-    // Key Vault Secrets User
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
+// The grant runs at the VAULT's scope, which is commonly a different resource
+// group from this one, so it has to be a module. The app cannot resolve its Key
+// Vault references until this exists, which is why the app is restarted below
+// rather than left to fail its first start-up.
+module vaultAccess 'gateway-vault-access.bicep' = {
+  name: 'deploy-gateway-vault-access'
+  scope: resourceGroup(keyVaultResourceGroupName)
+  params: {
+    keyVaultName: keyVaultName
     principalId: gateway.identity.principalId
-    principalType: 'ServicePrincipal'
   }
 }
 

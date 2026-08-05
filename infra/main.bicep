@@ -123,6 +123,9 @@ param manageRoleAssignments bool = true
 @maxLength(24)
 param keyVaultName string
 
+@description('Resource group holding that vault. A shared platform vault commonly lives OUTSIDE the initiative resource group, so this cannot be assumed to match. Only used when deployGateway is true. Defaults to the initiative resource group.')
+param keyVaultResourceGroupName string = ''
+
 // -------------------------------- budget -----------------------------------
 
 @description('Monthly budget cap in USD on the resource-group scope (ADR-0006). Deployer-chosen and REQUIRED: set it to your own monthly cap. No default, so no deployment silently inherits another deployer\'s figure or triggers an unintended spend ceiling.')
@@ -274,6 +277,7 @@ module gateway 'modules/model-gateway.bicep' = if (deployGateway) {
     gatewayName: names.gateway
     foundryAccountName: names.account
     keyVaultName: keyVaultName
+    keyVaultResourceGroupName: empty(keyVaultResourceGroupName) ? names.resourceGroup : keyVaultResourceGroupName
     foundryKeySecretName: kvRefs.outputs.speechKeySecretName
     gatewayTokenSecretName: gatewayTokenSecretName
     sku: gatewaySku
