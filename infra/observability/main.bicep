@@ -102,9 +102,9 @@ param azureMonitorWorkspacePublicNetworkAccess string
 @description('Log Analytics interactive retention in days.')
 param logAnalyticsRetentionInDays int
 
-@minValue(1)
-@description('Log Analytics daily quota safety value in GB.')
-param logAnalyticsDailyQuotaGb int
+@minValue(0.01)
+@description('Log Analytics daily quota safety value in GB. Minimum 0.01 GB (10 MB).')
+param logAnalyticsDailyQuotaGb = 1
 
 @description('Whether to create the native Azure Monitor dashboard with Grafana shell.')
 param deployGrafanaDashboardShell bool
@@ -184,9 +184,11 @@ var requiredTags = {
   Lifecycle: lifecycle
 }
 
-var tags = empty(expiresOn) ? requiredTags : union(requiredTags, {
-  ExpiresOn: expiresOn
-})
+var tags = empty(expiresOn)
+  ? requiredTags
+  : union(requiredTags, {
+      ExpiresOn: expiresOn
+    })
 
 var deployActivityAlerts = enableActivityLogAlerts && !empty(activityLogAlertDefinitions)
 var deployMetricAlertDefinitions = enableMetricAlerts && !empty(metricAlertDefinitions)

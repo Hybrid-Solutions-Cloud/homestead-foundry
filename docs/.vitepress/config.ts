@@ -56,6 +56,7 @@ const BUILD_SIDEBAR = [
     items: [
       { text: "Using your deployment", link: "/guide/using-your-deployment" },
       { text: "Connect your tools", link: "/guide/connect-your-tools" },
+      { text: "Content safety", link: "/guide/content-safety" },
       { text: "Building agents", link: "/guide/building-agents" },
     ],
   },
@@ -159,6 +160,7 @@ export default defineConfig({
             items: [
               { text: "Using your deployment", link: "/guide/using-your-deployment" },
               { text: "Connect your tools", link: "/guide/connect-your-tools" },
+      { text: "Content safety", link: "/guide/content-safety" },
               { text: "Building agents", link: "/guide/building-agents" },
             ],
           },
@@ -216,6 +218,7 @@ export default defineConfig({
           items: [
             { text: "Using your deployment", link: "/guide/using-your-deployment" },
             { text: "Connect your tools", link: "/guide/connect-your-tools" },
+      { text: "Content safety", link: "/guide/content-safety" },
             { text: "Building agents", link: "/guide/building-agents" },
           ],
         },

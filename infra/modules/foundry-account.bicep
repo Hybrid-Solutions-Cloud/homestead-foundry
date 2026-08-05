@@ -76,7 +76,13 @@ resource modelDeployments 'Microsoft.CognitiveServices/accounts/deployments@2025
       capacity: m.?capacity ?? capacity
     }
     properties: {
-      raiPolicyName: raiPolicyName
+      // Per-entry policy wins, and the stack-wide parameter is only the
+      // fallback, for the same reason capacity works that way: one value for
+      // every model is wrong as soon as two model kinds have different needs.
+      // A chat model serving a code editor and an image model have different
+      // content-safety requirements, and the default policy blocks the first
+      // while being right for the second. See docs/guide/content-safety.md.
+      raiPolicyName: m.?raiPolicy ?? raiPolicyName
       versionUpgradeOption: versionUpgradeOption
       model: {
         format: modelCatalog[m.id].?format ?? m.provider

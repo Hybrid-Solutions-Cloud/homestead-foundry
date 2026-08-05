@@ -3,7 +3,7 @@ param location string
 param tags object
 param skuName string
 param retentionInDays int
-param dailyQuotaGb int
+param dailyQuotaGb = 1
 
 resource workspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: name

@@ -25,6 +25,9 @@ type registryEntry = {
   @minValue(1)
   capacity: int?
 
+  @description('Content-safety (RAI) policy for this one deployment. AZURE-CLOUD ONLY and optional; omit to inherit the stack-wide raiPolicyName, which defaults to the Azure-managed Microsoft.DefaultV2. Per-entry because model kinds have different content-safety needs: DefaultV2 blocks on Protected Material Text and on Jailbreak detection in the prompt, and both fire routinely when a chat model serves a code editor, because an agentic client attaches whole files. The same policy is correct for an image model. See docs/guide/content-safety.md.')
+  raiPolicy: string?
+
   @description('Region the entry targets. AZURE-CLOUD ONLY; optional here for the same reason as sku. Informational for consumers; deployment resources are children of the account and always land in the account region.')
   region: string?
 
