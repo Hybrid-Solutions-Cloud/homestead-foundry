@@ -7,6 +7,57 @@ This page is the difference, and every claim on it was **measured against a live
 deployment**, not read from documentation. Where something is inferred rather
 than observed, it says so.
 
+## First, the three ways people reach a model
+
+Most confusion here comes from comparing things that are not comparable. There
+are three distinct arrangements, and only the last one is yours:
+
+| | **A subscription product** | **A vendor API key** | **A deployment you own** |
+|---|---|---|---|
+| Examples | a chat product, a coding assistant seat | calling a vendor endpoint directly | a model deployed into your own Foundry account |
+| **What you buy** | a seat, per person per month | tokens, from the vendor | tokens, through your own cloud account |
+| **Who sets the parameters** | **the product does, and you cannot see them** | you do | you do |
+| **Who owns the rate limit** | the vendor, pooled and undisclosed | the vendor, per key | **you**, per model, and you can raise it |
+| **Content filtering** | the vendor's, fixed | the vendor's, fixed | **yours, and you configure it** |
+| **Model version** | changes under you, without notice | changes on the vendor's schedule | **you pin it; it changes when you say** |
+| **Retirement** | the vendor decides | the vendor decides | you keep serving until you migrate |
+| **Where the data goes** | the vendor's estate | the vendor's estate | **your subscription, your region, your tenant** |
+| **What you can see** | almost nothing | request-level errors | **metrics, logs, spend, per deployment** |
+| **Features around the model** | **a great deal**, and it is the product | none, you build them | none, you build them |
+
+### The trade, stated plainly
+
+**A subscription gives you the surrounding product.** Agent mode, file context,
+tool calling, an editor integration that already works. That is most of the value
+and none of it is the model.
+
+**Your own deployment gives you the model and the controls.** Choice of vendor
+family, a rate limit you can raise, a content policy you can set, a version that
+does not move under you, data that stays in your tenant, and per-request
+visibility. It gives you **none** of the product.
+
+**So "I have my own models, why do I still need the assistant" has an answer**:
+you are buying two different things. The assistant is the harness. Your
+deployment is the engine. Pointing the harness at your engine is what these pages
+are about, and it works, but the harness keeps its own opinions about how to
+drive, which is the source of most of the failures below.
+
+### What this means in practice
+
+- **Cost stops being fixed.** A seat is predictable per person; a deployment
+  bills per token consumed, so an agent left running against a large repository
+  can spend more in an hour than a person does in a month of chat.
+- **You inherit operations.** Nobody else is watching your quota, your content
+  policy, or your spend. The failures on this page are ones a subscription would
+  have absorbed silently on your behalf.
+- **You gain a real audit trail.** Every call appears in your account's metrics
+  and can be attributed. On a subscription, you cannot prove what happened.
+- **Multi-vendor becomes possible.** One endpoint, several vendor families,
+  swapped per job. No subscription offers that, and it is the strongest argument
+  for owning the deployment.
+
+---
+
 ## The four axes that change
 
 | | Vendor-hosted API | A deployment you own |
