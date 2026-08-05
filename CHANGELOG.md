@@ -8,6 +8,28 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- A [model availability matrix](docs/reference/model-matrix.md): 233 models
+  against 42 regions, where the two on-premises targets are treated as regions.
+  Interactive, filterable, sortable, with per-region deployment types, capacity
+  ceilings, versions and retirement dates on every row. Each cell is coloured by
+  configuration profile, so a model identical everywhere reads as a uniform band
+  and one that differs by region reads as a mosaic.
+- [SPIKE-32](docs/research/SPIKE-32-model-region-availability-matrix.md), the
+  research behind it. Availability was measured with
+  `az cognitiveservices model list` across all 63 physical regions rather than
+  read from documentation. The finding: **region changes what you can buy, not
+  what the model is.** No model's context window or maximum output differed
+  between regions; what differs is the deployment types on offer, for 56 of 134
+  cloud models. Sixty-four model-and-region pairs offer no pay-as-you-go
+  capacity at all. North Europe carries 28 models against Sweden Central's 132.
+  Four models run on all three deployment targets, and 82 of 134 cloud models
+  retire within twelve months.
+- `scripts/model-matrix/`, which generates that dataset. The cloud half is a
+  live read needing only Reader; the on-premises half is still a transcription
+  of the SPIKE-22 snapshot. This is the first part of issue #15 to land and does
+  not close it, because nothing schedules the refresh yet.
+- A VitePress custom theme, extending the stock theme rather than replacing it,
+  so the matrix component can be registered without changing any existing page.
 - Dashboard panels 7-11: directional cost estimation by deployment, aggregate
   token consumption, model inventory (all 22 deployed models), content safety /
   RAI blocks (HTTP 400), and caller/consumer breakdown.

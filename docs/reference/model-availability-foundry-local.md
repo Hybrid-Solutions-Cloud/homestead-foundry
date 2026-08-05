@@ -201,6 +201,7 @@ chore: see
 
 ## See also
 
+- [Model availability matrix](./model-matrix), all three targets side by side, filterable.
 - [Available models: Azure AI Foundry](./model-availability-azure-cloud), the hosted cloud roster.
 - [Available models: Azure Local Foundry](./model-availability-azure-local-foundry), the cluster roster.
 - [SPIKE-22](../research/SPIKE-22-foundry-local-model-catalog), the research behind every row here, including the open unknowns.

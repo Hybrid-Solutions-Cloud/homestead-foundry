@@ -29,6 +29,15 @@ The two on-premises targets are different, and they get full lists, because
 their catalogs are bounded and enumerable. See
 [Available models: Foundry Local and Azure Local Foundry](./model-catalog-foundry-local).
 
+::: tip There is now a generated comparison, and it does not contradict this
+The reasoning above is about a **hand-maintained** copy, which would be wrong
+within days. The [model availability matrix](./model-matrix) is **generated** from
+a live read of every region and carries the command that regenerates it, so it
+fails differently: it goes out of date visibly, on a stated snapshot date, rather
+than quietly. Use it to compare regions; use the commands below to answer for
+your own subscription today.
+:::
+
 ## Ask your own subscription
 
 Two questions, two commands. Both are read-only.
@@ -112,6 +121,7 @@ recurring manual chore: see
 
 ## See also
 
+- [Model availability matrix](./model-matrix), the generated per-region comparison, including which regions offer no pay-as-you-go capacity.
 - [Model catalog](./model-catalog), what this project chose and why.
 - [Model selection](../guide/model-selection), the methodology behind the choosing.
 - [Available models: Foundry Local and Azure Local Foundry](./model-catalog-foundry-local), the two bounded on-premises catalogs.

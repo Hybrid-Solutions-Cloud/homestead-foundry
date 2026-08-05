@@ -1,5 +1,10 @@
 # Models: Azure Local Foundry
 
+::: tip Compare this target against the other two
+[The model availability matrix](../../reference/model-matrix) puts every model on all three targets side by side, including the vLLM entries that are exclusive to this one.
+:::
+
+
 ::: info Scope
 This is the models page for **Azure Local Foundry**,
 one of the three targets in [ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation).

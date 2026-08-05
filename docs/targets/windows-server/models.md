@@ -1,5 +1,10 @@
 # Models: Foundry Local
 
+::: tip Compare this target against the other two
+[The model availability matrix](../../reference/model-matrix) puts every model on all three targets side by side, and shows the four models that run on all three.
+:::
+
+
 ::: info Scope
 This is the models page for **Foundry Local**,
 one of the three targets in [ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation).

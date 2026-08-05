@@ -1,5 +1,10 @@
 # Models: Azure AI Foundry
 
+::: tip Compare this target against the other two
+[The model availability matrix](../../reference/model-matrix) puts every model on all three targets side by side, across every region, and marks what is not available where.
+:::
+
+
 ::: info Scope
 This is the models page for the **Azure AI Foundry** target,
 the hosted-cloud target of [ADR-0011](../../adr/ADR-0011-multi-target-deployment-automation).
