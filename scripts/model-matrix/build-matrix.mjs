@@ -14,6 +14,37 @@ const SRC = process.argv[2];
 const ONPREM = process.argv[3];
 const OUT = process.argv[4];
 const SNAPSHOT = process.argv[5]; // ISO date, passed in
+const QUOTA = process.argv[6]; // optional: directory of usage-<region>.json
+
+// ---------- subscription quota ----------
+// The catalog's capacity.maximum is what the deployment TYPE accepts. It is not
+// what a subscription may allocate, and the two differ by a thousandfold on real
+// models. Without this join the matrix cannot answer the only capacity question
+// anyone actually asks, which is "where do I have room left".
+//
+// Keyed by the SKU's own `usageName` (for example
+// AIServices.GlobalStandard.DeepSeek-V4-Pro), which the catalog hands us, so the
+// two datasets join on a value neither side had to guess.
+const quotaByRegion = new Map();
+if (QUOTA && fs.existsSync(QUOTA)) {
+  for (const f of fs.readdirSync(QUOTA)) {
+    if (!f.startsWith('usage-') || !f.endsWith('.json')) continue;
+    const region = f.slice('usage-'.length, -'.json'.length);
+    let rows;
+    try {
+      rows = JSON.parse(fs.readFileSync(path.join(QUOTA, f), 'utf8'));
+    } catch {
+      continue;
+    }
+    const byName = new Map();
+    for (const u of rows) {
+      const n = u?.name?.value;
+      if (!n) continue;
+      byName.set(n, { used: u.currentValue ?? 0, limit: u.limit ?? 0 });
+    }
+    quotaByRegion.set(region, byName);
+  }
+}
 
 const files = fs.readdirSync(SRC).filter((f) => f.endsWith('.json'));
 
@@ -278,6 +309,45 @@ for (const rec of models.values()) {
     }
   }
 
+  // Quota is per region AND per deployment type, so it cannot live on a profile:
+  // profiles are shared across regions precisely because they are identical, and
+  // quota is the thing that is not. A model exhausted on GlobalStandard can hold
+  // untouched capacity on DataZoneStandard in the same region, which is the most
+  // actionable fact this dataset carries.
+  const quota = {};
+  let anyQuota = false;
+  for (const [region, pi] of Object.entries(perRegion)) {
+    const byName = quotaByRegion.get(region);
+    if (!byName) continue;
+    const entries = [];
+    for (const s of profiles[pi].skus) {
+      if (!s.usageName) continue;
+      const q = byName.get(s.usageName);
+      if (!q) continue;
+      entries.push({ sku: s.name, used: q.used, limit: q.limit, free: q.limit - q.used });
+    }
+    if (entries.length) {
+      quota[region] = entries;
+      anyQuota = true;
+    }
+  }
+
+  // Headroom summary, so the table can be filtered and sorted on it directly.
+  let bestFree = null;
+  let freeRegions = 0;
+  let exhaustedRegions = 0;
+  for (const [region, entries] of Object.entries(quota)) {
+    const free = Math.max(...entries.map((e) => e.free));
+    if (free > 0) {
+      freeRegions++;
+      if (bestFree === null || free > bestFree.free) {
+        bestFree = { region, free, sku: entries.find((e) => e.free === free).sku };
+      }
+    } else if (entries.some((e) => e.limit > 0)) {
+      exhaustedRegions++;
+    }
+  }
+
   const headline = profiles[0] || {};
   const ctxs = [...new Set(profiles.map((p) => p.ctx).filter((v) => v != null))];
   const outs = [...new Set(profiles.map((p) => p.out).filter((v) => v != null))];
@@ -339,6 +409,10 @@ for (const rec of models.values()) {
       lifecycle: p.lifecycle, deprecation: p.deprecation, kinds: p.kinds,
     })),
     byRegion: perRegion,
+    quota: anyQuota ? quota : null,
+    bestFree,
+    freeRegions,
+    exhaustedRegions,
     onprem: Object.fromEntries(
       Object.entries(onpremProfiles).map(([t, v]) => [
         t, { runtimes: [...v.runtimes], aliases: [...v.aliases], notes: [...v.notes] },
@@ -397,8 +471,17 @@ for (const r of regions) {
   }
 }
 
+out.hasQuota = quotaByRegion.size > 0;
+out.quotaRegions = quotaByRegion.size;
+
 fs.writeFileSync(OUT, JSON.stringify(out));
 console.log(`regions: ${regions.length}  models: ${out.models.length}`);
+if (out.hasQuota) {
+  const withQ = out.models.filter((m) => m.quota).length;
+  const exhausted = out.models.filter((m) => m.quota && m.freeRegions === 0 && m.exhaustedRegions > 0).length;
+  console.log(`quota joined for ${quotaByRegion.size} regions; ${withQ} models carry quota`);
+  console.log(`models with NO free capacity anywhere: ${exhausted}`);
+}
 console.log(`cloud rows: ${out.models.filter((m) => m.regionCount > 0).length}`);
 console.log(`on-prem only rows: ${out.models.filter((m) => m.regionCount === 0).length}`);
 console.log(`cross-target rows: ${out.models.filter((m) => m.regionCount > 0 && Object.keys(m.onprem).length).length}`);

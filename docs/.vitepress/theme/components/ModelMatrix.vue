@@ -54,6 +54,11 @@ const target = ref('')
 const sku = ref('')
 const onlyVaries = ref(false)
 const onlyProvOnly = ref(false)
+// 'profile' answers "is this model the same thing here as there".
+// 'quota' answers "where do I have room left", which is the question people
+// actually arrive with when a deployment starts returning 429.
+const colourMode = ref('profile')
+const quotaFilter = ref('')
 const sortKey = ref('regionCount')
 const sortDir = ref('desc')
 const expanded = ref(new Set())
@@ -97,6 +102,11 @@ const rows = computed(() => {
   if (sku.value) out = out.filter((m) => m.allSkus.includes(sku.value))
   if (onlyVaries.value) out = out.filter((m) => m.varies.length > 0)
   if (onlyProvOnly.value) out = out.filter((m) => m.provisionedOnly?.length > 0)
+  if (quotaFilter.value === 'exhausted')
+    out = out.filter((m) => m.quota && m.freeRegions === 0 && m.exhaustedRegions > 0)
+  else if (quotaFilter.value === 'headroom') out = out.filter((m) => m.freeRegions > 0)
+  else if (quotaFilter.value === 'partial')
+    out = out.filter((m) => m.freeRegions > 0 && m.exhaustedRegions > 0)
   if (target.value === 'cloud') out = out.filter((m) => m.regionCount > 0)
   else if (target.value === 'onprem') out = out.filter((m) => Object.keys(m.onprem).length > 0)
   else if (target.value === 'both')
@@ -134,6 +144,7 @@ function toggle(key) {
 function reset() {
   q.value = ''; publisher.value = ''; modality.value = ''; target.value = ''
   sku.value = ''; onlyVaries.value = false; onlyProvOnly.value = false; geoFilter.value = ''
+  quotaFilter.value = ''; colourMode.value = 'profile'
 }
 
 // Cell state for one model in one region. `null` means the honest answer:
@@ -145,7 +156,13 @@ function cell(m, r) {
   }
   const idx = m.byRegion?.[r.id]
   if (idx === undefined) return null
-  return { kind: 'cloud', idx, profile: m.profiles[idx] }
+  return { kind: 'cloud', idx, profile: m.profiles[idx], quota: m.quota?.[r.id] || null }
+}
+
+// Best remaining capacity in one region, across every deployment type it offers.
+function freeIn(c) {
+  if (!c || !c.quota || !c.quota.length) return null
+  return Math.max(...c.quota.map((q) => q.free))
 }
 
 // Profile index drives the colour. A model with one profile paints one flat
@@ -155,6 +172,14 @@ const HUES = [205, 145, 32, 265, 350, 175, 95, 15, 300, 230, 60, 320, 120, 250, 
 function cellStyle(c) {
   if (!c) return {}
   if (c.kind === 'onprem') return { '--h': 145, '--s': '55%' }
+  if (colourMode.value === 'quota') {
+    const free = freeIn(c)
+    // No quota reading is deliberately grey rather than green: "we did not
+    // measure this" and "you have room here" must not look the same.
+    if (free === null) return { '--h': 0, '--s': '0%', '--l': '62%' }
+    if (free <= 0) return { '--h': 2, '--s': '70%' }
+    return { '--h': 142, '--s': '58%' }
+  }
   return { '--h': HUES[c.idx % HUES.length], '--s': '62%' }
 }
 function fmt(n) {
@@ -237,6 +262,16 @@ const stats = computed(() => {
           <option value="">All geographies</option>
           <option v-for="g in geos" :key="g" :value="g">{{ g }}</option>
         </select>
+        <select v-if="data && data.hasQuota" v-model="quotaFilter" aria-label="Quota state">
+          <option value="">Any quota state</option>
+          <option value="exhausted">No free capacity anywhere</option>
+          <option value="headroom">Has free capacity somewhere</option>
+          <option value="partial">Exhausted in some regions, free in others</option>
+        </select>
+        <select v-if="data && data.hasQuota" v-model="colourMode" aria-label="Colour cells by">
+          <option value="profile">Colour by configuration</option>
+          <option value="quota">Colour by remaining quota</option>
+        </select>
         <label class="mm-check"><input type="checkbox" v-model="onlyVaries" /> Only models that differ by region</label>
         <label class="mm-check"><input type="checkbox" v-model="onlyProvOnly" /> Only models with a provisioned-only region</label>
         <button type="button" class="mm-reset" @click="reset">Reset</button>
@@ -258,6 +293,13 @@ const stats = computed(() => {
               <th @click="sortBy('modality')">Modality {{ arrow('modality') }}</th>
               <th @click="sortBy('regionCount')" title="Cloud regions this model is offered in">Regions {{ arrow('regionCount') }}</th>
               <th @click="sortBy('profileCount')" title="Distinct per-region configurations">Profiles {{ arrow('profileCount') }}</th>
+              <th
+                v-if="data && data.hasQuota"
+                @click="sortBy('freeRegions')"
+                title="Regions where this subscription still has unused quota"
+              >
+                Free in {{ arrow('freeRegions') }}
+              </th>
               <th
                 v-for="r in shownRegions"
                 :key="r.id"
@@ -282,6 +324,17 @@ const stats = computed(() => {
                   <span v-if="m.profileCount > 1" class="mm-varies" :title="m.varies.join(', ')">{{ m.profileCount }}</span>
                   <span v-else>{{ m.profileCount }}</span>
                 </td>
+                <td v-if="data && data.hasQuota" class="mm-num">
+                  <span
+                    v-if="m.quota && m.freeRegions === 0 && m.exhaustedRegions > 0"
+                    class="mm-exhausted"
+                    title="No unused quota in any region this model is offered in"
+                  >none</span>
+                  <span v-else-if="m.freeRegions > 0" class="mm-free" :title="m.bestFree ? `Most headroom: ${m.bestFree.free} units in ${m.bestFree.region} on ${m.bestFree.sku}` : ''">
+                    {{ m.freeRegions }}
+                  </span>
+                  <span v-else class="mm-unpub">no data</span>
+                </td>
                 <td
                   v-for="r in shownRegions"
                   :key="r.id"
@@ -291,7 +344,9 @@ const stats = computed(() => {
                   :title="cell(m, r)
                     ? `${m.name} in ${r.label}: ${cell(m, r).kind === 'onprem'
                         ? cell(m, r).op.runtimes.join(', ')
-                        : 'profile ' + (cell(m, r).idx + 1) + ': ' + (cell(m, r).profile.skus.map(s => s.name).join(', ') || 'no deployment SKU published')}`
+                        : (cell(m, r).quota
+                            ? cell(m, r).quota.map(qq => `${qq.sku} ${qq.used}/${qq.limit} used, ${qq.free} free`).join('  |  ')
+                            : 'profile ' + (cell(m, r).idx + 1) + ': ' + (cell(m, r).profile.skus.map(s => s.name).join(', ') || 'no deployment SKU published'))}`
                     : `${m.name} is NOT AVAILABLE in ${r.label}`"
                 >
                   <span v-if="!cell(m, r)" class="mm-dash">·</span>
@@ -299,7 +354,7 @@ const stats = computed(() => {
               </tr>
 
               <tr v-if="expanded.has(m.key)" class="mm-detail">
-                <td :colspan="4 + shownRegions.length">
+                <td :colspan="(data && data.hasQuota ? 5 : 4) + shownRegions.length">
                   <div class="mm-detail-inner">
                     <div class="mm-detail-head">
                       <h4>{{ m.name }}</h4>
@@ -324,6 +379,48 @@ const stats = computed(() => {
                       {{ m.provisionedOnly.join(', ') }}. Only provisioned or batch
                       capacity is offered there, which needs a reservation.
                     </p>
+
+                    <div v-if="m.quota" class="mm-quotablock">
+                      <h5>Your quota, per region and deployment type</h5>
+                      <p v-if="m.freeRegions === 0 && m.exhaustedRegions > 0" class="mm-finding mm-warnbox">
+                        <b>No unused capacity in any region.</b> Every deployment
+                        type this subscription can reach is at its limit. Moving
+                        region will not help; this needs a quota increase request.
+                      </p>
+                      <p v-else-if="m.bestFree" class="mm-finding mm-okbox">
+                        <b>Most headroom: {{ fmt(m.bestFree.free) }} units in {{ m.bestFree.region }}</b>
+                        on <code>{{ m.bestFree.sku }}</code>. Free capacity in
+                        {{ m.freeRegions }} region<template v-if="m.freeRegions !== 1">s</template><template
+                          v-if="m.exhaustedRegions"
+                        >, exhausted in {{ m.exhaustedRegions }}</template>.
+                      </p>
+                      <table class="mm-ptable">
+                        <thead>
+                          <tr><th>Region</th><th>Deployment type</th><th>Used</th><th>Limit</th><th>Free</th></tr>
+                        </thead>
+                        <tbody>
+                          <template v-for="(entries, region) in m.quota" :key="region">
+                            <tr v-for="e in entries" :key="region + e.sku" :class="{ 'mm-row-free': e.free > 0 }">
+                              <td>{{ region }}</td>
+                              <td>{{ e.sku }}</td>
+                              <td class="mm-num">{{ fmt(e.used) }}</td>
+                              <td class="mm-num">{{ fmt(e.limit) }}</td>
+                              <td class="mm-num">
+                                <b v-if="e.free > 0" class="mm-free">{{ fmt(e.free) }}</b>
+                                <span v-else class="mm-exhausted">0</span>
+                              </td>
+                            </tr>
+                          </template>
+                        </tbody>
+                      </table>
+                      <p class="mm-note">
+                        Measured against one subscription on {{ data.snapshot }}. Yours will differ:
+                        <code>az cognitiveservices usage list -l &lt;region&gt; -o table</code>.
+                        <b>GlobalStandard quota behaves as a single subscription-wide pool</b>, so it
+                        reads as consumed in every region once spent anywhere. A different
+                        deployment type carries a separate allocation.
+                      </p>
+                    </div>
 
                     <div v-if="Object.keys(m.onprem).length" class="mm-onprem">
                       <h5>On-premises</h5>
@@ -389,7 +486,7 @@ const stats = computed(() => {
               </tr>
             </template>
             <tr v-if="!rows.length">
-              <td :colspan="4 + shownRegions.length" class="mm-empty">
+              <td :colspan="(data && data.hasQuota ? 5 : 4) + shownRegions.length" class="mm-empty">
                 No model matches those filters.
               </td>
             </tr>
@@ -398,9 +495,17 @@ const stats = computed(() => {
       </div>
 
       <p class="mm-legend">
-        A coloured cell means the model is offered there; the colour is its
-        configuration profile, so a row of one colour is identical everywhere and a
-        row of many differs by region. A faint dot means <b>not available</b>.
+        <template v-if="colourMode === 'quota'">
+          <b>Coloured by remaining quota:</b> green means this subscription still
+          has unused capacity there, red means every deployment type is at its
+          limit, grey means no quota reading. A faint dot means
+          <b>not available</b>.
+        </template>
+        <template v-else>
+          A coloured cell means the model is offered there; the colour is its
+          configuration profile, so a row of one colour is identical everywhere and a
+          row of many differs by region. A faint dot means <b>not available</b>.
+        </template>
         Columns run the two on-premises targets, then the US regions, then
         everything else alphabetically; the rule marks where the international
         block starts. Snapshot {{ data.snapshot }}.
@@ -529,8 +634,8 @@ const stats = computed(() => {
 /* The boundary between the home block (on-premises and US) and everything
    international. Ordering alone does not show it at this column count. */
 .mm-divider { border-left: 2px solid var(--vp-c-brand-1) !important; }
-.mm-yes { background: hsl(var(--h) var(--s) 46% / 0.85); }
-:root.dark .mm-yes { background: hsl(var(--h) var(--s) 55% / 0.8); }
+.mm-yes { background: hsl(var(--h) var(--s) var(--l, 46%) / 0.85); }
+:root.dark .mm-yes { background: hsl(var(--h) var(--s) var(--l, 55%) / 0.8); }
 .mm-no { background: transparent; }
 .mm-dash { color: var(--vp-c-text-3); opacity: 0.45; font-size: 15px; line-height: 1; }
 
@@ -567,6 +672,16 @@ const stats = computed(() => {
 /* An absent value must not read as a small number. It recedes, and it keeps its
    own column width so two of them side by side do not run together. */
 .mm-unpub { color: var(--vp-c-text-3); font-style: italic; font-size: 11px; white-space: nowrap; }
+/* Quota state. Semantic colour, kept separate from the accent so it reads as a
+   status rather than as decoration. */
+.mm-free { color: var(--vp-c-green-1); font-weight: 700; }
+.mm-exhausted { color: var(--vp-c-danger-1); font-weight: 700; }
+.mm-okbox {
+  padding: 0.5rem 0.75rem; border-radius: 6px;
+  background: var(--vp-c-green-soft); color: var(--vp-c-green-1);
+}
+.mm-quotablock { margin: 0.8rem 0; }
+.mm-row-free td { background: var(--vp-c-green-soft); }
 .mm-ptable td.mm-num { min-width: 7.5rem; }
 .mm-swatch { display: inline-block; width: 0.7rem; height: 0.7rem; border-radius: 2px; margin-right: 0.35rem; background: hsl(var(--h) 62% 46%); vertical-align: -1px; }
 .mm-note { font-size: 11.5px; color: var(--vp-c-text-3); margin: 0.35rem 0 0; }

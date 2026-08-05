@@ -40,30 +40,46 @@ you deploy, and `gpt-4.1-mini` has seventeen distinct configurations across the 
 regions carrying it. The research behind every number is
 [SPIKE-32](../research/SPIKE-32-model-region-availability-matrix).
 
-::: danger The capacity numbers are product maximums, not your quota
-This is the easiest thing on this page to misread, and the gap is a
-**thousandfold**. When the matrix shows `GlobalStandard (1,000,000)`, that is the
-largest capacity **the deployment type will accept**. It is not what your
-subscription may allocate.
+## Where do I still have capacity?
 
-Measured on one subscription in East US on 2026-08-05: `DeepSeek-V4-Pro` shows a
-catalog maximum of **1,000,000** and a subscription quota of **1,000**, of which
-**1,000 was already in use**. The deployment was at 100% of its real ceiling
-while the matrix showed a million.
+The matrix carries **real subscription quota**, not just the catalog's product
+maximum, because the product maximum is the same everywhere and answers nothing.
+Set **Colour by remaining quota** and the whole grid turns into a headroom map:
+green where capacity is left, red where every deployment type is at its limit,
+grey where there is no reading.
 
-Your number comes from a different command, keyed on the quota bucket the matrix
-shows for each deployment type:
+- The **Free in** column counts the regions with unused quota. Sort on it.
+- **No free capacity anywhere** filters to the models that are genuinely stuck.
+- Expanding a row lists every region and deployment type with **used, limit and
+  free**, and names where the most headroom is.
 
-```bash
-az cognitiveservices usage list -l eastus \
-  --query "[?contains(name.value,'DeepSeek-V4-Pro')].{quota:name.value, used:currentValue, limit:limit}" \
-  -o table
-```
+::: danger Two numbers, a thousandfold apart. Do not confuse them
+The catalog publishes `capacity.maximum` per deployment type, which is the
+largest value **the deployment type will accept**. It is not what your
+subscription may allocate, and the expanded row labels it accordingly.
 
-**Check both SKUs.** Quota is granted per deployment type, so a model exhausted
-on `GlobalStandard` may have an untouched `DataZoneStandard` allocation sitting
-beside it. On the subscription above, `DeepSeek-V4-Pro` was at 1,000 of 1,000 on
-`GlobalStandard` and **0 of 1,000 on `DataZoneStandard`**.
+Measured in East US on 2026-08-05: `DeepSeek-V4-Pro` publishes a catalog maximum
+of **1,000,000** on `GlobalStandard`, against a subscription quota of **1,000**,
+of which **1,000 was already consumed**. The deployment was throttled at 100% of
+its real ceiling while the catalog advertised a figure a thousand times larger.
+:::
+
+::: warning GlobalStandard quota is one subscription-wide pool, so changing region will not help
+This is the single most useful thing measured here, and it is not obvious.
+
+On a subscription with **exactly one account, in East US**, `DeepSeek-V4-Pro`
+reported **1,000 of 1,000 consumed in all 33 regions that offer it.** There are no
+deployments in the other 32. `GlobalStandard` quota is therefore a **single
+subscription-wide allocation**, reported identically everywhere, not a per-region
+grant. Redeploying the same model in another region gains nothing.
+
+**A different deployment type carries a separate allocation.** The same model held
+**0 of 1,000 on `DataZoneStandard`** in nine US regions, entirely unused.
+`DeepSeek-V4-Flash` showed the same shape: 250 of 250 consumed on `GlobalStandard`
+everywhere, against 0 of 250 free on `DataZoneStandard` in sixteen regions.
+
+So when a model is throttled, **change deployment type before you change region,
+and before you ask Microsoft for an increase.**
 :::
 
 ## Five things worth knowing before you pick a region
@@ -120,9 +136,16 @@ and nothing needs more than Reader:
 
 ```powershell
 ./scripts/model-matrix/pull-regions.ps1 -Out ./.cache/models
+./scripts/model-matrix/pull-quota.ps1   -Out ./.cache/quota
 node ./scripts/model-matrix/make-onprem.mjs ./.cache/onprem.json
-node ./scripts/model-matrix/build-matrix.mjs ./.cache/models ./.cache/onprem.json ./docs/public/data/model-matrix.json <today>
+node ./scripts/model-matrix/build-matrix.mjs ./.cache/models ./.cache/onprem.json ./docs/public/data/model-matrix.json <today> ./.cache/quota
 ```
+
+The quota argument is optional. Leave it off and the matrix still renders
+availability and configuration; the quota column, the colour-by-quota mode and
+the per-region headroom tables simply do not appear. **Run it against your own
+subscription and the quota shown becomes yours**, which is the only way those
+numbers mean anything.
 
 The cloud half is a live read. The on-premises half is still a transcription of
 the [SPIKE-22](../research/SPIKE-22-foundry-local-model-catalog) catalog snapshot
