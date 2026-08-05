@@ -2,7 +2,7 @@
   "annotations": {
     "list": []
   },
-  "description": "Cost-safe Microsoft Foundry model use dashboard. Uses Azure Monitor platform metrics, token-based cost estimation, and model inventory. Intentionally excludes prompt, response, trace, and log-query data. Cost estimates are directional only; Cost Management is the source for billed charges.",
+  "description": "Cost-safe Microsoft Foundry model use dashboard. Panels 1-10 use free Azure Monitor platform metrics (Microsoft.CognitiveServices/accounts). Panel 11 requires AzureOpenAIRequestUsage diagnostic logs sent to Log Analytics (capped at 0.1 GB/day). Cost estimates are directional only; Cost Management is the source for billed charges.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
