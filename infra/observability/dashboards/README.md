@@ -12,7 +12,8 @@ not supported by the Azure API.
 
 `foundry-model-usage.dashboard.json` is the initial core definition. It is intentionally
 generic: `__SUBSCRIPTION_ID__`, `__FOUNDRY_RESOURCE_GROUP__`,
-`__FOUNDRY_RESOURCE_NAME__`, and `__LOCATION__` are placeholders that a private overlay
+`__FOUNDRY_RESOURCE_NAME__`, `__GATEWAY_RESOURCE_GROUP__`, `__GATEWAY_RESOURCE_NAME__`,
+and `__LOCATION__` are placeholders that a private overlay
 must replace at deployment time. Do not replace them in this public file. The definition
 uses native `Microsoft.CognitiveServices/accounts` metrics, so it does not create a
 diagnostic setting or send metric data to Log Analytics.
@@ -64,5 +65,29 @@ the dashboard.
 Ten of eleven panels run on free platform metrics. Only the caller/consumer breakdown
 (panel 11) requires paid Log Analytics ingestion. Set `logAnalyticsDailyQuotaGb` to a
 tight cap (e.g., 0.1 GB) in the private overlay to prevent surprise bills. No platform
-metrics are sent to Log Analytics — the `foundryDiagnosticSetting.metrics` array should
+metrics are sent to Log Analytics, so the `foundryDiagnosticSetting.metrics` array should
 remain empty.
+
+## The gateway row
+
+The last row covers the optional [model gateway](../../../docs/guide/model-gateway.md),
+and it is **empty for anyone who did not deploy one**, which is most deployments. Its
+panels read `Microsoft.Web/sites` platform metrics: requests split by 4xx and 5xx,
+average response time, health-check status, and CPU and memory.
+
+**These do not use the Azure Monitor workspace, and cannot.** That workspace stores
+**Prometheus** metrics, gathered from Kubernetes or by Prometheus remote-write. App
+Service platform metrics are collected automatically into the Azure Monitor metrics
+database instead, which is the same store the Foundry panels above already read through
+the `grafana-azure-monitor-datasource`. So the gateway panels need no new plumbing and no
+new data source. See
+[Monitor Azure App Service](https://learn.microsoft.com/azure/app-service/monitor-app-service#azure-monitor-platform-metrics)
+and [Azure Monitor workspace](https://learn.microsoft.com/azure/azure-monitor/metrics/azure-monitor-workspace-overview).
+
+Two of these panels answer questions nothing else can:
+
+- **HTTP 4xx** on the gateway is usually a caller presenting the wrong gateway token, not
+  a model fault. Reading it as a model problem sends you to the wrong place.
+- **Health check status** below 100 means instances are failing the `/health` probe. This
+  is what tells you the gateway is down before a person does, and when the gateway is
+  down every model behind it is unreachable.

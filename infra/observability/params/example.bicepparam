@@ -61,3 +61,85 @@ param enableAvailabilityTests = false
 param availabilityTestDefinitions = []
 param enableScheduledQueryAlerts = false
 param scheduledQueryAlertDefinitions = []
+
+// ------------------------- model gateway monitoring -------------------------
+// All of this is for the OPTIONAL model gateway (docs/guide/model-gateway.md).
+// Leave it off unless you deployed one; most deployments do not.
+//
+// These read Microsoft.Web/sites PLATFORM metrics, which Azure collects with no
+// configuration. They do NOT use the Azure Monitor workspace and cannot: that
+// workspace stores Prometheus metrics, and App Service platform metrics go to
+// the Azure Monitor metrics database instead. The diagnostic setting below is
+// for the HTTP LOGS, which are the part that is not a metric.
+
+param enableGatewayDiagnosticSetting = false
+param gatewayDiagnosticSetting = {
+  targetSubscriptionId: '00000000-0000-0000-0000-000000000000'
+  targetResourceGroupName: 'rg-<initiative>-<env>-<region>-01'
+  gatewayName: 'app-gw-<initiative>-<env>-<region>-01'
+  name: 'diag-gateway-to-law'
+  // AppServiceHTTPLogs answers "who called, what did they get, how long did it
+  // take". AppServiceConsoleLogs and AppServicePlatformLogs carry the shim's own
+  // stdout, which is where a stripped-parameter line shows up.
+  logs: [
+    { category: 'AppServiceHTTPLogs', enabled: true }
+    { category: 'AppServiceConsoleLogs', enabled: true }
+    { category: 'AppServicePlatformLogs', enabled: true }
+  ]
+  metrics: [
+    { category: 'AllMetrics', enabled: true }
+  ]
+}
+
+// Add these to metricAlertDefinitions when the gateway is deployed. Both are
+// whole-gateway: an App Service has no per-model dimension to split on.
+//
+//   {
+//     name: 'alert-gateway-5xx'
+//     properties: {
+//       description: 'The gateway is failing requests. Every model behind it is affected.'
+//       severity: 1
+//       enabled: true
+//       scopes: [ '<gateway resource id>' ]
+//       evaluationFrequency: 'PT1M'
+//       windowSize: 'PT5M'
+//       criteria: {
+//         'odata.type': 'Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria'
+//         allOf: [
+//           {
+//             name: 'Http5xx'
+//             metricName: 'Http5xx'
+//             metricNamespace: 'Microsoft.Web/sites'
+//             operator: 'GreaterThan'
+//             threshold: 5
+//             timeAggregation: 'Total'
+//             criterionType: 'StaticThresholdCriterion'
+//           }
+//         ]
+//       }
+//     }
+//   }
+//
+// Deliberately NOT alerting on Http4xx. A 401 there is a caller presenting the
+// wrong gateway token, which is the security control working, not an incident.
+
+// Add this to availabilityTestDefinitions to have Application Insights probe
+// /health from outside Azure. The endpoint is unauthenticated on purpose so a
+// probe can reach it, and it reports nothing about the account behind it.
+//
+//   {
+//     name: 'avail-gateway-health'
+//     kind: 'standard'
+//     properties: {
+//       Name: 'avail-gateway-health'
+//       SyntheticMonitorId: 'avail-gateway-health'
+//       Enabled: true
+//       Frequency: 300
+//       Timeout: 30
+//       Kind: 'standard'
+//       RetryEnabled: true
+//       Locations: [ { Id: 'us-il-ch1-azr' }, { Id: 'emea-nl-ams-azr' } ]
+//       Request: { RequestUrl: 'https://<gateway>.azurewebsites.net/health', HttpVerb: 'GET' }
+//       ValidationRules: { ExpectedHttpStatusCode: 200, SSLCheck: true, SSLCertRemainingLifetimeCheck: 7 }
+//     }
+//   }

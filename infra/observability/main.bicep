@@ -142,6 +142,12 @@ param enableAlertProcessingRules bool
 @description('Alert-processing rule definitions. Each item contains name, location, and full properties.')
 param alertProcessingRuleDefinitions array
 
+@description('Route the model gateway App Service logs and metrics into Log Analytics. Only meaningful when the optional gateway is deployed.')
+param enableGatewayDiagnosticSetting bool = false
+
+@description('Gateway diagnostic setting shape: targetSubscriptionId, targetResourceGroupName, gatewayName, name, logs, metrics, optional logAnalyticsDestinationType.')
+param gatewayDiagnosticSetting object = {}
+
 @description('Whether to deploy selected diagnostic categories to an existing Microsoft Foundry account.')
 param enableFoundryDiagnosticSetting bool
 
@@ -324,6 +330,19 @@ module foundryDiagnostics 'modules/foundry-diagnostic-setting.bicep' = if (enabl
   }
 }
 
+module gatewayDiagnostics 'modules/gateway-diagnostic-setting.bicep' = if (enableGatewayDiagnosticSetting) {
+  name: 'deploy--gateway-diagnostics-'
+  scope: resourceGroup(gatewayDiagnosticSetting.targetSubscriptionId, gatewayDiagnosticSetting.targetResourceGroupName)
+  params: {
+    gatewayName: gatewayDiagnosticSetting.gatewayName
+    name: gatewayDiagnosticSetting.name
+    logAnalyticsWorkspaceResourceId: logAnalytics.outputs.id
+    logs: gatewayDiagnosticSetting.logs
+    metrics: gatewayDiagnosticSetting.metrics
+    logAnalyticsDestinationType: gatewayDiagnosticSetting.?logAnalyticsDestinationType ?? ''
+  }
+}
+
 module applicationInsights 'modules/application-insights.bicep' = if (enableApplicationInsights) {
   name: 'deploy-${workload}-application-insights-${instance}'
   scope: resourceGroup(names.resourceGroup)
@@ -373,6 +392,7 @@ output capabilityStatus object = {
   metricAlerts: deployMetricAlertDefinitions
   alertProcessingRules: deployAlertProcessingRules
   foundryDiagnosticSetting: enableFoundryDiagnosticSetting
+  gatewayDiagnosticSetting: enableGatewayDiagnosticSetting
   applicationInsights: enableApplicationInsights
   availabilityTests: deployAvailability
   scheduledQueryAlerts: deployScheduledQueries

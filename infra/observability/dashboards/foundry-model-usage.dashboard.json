@@ -923,6 +923,382 @@
       ],
       "title": "Caller / consumer breakdown (requires Usage diagnostics enabled)",
       "type": "timeseries"
+    },
+    {
+      "id": 12,
+      "type": "row",
+      "title": "Model gateway (optional; empty unless deployGateway is true)",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 56
+      },
+      "panels": []
+    },
+    {
+      "id": 13,
+      "title": "Gateway requests and errors",
+      "description": "Traffic through the gateway. A rising 4xx line is usually a caller presenting the wrong gateway token, not a model problem.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 57
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "alias": "Requests",
+          "azureMonitor": {
+            "aggregation": "Total",
+            "allowedTimeGrainsMs": [],
+            "dimensionFilters": [],
+            "metricName": "Requests",
+            "metricNamespace": "Microsoft.Web/sites",
+            "region": "__LOCATION__",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Web/sites",
+                "region": "__LOCATION__",
+                "resourceGroup": "__GATEWAY_RESOURCE_GROUP__",
+                "resourceName": "__GATEWAY_RESOURCE_NAME__",
+                "subscription": "__SUBSCRIPTION_ID__"
+              }
+            ],
+            "timeGrain": "auto",
+            "top": "10"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "__SUBSCRIPTION_ID__"
+        },
+        {
+          "alias": "HTTP 5xx",
+          "azureMonitor": {
+            "aggregation": "Total",
+            "allowedTimeGrainsMs": [],
+            "dimensionFilters": [],
+            "metricName": "Http5xx",
+            "metricNamespace": "Microsoft.Web/sites",
+            "region": "__LOCATION__",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Web/sites",
+                "region": "__LOCATION__",
+                "resourceGroup": "__GATEWAY_RESOURCE_GROUP__",
+                "resourceName": "__GATEWAY_RESOURCE_NAME__",
+                "subscription": "__SUBSCRIPTION_ID__"
+              }
+            ],
+            "timeGrain": "auto",
+            "top": "10"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "B",
+          "subscription": "__SUBSCRIPTION_ID__"
+        },
+        {
+          "alias": "HTTP 4xx (includes 401 from callers with no token)",
+          "azureMonitor": {
+            "aggregation": "Total",
+            "allowedTimeGrainsMs": [],
+            "dimensionFilters": [],
+            "metricName": "Http4xx",
+            "metricNamespace": "Microsoft.Web/sites",
+            "region": "__LOCATION__",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Web/sites",
+                "region": "__LOCATION__",
+                "resourceGroup": "__GATEWAY_RESOURCE_GROUP__",
+                "resourceName": "__GATEWAY_RESOURCE_NAME__",
+                "subscription": "__SUBSCRIPTION_ID__"
+              }
+            ],
+            "timeGrain": "auto",
+            "top": "10"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "C",
+          "subscription": "__SUBSCRIPTION_ID__"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "Gateway response time",
+      "description": "Includes the model call itself, so this tracks model latency plus the gateway hop. A step change with flat model latency means the gateway, not the model.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 57
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "alias": "Average response time",
+          "azureMonitor": {
+            "aggregation": "Average",
+            "allowedTimeGrainsMs": [],
+            "dimensionFilters": [],
+            "metricName": "AverageResponseTime",
+            "metricNamespace": "Microsoft.Web/sites",
+            "region": "__LOCATION__",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Web/sites",
+                "region": "__LOCATION__",
+                "resourceGroup": "__GATEWAY_RESOURCE_GROUP__",
+                "resourceName": "__GATEWAY_RESOURCE_NAME__",
+                "subscription": "__SUBSCRIPTION_ID__"
+              }
+            ],
+            "timeGrain": "auto",
+            "top": "10"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "__SUBSCRIPTION_ID__"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "title": "Gateway health check",
+      "description": "The platform probing /health. Below 100 means instances are failing the probe. This is the panel that tells you the gateway is down before a person does.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 65
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "alias": "Health check status",
+          "azureMonitor": {
+            "aggregation": "Average",
+            "allowedTimeGrainsMs": [],
+            "dimensionFilters": [],
+            "metricName": "HealthCheckStatus",
+            "metricNamespace": "Microsoft.Web/sites",
+            "region": "__LOCATION__",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Web/sites",
+                "region": "__LOCATION__",
+                "resourceGroup": "__GATEWAY_RESOURCE_GROUP__",
+                "resourceName": "__GATEWAY_RESOURCE_NAME__",
+                "subscription": "__SUBSCRIPTION_ID__"
+              }
+            ],
+            "timeGrain": "auto",
+            "top": "10"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "__SUBSCRIPTION_ID__"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "Gateway CPU and memory",
+      "description": "B1 is a small tier. If either of these saturates while requests are flat, the shim is not the bottleneck and the tier needs raising.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 65
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "alias": "CPU seconds",
+          "azureMonitor": {
+            "aggregation": "Total",
+            "allowedTimeGrainsMs": [],
+            "dimensionFilters": [],
+            "metricName": "CpuTime",
+            "metricNamespace": "Microsoft.Web/sites",
+            "region": "__LOCATION__",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Web/sites",
+                "region": "__LOCATION__",
+                "resourceGroup": "__GATEWAY_RESOURCE_GROUP__",
+                "resourceName": "__GATEWAY_RESOURCE_NAME__",
+                "subscription": "__SUBSCRIPTION_ID__"
+              }
+            ],
+            "timeGrain": "auto",
+            "top": "10"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "__SUBSCRIPTION_ID__"
+        },
+        {
+          "alias": "Memory working set",
+          "azureMonitor": {
+            "aggregation": "Average",
+            "allowedTimeGrainsMs": [],
+            "dimensionFilters": [],
+            "metricName": "MemoryWorkingSet",
+            "metricNamespace": "Microsoft.Web/sites",
+            "region": "__LOCATION__",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Web/sites",
+                "region": "__LOCATION__",
+                "resourceGroup": "__GATEWAY_RESOURCE_GROUP__",
+                "resourceName": "__GATEWAY_RESOURCE_NAME__",
+                "subscription": "__SUBSCRIPTION_ID__"
+              }
+            ],
+            "timeGrain": "auto",
+            "top": "10"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "B",
+          "subscription": "__SUBSCRIPTION_ID__"
+        }
+      ]
     }
   ],
   "refresh": "5m",
