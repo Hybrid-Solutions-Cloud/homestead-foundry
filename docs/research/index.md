@@ -33,3 +33,4 @@ Every research spike behind the architecture decisions, in order. Each grounds i
 | [SPIKE-28](./SPIKE-28-azure-local-networking-storage-certificates) | Networking, ingress, TLS, and storage for Foundry Local on Azure Local |
 | [SPIKE-29](./SPIKE-29-local-track-lifecycle-and-upgrade) | Lifecycle, upgrade, and drift for the two Foundry Local tracks |
 | [SPIKE-31](./SPIKE-31-cross-track-feature-parity) | Cross-track capability and feature parity across the three deployment targets |
+| [SPIKE-32](./SPIKE-32-model-region-availability-matrix) | Every model against every region, and what actually differs between them |

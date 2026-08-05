@@ -10,9 +10,15 @@ them will mislead you.
 
 | Reference | Answers | Covers |
 |---|---|---|
+| [Model availability matrix](./model-matrix) | Where can **any** model run, and what differs? | All three targets at once, interactively: 233 models against 42 regions, with per-region deployment types, capacity ceilings, and retirement dates. Generated, from [SPIKE-32](../research/SPIKE-32-model-region-availability-matrix). |
 | [Model catalog](./model-catalog) | What did **this project** choose? | Every model this methodology has deployed, evaluated, or rejected on the Azure AI Foundry target, with the reasoning behind each row. Curated, roughly 38 rows. |
 | [Available models: Azure AI Foundry](./model-availability-azure-cloud) | What **can** I deploy on the cloud? | How to query your own subscription and region, plus a dated snapshot for scale. Not a copied catalog, and the page explains why. |
 | [Available models: Foundry Local and Azure Local Foundry](./model-catalog-foundry-local) | What **can** I deploy on premises? | The full roster for both on-premises targets: 170 entries in two diverging halves, from [SPIKE-22](../research/SPIKE-22-foundry-local-model-catalog). |
+
+**Start with the matrix if your question involves more than one region or more
+than one target.** The prose pages are better for understanding a single target;
+the matrix is the only one that can answer "where does this model run, and is it
+the same thing there."
 
 **The catalog is a shortlist, not a menu.** A model absent from it is not
 unavailable; it is unevaluated, or it was evaluated and rejected with a row
@@ -22,9 +28,20 @@ saying so. The reasoning is in
 ## Why the lists are split by target
 
 The Azure AI Foundry target and the two on-premises targets run close to disjoint
-rosters. Nothing in the cloud catalog runs on Foundry Local: no image generation,
-no text to speech, no video, and no proprietary frontier reasoning models. A
-single table with a per-target column would read as three noes on every row.
+rosters. Nothing in **this project's chosen catalog** runs on Foundry Local: no
+image generation, no text to speech, no video, and no proprietary frontier
+reasoning models. A single table with a per-target column would read as three
+noes on every row.
+
+::: warning "Close to disjoint" is not "disjoint", and SPIKE-32 measured the overlap
+An earlier version of this page said nothing in the cloud catalog runs on Foundry
+Local. That is true of the **chosen** catalog and false of the **available** one.
+[SPIKE-32](../research/SPIKE-32-model-region-availability-matrix) found **eleven
+models present on more than one target**, and **four that run on all three**:
+`Phi-4`, `Phi-4-mini-instruct`, `Phi-4-mini-reasoning`, and `gpt-oss-20b`. If
+portability across cloud, cluster, and device is a requirement, those four are the
+entire option set, and the [matrix](./model-matrix) is where to see it.
+:::
 
 The two on-premises targets share one page, with a column each, per
 [ADR-0017](../adr/ADR-0017-deployment-target-documentation-structure) decision 5.
@@ -41,7 +58,11 @@ repository's own
 The cloud page gives you the query instead.
 
 Automating the refresh of all of these, from live catalogs rather than by hand,
-is tracked as a feature request rather than left as a recurring chore.
+is tracked as a feature request rather than left as a recurring chore. The
+[matrix](./model-matrix) is the first part of that to land: its cloud half is
+**generated** by [`scripts/model-matrix/`](https://github.com/Hybrid-Solutions-Cloud/homestead-foundry/tree/main/scripts/model-matrix)
+from a live read of 63 regions, so it is regenerated rather than edited. Its
+on-premises half is still a transcription, and nothing schedules either yet.
 
 ## Machine-readable counterpart
 

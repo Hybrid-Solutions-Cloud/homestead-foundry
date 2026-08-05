@@ -182,6 +182,7 @@ export default defineConfig({
         text: "Reference",
         items: [
           { text: "Reference index", link: "/reference/" },
+          { text: "Model availability matrix", link: "/reference/model-matrix" },
           { text: "Model catalog (what this project chose)", link: "/reference/model-catalog" },
           { text: "Available: Azure AI Foundry", link: "/reference/model-availability-azure-cloud" },
           { text: "Available: Foundry Local", link: "/reference/model-availability-foundry-local" },
@@ -341,6 +342,12 @@ export default defineConfig({
           ],
         },
         {
+          text: "Compare everything at once",
+          items: [
+            { text: "Model availability matrix", link: "/reference/model-matrix" },
+          ],
+        },
+        {
           text: "What is available",
           items: [
             { text: "Azure AI Foundry", link: "/reference/model-availability-azure-cloud" },
@@ -385,6 +392,7 @@ export default defineConfig({
             { text: "SPIKE-04 Identity, secrets, security", link: "/research/SPIKE-04-identity-security" },
             { text: "SPIKE-06 Publish-pipeline integration", link: "/research/SPIKE-06-pipeline-integration" },
             { text: "SPIKE-14 Tenant model and region survey", link: "/research/SPIKE-14-tenant-region-survey" },
+            { text: "SPIKE-32 Model and region availability matrix", link: "/research/SPIKE-32-model-region-availability-matrix" },
             { text: "SPIKE-17 Agent MCP gateway governance", link: "/research/SPIKE-17-agent-mcp-gateway-governance" },
           ],
         },

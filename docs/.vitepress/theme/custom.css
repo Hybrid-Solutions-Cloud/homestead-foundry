@@ -1,0 +1,43 @@
+/* Page-level overrides, applied only where a page opts in through the
+   `pageClass` frontmatter key. Nothing here affects a page that does not ask
+   for it.
+
+   The model matrix is 42 columns wide. VitePress caps document content at
+   688px with an aside, which showed two region columns out of 42 and made the
+   comparison the page exists for impossible to see. This widens the container
+   for that one page while keeping the prose at a readable measure, so only the
+   table itself uses the extra width. */
+
+.matrix-page .VPDoc .container,
+.matrix-page .VPDoc .content,
+.matrix-page .VPDoc.has-aside .content-container {
+  max-width: none;
+}
+
+.matrix-page .VPDoc {
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+/* Prose stays at a comfortable measure. Without this the paragraphs would
+   stretch to the full window and become unreadable, which trades one layout
+   problem for another. Only the matrix component is allowed the full width. */
+.matrix-page .vp-doc > div > h1,
+.matrix-page .vp-doc > div > h2,
+.matrix-page .vp-doc > div > h3,
+.matrix-page .vp-doc > div > h4,
+.matrix-page .vp-doc > div > p,
+.matrix-page .vp-doc > div > ul,
+.matrix-page .vp-doc > div > ol,
+.matrix-page .vp-doc > div > blockquote,
+.matrix-page .vp-doc > div > .custom-block,
+.matrix-page .vp-doc > div > div[class*="language-"] {
+  max-width: 54rem;
+}
+
+@media (max-width: 960px) {
+  .matrix-page .VPDoc {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
