@@ -109,10 +109,50 @@ because the client hardcodes parameters you cannot reach. GitHub Copilot Chat
 sends `temperature: 0.1` and its custom-endpoint configuration has **no field to
 change it** - seven properties, none for temperature.
 
-**The workaround is the API surface, not the parameter.** The **Responses API**
-does not take temperature the same way, and reasoning models work through it.
-Configure those deployments as a second group with `apiType: "responses"`; leave
-everything else on Chat Completions.
+::: warning Correction: switching to the Responses API is not the fix
+An earlier version of this page said the Responses API "does not take temperature
+the same way" and that reasoning models work through it. **That is wrong, and it
+was published.** Measured against a live deployment, `gpt-5-6-sol` returns the
+identical 400 on both surfaces:
+
+| Request | `/chat/completions` | `/responses` |
+|---|---|---|
+| no temperature | 200 | 200 |
+| `temperature: 1` | 200 | 200 |
+| **`temperature: 0.1`** | **400** | **400** |
+
+The restriction belongs to the **model**, not the endpoint. Routing reasoning
+models through `apiType: "responses"` does help in practice, but only because
+that client path happens not to send temperature. That is **the client's
+behaviour, not a property of the API**, so it can change on any extension update
+and it fixes nothing for any other tool.
+:::
+
+**There is no fix on the Azure side, and this is worth being precise about.** A
+deployment has no setting that permits or forbids a temperature, so redeploying
+the model, or recreating the deployment "without locking parameters", changes
+nothing. The value is chosen by the client and rejected by the model. **The only
+place to intervene is between them.**
+
+### The durable fix: a shim that drops what the endpoint refuses
+
+Put a small local proxy between the editor and the endpoint. Forward every
+request untouched; **only if the endpoint answers 400 with `unsupported_value`
+and names a `param`, drop that parameter and retry once.**
+
+That inversion matters. A proxy carrying a list of which models reject which
+parameters is wrong the day a new model ships. Letting the endpoint decide keeps
+working for parameters and models that do not exist yet, and it leaves alone the
+models that accept temperature rather than degrading them to a default.
+
+A 400 arrives before any response body streams, so the retry costs one round trip
+and never truncates a stream. **Stream the body straight through**: an agentic
+chat client uses server-sent events, and a proxy that buffers turns a live token
+stream into a long pause followed by a wall of text.
+
+A working implementation is about 120 lines with no dependencies. It also lets
+the API key stay server-side, so it stops living in the editor's synced
+credential store.
 
 **Verify a model against the client you will actually use, not just with curl.**
 Tested one way, a model looks fine; tested the other, it never worked.
