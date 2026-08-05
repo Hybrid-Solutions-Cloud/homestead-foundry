@@ -104,7 +104,12 @@ resource gateway 'Microsoft.Web/sites@2023-12-01' = {
       ftpsState: 'Disabled'
       http20Enabled: true
       healthCheckPath: '/health'
-      appCommandLine: 'node scripts/foundry-proxy.mjs'
+      // The entry point sits at the package ROOT, not in a subdirectory. A zip
+      // built on Windows with Compress-Archive stores entries as `dir\file`,
+      // and the Linux host reads that backslash as part of the FILENAME rather
+      // than as a path separator, so a nested layout silently fails to start
+      // with MODULE_NOT_FOUND. A flat package cannot hit that.
+      appCommandLine: 'node foundry-proxy.mjs'
       appSettings: [
         {
           name: 'FOUNDRY_ENDPOINT'
