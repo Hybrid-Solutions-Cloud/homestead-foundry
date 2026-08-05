@@ -141,6 +141,36 @@ Two rows deserve attention.
 
 North Europe again, and this compounds its narrow catalog: of the 28 models it carries, half of the notable ones cannot be deployed there without a reservation.
 
+::: danger A catalog maximum is not a quota, and the gap is a thousandfold
+Every capacity figure in this section comes from `model.skus[].capacity.maximum`,
+which is **the largest value the deployment type will accept**. It is not what a
+given subscription may allocate. Those are different numbers from different
+commands, and confusing them is the most likely way to misuse this spike.
+
+Measured in East US on 2026-08-05: `DeepSeek-V4-Pro` publishes a catalog maximum
+of **1,000,000** on `GlobalStandard`. The subscription's quota for the same model,
+same SKU, same region was **1,000**, and **1,000 was already consumed**. The
+deployment was throttled at 100% of its real ceiling while the catalog advertised
+a figure a thousand times larger.
+
+The catalog hands you the join key: each SKU carries a **`usageName`**, for
+example `AIServices.GlobalStandard.DeepSeek-V4-Pro`, and that is the bucket the
+quota command reports against.
+
+```bash
+az cognitiveservices usage list -l eastus \
+  --query "[?contains(name.value,'DeepSeek-V4-Pro')].{quota:name.value, used:currentValue, limit:limit}" \
+  -o table
+```
+
+**Quota is granted per deployment type, not per model.** On that same
+subscription `DeepSeek-V4-Pro` was exhausted on `GlobalStandard` at 1,000 of
+1,000 while holding **0 of 1,000 on `DataZoneStandard`** - unused headroom on a
+second SKU, reachable without asking Microsoft for anything. `DeepSeek-V4-Flash`
+showed the same shape at 250 of 250 against 0 of 250. **Check every SKU before
+concluding a model is out of capacity.**
+:::
+
 Capacity ceilings for the same deployment type also move between regions, on 7 models. `gpt-4.1`'s `Standard` ceiling is **1,000,000 units in most regions and 10,000,000 in `northcentralus` and `swedencentral`**. `Ministral-3B`'s `GlobalStandard` ceiling is **1,000 units in 27 regions and 1 unit in six** (`centralus`, `centraluseuap`, `japanwest`, `ukwest`, `westcentralus`, `westus2`) - a thousandfold difference in what the same model in the same SKU will let you allocate.
 
 ::: tip A measurement trap worth recording

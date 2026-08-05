@@ -145,6 +145,21 @@ apart. Check before you design around a model:
 az cognitiveservices usage list -l <region> --query "[?contains(name.value,'<model>')].{name:name.value, used:currentValue, limit:limit}" -o table
 ```
 
+::: warning Do not read the catalog's maximum as your quota
+The model catalog publishes a `capacity.maximum` per deployment type, and it is
+**the largest value the deployment type accepts**, not what you may allocate.
+`DeepSeek-V4-Pro` publishes **1,000,000** while the same subscription's quota for
+it in East US is **1,000**. Only the second number throttles you. The catalog
+gives you the bucket name to ask with, such as
+`AIServices.GlobalStandard.DeepSeek-V4-Pro`.
+
+**Quota is granted per deployment type**, so a model exhausted on
+`GlobalStandard` can still hold untouched `DataZoneStandard` capacity. Check
+every SKU before concluding a model is out of room. See the
+[model availability matrix](../reference/model-matrix) for which deployment types
+each model offers, per region.
+:::
+
 **Capacity is not a cost control.** On `GlobalStandard` you bill per token
 consumed either way, so a throttled deployment **spends the same and delivers
 less**: the client hits `429` on its second call and either stalls or retries the

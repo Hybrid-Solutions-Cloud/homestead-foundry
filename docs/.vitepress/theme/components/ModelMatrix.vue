@@ -341,7 +341,7 @@ const stats = computed(() => {
                       <table class="mm-ptable">
                         <thead>
                           <tr>
-                            <th>#</th><th>Regions</th><th>Deployment types (ceiling in units)</th>
+                            <th>#</th><th>Regions</th><th>Deployment types (product maximum, NOT your quota)</th>
                             <th>Context</th><th>Max output</th><th>Versions</th><th>Status</th>
                           </tr>
                         </thead>
@@ -359,8 +359,8 @@ const stats = computed(() => {
                                 {{ s.name }}<template v-if="s.allMax && s.allMax.length"> ({{ s.allMax.map(fmt).join(' / ') }})</template>
                               </span>
                             </td>
-                            <td class="mm-num">{{ fmt(p.ctx) }}</td>
-                            <td class="mm-num">{{ fmt(p.out) }}</td>
+                            <td class="mm-num"><span v-if="p.ctx == null" class="mm-unpub">not published</span><template v-else>{{ fmt(p.ctx) }}</template></td>
+                            <td class="mm-num"><span v-if="p.out == null" class="mm-unpub">not published</span><template v-else>{{ fmt(p.out) }}</template></td>
                             <td>{{ p.versions.join(', ') }}</td>
                             <td>{{ p.lifecycle.join(', ') || 'not published' }}</td>
                           </tr>
@@ -371,9 +371,17 @@ const stats = computed(() => {
                         two entries under that one name in the same region. That is
                         the source data, not a rounding of it.
                       </p>
-                      <p v-if="m.profiles.some(p => p.skus.some(s => s.usageName))" class="mm-note">
-                        Quota bucket:
-                        <code v-for="s in m.profiles[0].skus.filter(s => s.usageName)" :key="s.name">{{ s.usageName }}</code>
+                      <p v-if="m.profiles.some(p => p.skus.some(s => s.usageName))" class="mm-quota">
+                        <b>The number above is not what you can deploy.</b> It is the
+                        largest capacity the deployment type accepts. What you can
+                        actually allocate is your subscription's quota in that
+                        region, which is a separate and usually far smaller number.
+                        Ask for it by quota bucket:
+                        <span class="mm-buckets">
+                          <code v-for="s in m.profiles[0].skus.filter(s => s.usageName)" :key="s.name">{{ s.usageName }}</code>
+                        </span>
+                        <br />
+                        <code class="mm-cmd">az cognitiveservices usage list -l &lt;region&gt; --query "[?contains(name.value,'{{ m.name }}')].{{ '{' }}quota:name.value, used:currentValue, limit:limit{{ '}' }}" -o table</code>
                       </p>
                     </div>
                   </div>
@@ -556,8 +564,22 @@ const stats = computed(() => {
 .mm-regionlist { max-width: 22rem; font-size: 11.5px; color: var(--vp-c-text-2); word-break: break-word; }
 .mm-sku { display: inline-block; margin: 0 0.3rem 0.15rem 0; padding: 0.05rem 0.35rem; border-radius: 4px; background: var(--vp-c-default-soft); white-space: nowrap; font-size: 11px; }
 .mm-none { color: var(--vp-c-text-3); font-style: italic; }
+/* An absent value must not read as a small number. It recedes, and it keeps its
+   own column width so two of them side by side do not run together. */
+.mm-unpub { color: var(--vp-c-text-3); font-style: italic; font-size: 11px; white-space: nowrap; }
+.mm-ptable td.mm-num { min-width: 7.5rem; }
 .mm-swatch { display: inline-block; width: 0.7rem; height: 0.7rem; border-radius: 2px; margin-right: 0.35rem; background: hsl(var(--h) 62% 46%); vertical-align: -1px; }
 .mm-note { font-size: 11.5px; color: var(--vp-c-text-3); margin: 0.35rem 0 0; }
+/* The single most misreadable number on this page gets the loudest treatment.
+   A product maximum of 1,000,000 sitting next to a subscription quota of 1,000
+   is a thousandfold difference, and readers will assume the big number is
+   theirs unless told otherwise in the same place they read it. */
+.mm-quota {
+  font-size: 12px; margin: 0.5rem 0 0; padding: 0.55rem 0.75rem;
+  border-radius: 6px; background: var(--vp-c-warning-soft); color: var(--vp-c-warning-1);
+}
+.mm-buckets code { margin-right: 0.35rem; }
+.mm-cmd { display: inline-block; margin-top: 0.35rem; font-size: 11px; word-break: break-all; }
 .mm-empty { text-align: center; padding: 2rem; color: var(--vp-c-text-2); }
 .mm-legend { font-size: 12px; color: var(--vp-c-text-3); margin-top: 0.6rem; }
 

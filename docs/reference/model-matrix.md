@@ -40,6 +40,32 @@ you deploy, and `gpt-4.1-mini` has seventeen distinct configurations across the 
 regions carrying it. The research behind every number is
 [SPIKE-32](../research/SPIKE-32-model-region-availability-matrix).
 
+::: danger The capacity numbers are product maximums, not your quota
+This is the easiest thing on this page to misread, and the gap is a
+**thousandfold**. When the matrix shows `GlobalStandard (1,000,000)`, that is the
+largest capacity **the deployment type will accept**. It is not what your
+subscription may allocate.
+
+Measured on one subscription in East US on 2026-08-05: `DeepSeek-V4-Pro` shows a
+catalog maximum of **1,000,000** and a subscription quota of **1,000**, of which
+**1,000 was already in use**. The deployment was at 100% of its real ceiling
+while the matrix showed a million.
+
+Your number comes from a different command, keyed on the quota bucket the matrix
+shows for each deployment type:
+
+```bash
+az cognitiveservices usage list -l eastus \
+  --query "[?contains(name.value,'DeepSeek-V4-Pro')].{quota:name.value, used:currentValue, limit:limit}" \
+  -o table
+```
+
+**Check both SKUs.** Quota is granted per deployment type, so a model exhausted
+on `GlobalStandard` may have an untouched `DataZoneStandard` allocation sitting
+beside it. On the subscription above, `DeepSeek-V4-Pro` was at 1,000 of 1,000 on
+`GlobalStandard` and **0 of 1,000 on `DataZoneStandard`**.
+:::
+
 ## Five things worth knowing before you pick a region
 
 **North Europe carries 28 models. Sweden Central carries 132.** Both are
