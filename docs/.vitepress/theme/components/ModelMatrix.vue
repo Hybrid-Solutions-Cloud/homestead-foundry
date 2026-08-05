@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, shallowRef } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, shallowRef } from 'vue'
 import { withBase } from 'vitepress'
 
 // The dataset is ~470 KB, so it is fetched rather than bundled: bundling it
@@ -20,6 +20,33 @@ onMounted(async () => {
   }
 })
 
+// Full screen is a component state rather than the Fullscreen API. The native
+// API paints the element on a black backdrop outside the page's stacking
+// context, which drops the theme variables the table is styled with; a fixed
+// overlay keeps the site's own light and dark themes intact.
+const fullscreen = ref(false)
+
+function toggleFullscreen() {
+  fullscreen.value = !fullscreen.value
+}
+
+function onKey(e) {
+  if (e.key === 'Escape' && fullscreen.value) fullscreen.value = false
+}
+
+// The page behind the overlay must not scroll, or dismissing full screen returns
+// the reader somewhere they did not choose to be.
+watch(fullscreen, (on) => {
+  if (typeof document === 'undefined') return
+  document.documentElement.style.overflow = on ? 'hidden' : ''
+})
+
+onMounted(() => window.addEventListener('keydown', onKey))
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKey)
+  if (typeof document !== 'undefined') document.documentElement.style.overflow = ''
+})
+
 const q = ref('')
 const publisher = ref('')
 const modality = ref('')
@@ -36,6 +63,13 @@ const regions = computed(() => data.value?.regions ?? [])
 const shownRegions = computed(() =>
   geoFilter.value ? regions.value.filter((r) => r.geo === geoFilter.value) : regions.value
 )
+// The first international column gets a rule down its left edge. Ordering the
+// columns is not enough on its own: at 42 columns the boundary between the home
+// block and the rest is invisible without one.
+const firstIntl = computed(() => {
+  const r = shownRegions.value.find((x) => x.group === 'international')
+  return r ? r.id : null
+})
 const geos = computed(() => [...new Set(regions.value.map((r) => r.geo))].sort())
 const publishers = computed(() =>
   [...new Set((data.value?.models ?? []).map((m) => m.publisher))].sort()
@@ -147,7 +181,21 @@ const stats = computed(() => {
 </script>
 
 <template>
-  <div class="mm">
+  <div class="mm" :class="{ 'mm-fs': fullscreen }">
+    <div
+      v-if="fullscreen"
+      class="mm-fs-bar"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Model availability matrix, full screen"
+    >
+      <strong>Model availability matrix</strong>
+      <span class="mm-fs-note">{{ rows.length }} of {{ data ? data.models.length : 0 }} models, {{ shownRegions.length }} regions</span>
+      <button type="button" class="mm-reset mm-fs-close" @click="toggleFullscreen">
+        Close (Esc)
+      </button>
+    </div>
+
     <p v-if="loading" class="mm-msg">Loading the matrix…</p>
     <p v-else-if="error" class="mm-msg mm-err">
       Could not load the dataset ({{ error }}). It is served from
@@ -192,6 +240,9 @@ const stats = computed(() => {
         <label class="mm-check"><input type="checkbox" v-model="onlyVaries" /> Only models that differ by region</label>
         <label class="mm-check"><input type="checkbox" v-model="onlyProvOnly" /> Only models with a provisioned-only region</label>
         <button type="button" class="mm-reset" @click="reset">Reset</button>
+        <button type="button" class="mm-reset mm-fs-btn" @click="toggleFullscreen">
+          {{ fullscreen ? 'Exit full screen' : 'Full screen' }}
+        </button>
       </div>
 
       <p class="mm-count">
@@ -211,7 +262,7 @@ const stats = computed(() => {
                 v-for="r in shownRegions"
                 :key="r.id"
                 class="mm-th-region"
-                :class="{ 'mm-th-onprem': r.kind === 'onprem' }"
+                :class="{ 'mm-th-onprem': r.kind === 'onprem', 'mm-divider': r.id === firstIntl }"
                 :title="`${r.label} (${r.geo}), ${r.count} models`"
               >
                 <span>{{ r.label }}</span>
@@ -235,7 +286,7 @@ const stats = computed(() => {
                   v-for="r in shownRegions"
                   :key="r.id"
                   class="mm-cell"
-                  :class="cell(m, r) ? 'mm-yes' : 'mm-no'"
+                  :class="[cell(m, r) ? 'mm-yes' : 'mm-no', { 'mm-divider': r.id === firstIntl }]"
                   :style="cellStyle(cell(m, r))"
                   :title="cell(m, r)
                     ? `${m.name} in ${r.label}: ${cell(m, r).kind === 'onprem'
@@ -342,7 +393,9 @@ const stats = computed(() => {
         A coloured cell means the model is offered there; the colour is its
         configuration profile, so a row of one colour is identical everywhere and a
         row of many differs by region. A faint dot means <b>not available</b>.
-        Snapshot {{ data.snapshot }}.
+        Columns run the two on-premises targets, then the US regions, then
+        everything else alphabetically; the rule marks where the international
+        block starts. Snapshot {{ data.snapshot }}.
       </p>
     </template>
   </div>
@@ -354,6 +407,42 @@ const stats = computed(() => {
 .mm { margin: 1.5rem 0; font-size: 14px; }
 .mm-msg { color: var(--vp-c-text-2); }
 .mm-err { color: var(--vp-c-danger-1); }
+
+/* Full screen. A fixed overlay rather than the Fullscreen API, so the page's
+   own theme variables still apply. z-index clears the VitePress nav, which
+   sits at 60. */
+.mm-fs {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  margin: 0;
+  padding: 0.75rem 1rem 1rem;
+  background: var(--vp-c-bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.mm-fs-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--vp-c-divider);
+  flex: 0 0 auto;
+}
+.mm-fs-bar strong { font-size: 0.95rem; }
+.mm-fs-note { color: var(--vp-c-text-2); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.mm-fs-close { margin-left: auto; }
+/* In full screen the summary band and the legend are noise: the reader opened
+   this to work the table, and every row of chrome is a row the table loses. */
+.mm-fs .mm-stats,
+.mm-fs .mm-legend { display: none; }
+.mm-fs .mm-controls { flex: 0 0 auto; }
+.mm-fs .mm-count { flex: 0 0 auto; }
+/* The scroll box takes whatever height is left rather than a fixed fraction of
+   the viewport, so the table fills the screen exactly once. */
+.mm-fs .mm-scroll { flex: 1 1 auto; max-height: none; min-height: 0; }
 
 .mm-stats {
   display: flex; flex-wrap: wrap; gap: 0.5rem 2rem;
@@ -374,7 +463,13 @@ const stats = computed(() => {
   padding: 0.4rem 0.6rem; border: 1px solid var(--vp-c-divider);
   border-radius: 6px; background: var(--vp-c-bg); color: var(--vp-c-text-1); font-size: 13px;
 }
-.mm-check { display: flex; align-items: center; gap: 0.35rem; font-size: 13px; color: var(--vp-c-text-2); cursor: pointer; }
+/* flex: 0 0 auto so a label that will not fit wraps to the next line instead of
+   being squeezed against the container edge and clipped. Its text cannot
+   compress, so without this the last control is cut off at some widths. */
+.mm-check {
+  display: flex; align-items: center; gap: 0.35rem; flex: 0 0 auto;
+  white-space: nowrap; font-size: 13px; color: var(--vp-c-text-2); cursor: pointer;
+}
 .mm-reset {
   padding: 0.4rem 0.8rem; border: 1px solid var(--vp-c-divider); border-radius: 6px;
   background: var(--vp-c-bg-soft); color: var(--vp-c-text-1); cursor: pointer; font-size: 13px;
@@ -423,6 +518,9 @@ const stats = computed(() => {
 }
 
 .mm-cell { width: 1.35rem; min-width: 1.35rem; padding: 0 !important; text-align: center; }
+/* The boundary between the home block (on-premises and US) and everything
+   international. Ordering alone does not show it at this column count. */
+.mm-divider { border-left: 2px solid var(--vp-c-brand-1) !important; }
 .mm-yes { background: hsl(var(--h) var(--s) 46% / 0.85); }
 :root.dark .mm-yes { background: hsl(var(--h) var(--s) 55% / 0.8); }
 .mm-no { background: transparent; }

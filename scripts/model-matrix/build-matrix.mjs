@@ -39,11 +39,19 @@ for (const f of files) {
     count: rows.length,
   });
 }
-regions.sort((a, b) => (a.geo + a.label).localeCompare(b.geo + b.label));
-
 // The two on-premises targets are modelled as regions, exactly as asked.
 regions.push({ id: 'foundry-local', label: 'Foundry Local', geo: 'On-premises', kind: 'onprem', count: 0 });
 regions.push({ id: 'azure-local-foundry', label: 'Azure Local Foundry', geo: 'On-premises', kind: 'onprem', count: 0 });
+
+// Column order: the two on-premises targets, then the US regions, then
+// everything else alphabetically. Most readers of this repository are working
+// in a US region or on their own hardware, so those columns sit where the eye
+// lands first rather than being reached by scrolling past twenty-nine others.
+// `group` is carried into the data so the table can rule a line between the two
+// blocks; sorting alone does not make a boundary visible in 42 columns.
+const rank = (r) => (r.kind === 'onprem' ? 0 : r.geo === 'US' ? 1 : 2);
+for (const r of regions) r.group = rank(r) === 2 ? 'international' : 'home';
+regions.sort((a, b) => rank(a) - rank(b) || a.label.localeCompare(b.label, 'en'));
 
 // ---------- classify ----------
 function modality(name, caps, kind) {

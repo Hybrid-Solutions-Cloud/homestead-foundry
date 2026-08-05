@@ -21,6 +21,13 @@ exists, and a row painted many colours differs by region. A faint dot means
 the top.
 :::
 
+::: tip Column order, and going full screen
+Columns run **Foundry Local and Azure Local Foundry first, then the US regions,
+then everything else alphabetically.** A brand-coloured rule marks where the
+international block begins. Forty-two columns do not fit a documentation page, so
+use **Full screen** to work the table against the whole window; `Esc` closes it.
+:::
+
 <ModelMatrix />
 
 ## What the matrix shows, in one paragraph
