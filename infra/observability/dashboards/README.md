@@ -53,3 +53,16 @@ The first Foundry dashboard should contain only these operational views:
 Cost Management is not a native Grafana data source. Keep billing investigation and
 scheduled cost reporting in Cost Management rather than attempting to reproduce it in
 the dashboard.
+
+## Cost model
+
+| Data source | Destination | Cost | Used by |
+|---|---|---|---|
+| Platform metrics (`Microsoft.CognitiveServices/accounts`) | Azure Monitor metrics pipeline | **Free** | Panels 1-10 |
+| `AzureOpenAIRequestUsage` diagnostic logs | Log Analytics | Per GB ingested | Panel 11 only |
+
+Ten of eleven panels run on free platform metrics. Only the caller/consumer breakdown
+(panel 11) requires paid Log Analytics ingestion. Set `logAnalyticsDailyQuotaGb` to a
+tight cap (e.g., 0.1 GB) in the private overlay to prevent surprise bills. No platform
+metrics are sent to Log Analytics — the `foundryDiagnosticSetting.metrics` array should
+remain empty.

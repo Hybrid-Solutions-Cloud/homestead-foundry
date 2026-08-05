@@ -143,3 +143,20 @@ This category produces log data and therefore incurs Log Analytics ingestion and
 retention cost. The private overlay should set `logAnalyticsDailyQuotaGb` to a value
 that accommodates the expected volume. Usage logs are not required for the core
 platform-metric panels (1-10); only panel 11 depends on them.
+
+## Cost model
+
+| Data source | Destination | Cost | Used by |
+|---|---|---|---|
+| Platform metrics (`Microsoft.CognitiveServices/accounts`) | Azure Monitor metrics pipeline | **Free** | Panels 1-10 |
+| `AzureOpenAIRequestUsage` diagnostic logs | Log Analytics | Per GB ingested | Panel 11 only |
+
+The dashboard is designed so that 10 of 11 panels run on free platform metrics.
+Only the caller/consumer breakdown (panel 11) requires paid Log Analytics ingestion.
+Set `logAnalyticsDailyQuotaGb` to a tight cap (e.g., 0.1 GB) to prevent surprise
+bills. The Azure Monitor Workspace (`amw-*`) deployed by this package is available
+for Prometheus metrics but is not required by the Foundry dashboard panels.
+
+No platform metrics are sent to Log Analytics. The `foundryDiagnosticSetting.metrics`
+array is empty in the recommended configuration. This avoids double-ingestion cost
+for data already available on the free metrics pipeline.
