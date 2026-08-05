@@ -95,6 +95,8 @@ How to record a deviation, illustrated with `ais`: the placeholder example above
       ais-<initiative>-<env>-<region>-<instance>    (AIServices, S0, custom subdomain)
         <model deployment name>                     (Global Standard, capacity as decided)
         proj-<initiative>-<purpose>-<instance>       (Foundry project, if created)
+      asp-<initiative>-<env>-<region>-<instance>   (App Service plan, Linux B1; OPTIONAL, off by default)
+        app-gw-<initiative>-<env>-<region>-<instance> (request gateway; see guide/model-gateway)
       budget-<initiative>-<env>-<region>-<instance> (Cost Management budget on the RG scope)
     <adjacent pre-existing resource groups>          (untouched; see section 3.6)
     kv-<platform>-vault-<instance>                   (pre-existing platform Key Vault; REUSED, not created)

@@ -136,6 +136,23 @@ param budgetContactEmails string[]
 @description('Budget period start, first of the current month.')
 param budgetStartDate string = utcNow('yyyy-MM-01')
 
+// ------------------------------- gateway -----------------------------------
+// OFF BY DEFAULT, and it should stay that way for most deployments. The gateway
+// exists to repair requests a client sends that a model refuses, which today
+// means editor extensions that hardcode a temperature reasoning models reject.
+// If every model you deploy accepts what your tools send, this buys you nothing
+// and costs roughly $12 a month. Turn it on when a tool you cannot configure
+// meets a model that will not budge. See docs/guide/model-gateway.md.
+@description('Deploy the hosted request gateway in front of the account. Most deployments do not need this.')
+param deployGateway bool = false
+
+@description('Vault secret holding the token callers present to the gateway. Deliberately NOT the Foundry account key, so it can be rotated independently and cannot be replayed against the account. The secret is created by hand, like every other value in the vault.')
+param gatewayTokenSecretName string = ''
+
+@description('App Service tier for the gateway. B1 is the cheapest tier that stays warm; the free tier carries a daily CPU quota that stalls an editor mid-task.')
+@allowed(['B1', 'B2', 'B3', 'S1', 'P0v3', 'P1v3'])
+param gatewaySku string = 'B1'
+
 // ------------------------------ composed names -----------------------------
 
 var baseName = '${workload}-${env}-${regionToken}-${instance}'
@@ -147,6 +164,8 @@ var names = {
   account: 'aif-${baseName}'
   budget: 'budget-${baseName}'
   project: 'proj-${workload}-${projectPurpose}-${instance}'
+  gatewayPlan: 'asp-${baseName}'
+  gateway: 'app-gw-${baseName}'
 }
 
 var baseTags = {
@@ -243,6 +262,29 @@ module kvRefs 'modules/keyvault-secret-refs.bicep' = {
   }
 }
 
+// Scoped to the same resource group as everything else, so the wipe-and-redeploy
+// contract still holds: az group delete removes the gateway with the account it
+// fronts, leaving nothing orphaned.
+module gateway 'modules/model-gateway.bicep' = if (deployGateway) {
+  name: 'deploy-model-gateway'
+  scope: resourceGroup(names.resourceGroup)
+  params: {
+    location: location
+    planName: names.gatewayPlan
+    gatewayName: names.gateway
+    foundryAccountName: names.account
+    keyVaultName: keyVaultName
+    foundryKeySecretName: kvRefs.outputs.speechKeySecretName
+    gatewayTokenSecretName: gatewayTokenSecretName
+    sku: gatewaySku
+    tags: tags
+  }
+  dependsOn: [
+    rg
+    foundry
+  ]
+}
+
 // -------------------------------- outputs ----------------------------------
 
 output resourceGroupName string = names.resourceGroup
@@ -264,6 +306,9 @@ output suggestedSecurityGroupNames string[] = [
 
 @description('Deployable registry ids whose declared region differs from the location parameter. Should be empty; reconcile the registry if not.')
 output regionMismatchedRegistryIds string[] = regionMismatchedRegistryIds
+
+@description('Empty unless deployGateway is true. Editors point at this instead of the account endpoint; the deployment name they send does not change.')
+output gatewayBaseUrl string = deployGateway ? gateway!.outputs.gatewayBaseUrl : ''
 
 @description('Deployable registry ids that declare no capacity of their own and therefore inherit modelDeploymentCapacity. Should be empty on a considered roster; set a capacity per entry in the registry if not. Anything listed here deploys at the fallback, which defaults to 1 and throttles to roughly 1 request per minute.')
 output inheritedCapacityRegistryIds string[] = inheritedCapacityRegistryIds

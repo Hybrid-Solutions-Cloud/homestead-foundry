@@ -196,3 +196,18 @@ A tool is working when you have seen it return a completion **from your endpoint
 3. The call actually reached Azure, confirmed by either the tool's request log showing your hostname, or a new entry under your account's metrics in the portal.
 
 Step 3 is the one people skip. A tool that silently fell back to its own hosted model will look like it is working.
+
+## When the tool sends something the model refuses
+
+Some clients hardcode request parameters and give you no field to change them.
+GitHub Copilot Chat sends `temperature: 0.1` on every request, and reasoning
+models reject any temperature but their default, so those deployments answer 400
+through the editor while working perfectly over `curl`.
+
+There is no setting on the Azure side that fixes this, because the parameter is
+chosen by the client. See [model behaviour and limits](./model-behaviour-and-limits#the-client-makes-this-worse)
+for why, and [model gateway](./model-gateway) for the shim that repairs it.
+
+**Most rosters do not need that gateway.** On one measured account, ten of eleven
+chat deployments accepted a custom temperature without complaint. Deploy it only
+when a tool you cannot configure meets a model that will not budge.

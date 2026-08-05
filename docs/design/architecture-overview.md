@@ -43,6 +43,7 @@ One shared Azure AI Foundry account of kind `AIServices` (`<prefix>-<initiative>
 | Model deployment | `mai-image-25` | MAI-Image-2.5 (Preview), model format Microsoft, SKU GlobalStandard, capacity 1; version re-queried at deploy time | ADR-0002, ADR-0004 |
 | Foundry project | `proj-<initiative>-media-01` | Optional Foundry account project, created for the playground voice audition and the auto-applied `project` cost tag; no runtime call depends on it | ADR-0004 follow-up, ADR-0003 follow-up, ADR-0006 |
 | Budget | `budget-<initiative>-<env>-<region>-01` | Cost Management monthly budget, capped USD, scoped to the resource group, notify-only backstop | ADR-0006 |
+| Model gateway (**optional, off by default**) | `app-gw-<initiative>-<env>-<region>-01` on `asp-<initiative>-<env>-<region>-01` | App Service (Linux, B1) running a request shim in front of the account. Repairs requests a client sends that a model refuses, and holds the account key so editor configuration never carries it. **Deploy only when a tool you cannot configure meets a model that will not budge** | see [model gateway](../guide/model-gateway) |
 
 ### 2.2 Azure estate (existing, reused or untouched)
 

@@ -154,6 +154,11 @@ A working implementation is about 120 lines with no dependencies. It also lets
 the API key stay server-side, so it stops living in the editor's synced
 credential store.
 
+**This repository ships one.** See [model gateway](./model-gateway) for the
+hosted version, what it costs, and the cases where you should not deploy it: on
+one measured account **ten of eleven chat deployments accepted a custom
+temperature without complaint**, so most rosters need nothing.
+
 **Verify a model against the client you will actually use, not just with curl.**
 Tested one way, a model looks fine; tested the other, it never worked.
 
