@@ -102,9 +102,9 @@ param azureMonitorWorkspacePublicNetworkAccess string
 @description('Log Analytics interactive retention in days.')
 param logAnalyticsRetentionInDays int
 
-@minValue(0.01)
-@description('Log Analytics daily quota safety value in GB. Minimum 0.01 GB (10 MB).')
-param logAnalyticsDailyQuotaGb = 1
+@minValue(1)
+@description('Log Analytics daily quota safety value in GB. Minimum 1 GB.')
+param logAnalyticsDailyQuotaGb int
 
 @description('Whether to create the native Azure Monitor dashboard with Grafana shell.')
 param deployGrafanaDashboardShell bool
