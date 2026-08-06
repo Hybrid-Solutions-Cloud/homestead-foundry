@@ -34,3 +34,5 @@ Every research spike behind the architecture decisions, in order. Each grounds i
 | [SPIKE-29](./SPIKE-29-local-track-lifecycle-and-upgrade) | Lifecycle, upgrade, and drift for the two Foundry Local tracks |
 | [SPIKE-31](./SPIKE-31-cross-track-feature-parity) | Cross-track capability and feature parity across the three deployment targets |
 | [SPIKE-32](./SPIKE-32-model-region-availability-matrix) | Every model against every region, and what actually differs between them |
+| [SPIKE-33](./SPIKE-33-client-tool-survey) | Which client tools can point at this endpoint, and what each one gets wrong |
+| [SPIKE-34](./SPIKE-34-orchestration-options) | Orchestration options, and which of them can be pointed at this account |
