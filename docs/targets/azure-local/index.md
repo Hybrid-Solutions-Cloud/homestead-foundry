@@ -63,6 +63,7 @@ ADR-0014 calls that wrapper a first-class deliverable rather than glue.
 
 | Topic | Summary |
 |---|---|
+| [Hardware sizing](../hardware-sizing#azure-local-foundry-hardware) | Published cluster floor, supported GPU nodes, and workload profiles from CPU proof of concept through multi-node production |
 | [Architecture](./architecture) | Three layers, Bicep owns the middle one, Istio as a Gateway API provider only |
 | [Models](./models) | Foundry Local catalog via `ModelDeployment`, explicit resources always |
 | [Features](./features) | Concurrent serving, Agentic Retrieval, disconnected operation |

@@ -2,6 +2,10 @@
 
 ::: tip Compare this target against the other two
 [The model availability matrix](../../reference/model-matrix) puts every model on all three targets side by side, and shows the four models that run on all three.
+
+[Hardware requirements and sizing](../hardware-sizing#foundry-local-hardware)
+maps the model classes on this page to CPU, RAM, GPU, NPU, and storage planning
+profiles.
 :::
 
 

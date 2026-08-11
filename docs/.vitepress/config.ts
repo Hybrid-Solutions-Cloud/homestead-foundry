@@ -132,6 +132,7 @@ export default defineConfig({
         items: [
           { text: "Compare the three", link: "/targets/" },
           { text: "Choosing a target", link: "/targets/choosing" },
+          { text: "Hardware sizing", link: "/targets/hardware-sizing" },
           { text: "Azure AI Foundry", link: "/targets/azure-cloud/" },
           { text: "Foundry Local", link: "/targets/windows-server/" },
           { text: "Azure Local Foundry", link: "/targets/azure-local/" },
@@ -286,6 +287,7 @@ export default defineConfig({
           items: [
             { text: "Compare the three targets", link: "/targets/" },
             { text: "Choosing a target", link: "/targets/choosing" },
+            { text: "Hardware sizing", link: "/targets/hardware-sizing" },
           ],
         },
         {

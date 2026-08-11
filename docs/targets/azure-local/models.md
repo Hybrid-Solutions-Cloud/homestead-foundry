@@ -2,6 +2,10 @@
 
 ::: tip Compare this target against the other two
 [The model availability matrix](../../reference/model-matrix) puts every model on all three targets side by side, including the vLLM entries that are exclusive to this one.
+
+[Hardware requirements and sizing](../hardware-sizing#azure-local-foundry-hardware)
+maps the CPU and vLLM model classes on this page to worker, GPU, storage, and
+replica profiles.
 :::
 
 

@@ -45,6 +45,7 @@ is available.
 
 | Topic | Summary |
 |---|---|
+| [Hardware sizing](../hardware-sizing#foundry-local-hardware) | Supported devices, accelerator paths, and workload profiles from a small CPU model through 20B-class evaluation |
 | [Architecture](./architecture) | Arc-enabled host, four-stage idempotent install, model cache as the unit of state |
 | [Models](./models) | Foundry Local catalog, CPU-first, roughly a 5 GB quantized 4B-class ceiling |
 | [Features](./features) | OpenAI-compatible local API, `foundry` CLI, SDKs, fully disconnected operation |

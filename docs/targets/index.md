@@ -243,6 +243,8 @@ kind. Full per-signal gap list:
 ## Where to go next
 
 - [Choosing a target](./choosing), the same comparison as prose.
+- [Hardware requirements and sizing](./hardware-sizing), the local-target
+  hardware matrix from minimum installation through multi-node production.
 - [Azure AI Foundry](./azure-cloud/), the target this repository has deployed and proven.
 - [Foundry Local](./windows-server/), on a single Arc-enabled Windows Server.
 - [Azure Local Foundry](./azure-local/), Foundry Local at cluster scale.
