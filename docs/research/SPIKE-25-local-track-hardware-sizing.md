@@ -2,7 +2,21 @@
 
 Role: foundry-researcher (Opus). Status: research spike complete. Read-only: no Azure resources created, read, or modified; no `az` command run; no software installed; no benchmark executed; no cluster touched. First-party documentation review only.
 Date: 2026-07-30
-Scope: hardware sizing and capacity planning for deployment track 2 (Foundry Local on Windows Server) and track 3 (Foundry Local on Azure Local). Closes SPIKE-19 UNKNOWN #4 (whether the GPU SKUs in scope are release-gated, and how) and fills the sizing gap that neither track currently documents: ADR-0013 commits track 2 to a CPU-only quantized model without saying what hardware that needs, and ADR-0014 commits track 3 to a `Standard_D8s_v3` worker pool without saying what `resources` a `ModelDeployment` on it should carry. Every factual claim is grounded in a first-party (Microsoft Learn) source, cited inline. Anything Microsoft has not published is marked **UNKNOWN** with the test or doc that would resolve it. Any figure I derived by arithmetic from first-party numbers is labelled **derived** at the point of use. This spike authorizes no deployment and no spend.
+Scope: hardware sizing and capacity planning for deployment track 2 (Foundry Local on Windows Server) and track 3 (Foundry Local on Azure Local). Closes SPIKE-19 UNKNOWN #4 (whether the GPU node profiles in scope are release-gated, and how) and fills the sizing gap that neither track currently documents: ADR-0013 commits track 2 to a CPU-only quantized model without saying what hardware that needs, and ADR-0014 commits track 3 to an 8-vCPU, 32-GiB worker pool without saying what `resources` a `ModelDeployment` on it should carry. Every factual claim is grounded in a first-party (Microsoft Learn) source, cited inline. Anything Microsoft has not published is marked **UNKNOWN** with the test or doc that would resolve it. Any figure I derived by arithmetic from first-party numbers is labelled **derived** at the point of use. This spike authorizes no deployment and no spend.
+
+> **2026-08-11 correction and documentation update.** The `Standard_D*`,
+> `Standard_NC*`, and `Standard_NK*` names below are AKS Arc node-size profile
+> labels for VMs backed by customer-owned Azure Local hardware. They are not
+> Azure public-cloud VM purchases, regional capacity commitments, or physical
+> server SKUs. Current guidance must lead with actual vCPU, RAM, GPU, storage,
+> and node-count quantities. Also, the current vLLM reference now publishes A10
+> benchmarks for five models, so Q8 is partially closed for that exact GPU and
+> test method. No equivalent first-party device-based Foundry Local or Azure
+> Local CPU benchmark was found. Finally, the current Agentic Retrieval
+> requirements page conflicts with itself: it names two embedding GPU VMs in
+> prose and in the deployment-mode table, but one GPU worker in the combined
+> cluster-capacity row. Use the conservative two-role interpretation and confirm
+> the supported preview topology before procurement.
 
 Depends on: `docs/research/SPIKE-08-foundry-local-on-device.md`, `docs/research/SPIKE-09-azure-local-foundry.md`, `docs/research/SPIKE-18-foundry-local-windows-server.md`, `docs/research/SPIKE-19-foundry-local-azure-local-deployment.md`, `docs/adr/ADR-0013-foundry-local-windows-server-install.md`, `docs/adr/ADR-0014-foundry-local-azure-local-deployment-layers.md`. All six were read first. This spike verifies and corrects against Microsoft Learn; it does not restate them.
 
@@ -21,7 +35,7 @@ Eight questions. Questions 1 to 4 size track 2, questions 5 to 7 size track 3, q
 3. How much disk does the model cache need per model, where does it live by default, and can that location be relocated?
 4. What is the GPU and accelerator support matrix for Foundry Local: which NVIDIA generations, which AMD parts, which NPUs, and what minimum VRAM per model class?
 5. For track 3: what are the documented AKS Arc worker node sizes, what is the floor, and what is recommended? Confirm SPIKE-19's `Standard_A4_v2` and `Standard_D8s_v3` findings and enumerate the full documented list.
-6. For track 3 GPU: which GPU SKUs are available on Azure Local, what is the release gating (SPIKE-19 UNKNOWN #4), and what are the DDA versus GPU-P constraints? Confirm AMD is unsupported and NVIDIA-only via DDA.
+6. For track 3 GPU: which physical GPUs and AKS Arc GPU node profiles are available on Azure Local, what is the release gating (SPIKE-19 UNKNOWN #4), and what are the DDA versus GPU-P constraints? Confirm AMD is unsupported and NVIDIA-only via DDA.
 7. What CPU and memory `resources` should a `ModelDeployment` set for a 4.8 GB model, given that ADR-0014 decision 6 forbids the CRD defaults but names no replacement?
 8. Is there **any** first-party throughput or latency figure for CPU inference on either target?
 
@@ -194,7 +208,7 @@ Five things worth pulling out, because they are not obvious from the matrix:
 4. **Plugin providers self-update.** "Foundry Local automatically downloads these execution providers on first run. The plugin execution providers automatically update when new versions are available." Source: same page. On a governed server that is an unmanaged automatic-update path, which is an operational consideration ADR-0013 has not recorded.
 5. **Each plugin provider carries its own license terms**, listed per row on the same page (NVIDIA CUDA EULA, an Intel distribution license, the QNN license bundled inside the Qualcomm SDK zip). Track 2's license question is therefore two questions, not one: per-model licenses (`foundry model info <model> --license`, already carried as SPIKE-18 UNKNOWN #6) **and** per-execution-provider licenses.
 
-**Minimum VRAM per model class for the device SDK: UNKNOWN.** No VRAM table is published for Foundry Local on Windows. The only per-model memory figures Microsoft publishes are the vLLM-on-A10 GPU memory numbers in Q2 anchor 2, which belong to the Azure Local product and a different runtime. SPIKE-08 already warned against reading those as device-SDK requirements and that warning stands. They are a **lower bound at best**: a model needing 7.806 GB under vLLM's PagedAttention memory management will not need less under ONNX Runtime, which the comparison table describes as "Standard ONNX Runtime" memory optimization against vLLM's "PagedAttention, FP8, KV cache, chunked prefill." Source: [Inference runtimes in Foundry Local on Azure Local](https://learn.microsoft.com/azure/azure-sovereign-clouds/private/foundry-local/concept-inference-runtimes#comparison).
+**Minimum VRAM per model class for the device SDK: UNKNOWN.** No VRAM table is published for Foundry Local on Windows. The only per-model memory figures Microsoft publishes are the vLLM-on-A10 GPU memory numbers in Q2 anchor 2, which belong to the Azure Local product and a different runtime. They are not a lower bound for ONNX device variants. Model format, quantization, execution provider, context, and cache implementation differ, so the vLLM figure is an adjacent reference only. Source: [Inference runtimes in Foundry Local on Azure Local](https://learn.microsoft.com/azure/azure-sovereign-clouds/private/foundry-local/concept-inference-runtimes#comparison).
 
 **Track 2's practical answer stands unchanged from ADR-0013 decision 9:** the target host has no GPU passthrough, so the WinML accelerated path is out by its own documented requirement, CPU is the execution provider, and the accelerator matrix is planning material for a future host rather than a constraint on the committed increment.
 
@@ -204,7 +218,7 @@ Five things worth pulling out, because they are not obvious from the matrix:
 
 | Requirement | Minimum | Recommended |
 |---|---|---|
-| Worker node VM size | `Standard_D4s_v3` (4 vCPU / 16 GiB) | `Standard_D8s_v3` (8 vCPU / 32 GiB) |
+| Worker VM resources | 4 vCPU / 16 GiB (`Standard_D4s_v3` AKS Arc profile) | 8 vCPU / 32 GiB (`Standard_D8s_v3` AKS Arc profile) |
 | Allocatable memory per node | >= 14 GiB | >= 28 GiB |
 | Worker node count | 1 | 2+ (high availability or GPU pool separation) |
 
@@ -214,7 +228,7 @@ And the warning: "Don't use the `az aksarc create` default worker size `Standard
 
 Worker node sizes (non-GPU):
 
-| VM size | vCPU | Memory (GB) | Verdict against the Foundry Local floor |
+| AKS Arc node-profile label | vCPU | Memory (GB) | Verdict against the Foundry Local floor |
 |---|---|---|---|
 | `Standard_A2_v2` | 2 | 4 | Below floor |
 | `Standard_K8S3_v1` | 4 | 6 | Below floor |
@@ -234,11 +248,11 @@ Source for all four: [Scale requirements for AKS on Azure Local](https://learn.m
 
 **Trap 1: three of the seven documented worker sizes are below the Foundry Local floor, and the default is one of them.** SPIKE-19 caught `Standard_A4_v2`. The list shows `Standard_A2_v2` and `Standard_K8S3_v1` are also below it. An implementer picking "the smallest thing that appears in the docs" has a two-in-three chance of picking something that cannot run the product.
 
-**Trap 2, and this is the substantive new finding: Microsoft's own recommended node cannot satisfy Microsoft's own recommended memory limit.** The CPU `ModelDeployment` example sets `limits.memory: "32Gi"`. The recommended worker node is `Standard_D8s_v3` with 32 GiB total and ">= 28 GiB" allocatable. **A 32Gi limit cannot be scheduled on a node with 28 GiB allocatable.** The pod would be unschedulable, and this is not an edge case, it is the documented example on the documented recommended node. SPIKE-19 spotted the same shape in the `storeModel.cacheJob` defaults ("16Gi for requests and 32Gi for limits" against a 32 GiB recommended node) and called it "a tension." It is the same defect twice, and it is worth stating as a rule rather than as two separate observations:
+**Trap 2: Microsoft's worked example permits a memory ceiling the recommended node cannot fully provide.** The CPU `ModelDeployment` example sets a 16 GiB memory request and a 32 GiB limit. The recommended worker has at least 28 GiB allocatable. Kubernetes schedules against the 16 GiB request, not the 32 GiB limit, so the pod is **not** unschedulable for this reason. However, the pod cannot safely realize its full limit on that node after system and peer workloads are included. If usage rises above the request while the node is under memory pressure, the pod can be evicted; if it reaches its cgroup limit, it can be terminated. The correct rule is:
 
-> **Any `memory` limit at or near 32Gi requires a `Standard_D16s_v3` (16 vCPU / 64 GiB) node or larger. On a `Standard_D8s_v3` it does not fit.**
+> **Size placement from requests, and size failure-free peak operation from measured usage plus node headroom. A 32 GiB limit on a node with 28 GiB allocatable is legal overcommit, not 32 GiB of guaranteed capacity.**
 
-Derived by comparing the two first-party figures; Microsoft does not state it. It is arithmetic, not inference: 32 > 28.
+Source: [Kubernetes resource management](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#how-pods-with-resource-requests-are-scheduled).
 
 **Trap 3: the CPU request in the example is half the node.** `requests.cpu: "4"` on an 8 vCPU node reserves half the schedulable CPU for one pod, before the operator, cert-manager, istiod, and the cluster's own system pods. One model per node is the realistic density on `Standard_D8s_v3`, and ADR-0014's "worker node count 2+" recommendation should be read as the practical minimum rather than an HA nicety.
 
@@ -262,11 +276,11 @@ New, and not in SPIKE-19: **EPP turns itself on when you scale.** `spec.vllm.epp
 
 "GPUs are only supported on Linux OS node pools. GPUs aren't supported on Windows OS node pools." Sources: [Use GPUs for compute-intensive workloads in AKS on Azure Local](https://learn.microsoft.com/azure/aks/aksarc/deploy-gpu-node-pool#supported-gpu-models), duplicated in [Scale requirements](https://learn.microsoft.com/azure/aks/aksarc/scale-requirements).
 
-**Additionally, four of the seven GPU SKU families are still marked Preview in the SKU tables**: L4, L40, L40S, and RTX Pro 6000 are each headed "(Preview)". A2, A16, and T4 are not. Source: same pages. So the gating is two-dimensional: a release floor **and** a preview status, and the newer and larger the card, the more likely both apply.
+**Additionally, four of the seven GPU node-profile families are still marked Preview in the profile tables**: L4, L40, L40S, and RTX Pro 6000 are each headed "(Preview)". A2, A16, and T4 are not. Source: same pages. So the gating is two-dimensional: a release floor **and** a preview status, and the newer and larger the card, the more likely both apply.
 
-**The full GPU VM SKU list**, which no prior spike enumerated completely:
+**The full local GPU worker profile list**, which no prior spike enumerated completely:
 
-| GPU model | VM size | GPUs | GPU memory (GiB) | vCPU | Memory (GiB) |
+| GPU model | AKS Arc profile label | GPUs | GPU memory (GiB) | vCPU | Memory (GiB) |
 |---|---|---|---|---|---|
 | T4 | `Standard_NK6` | 1 | 8 | 6 | 12 |
 | T4 | `Standard_NK12` | 2 | 16 | 12 | 24 |
@@ -289,7 +303,7 @@ New, and not in SPIKE-19: **EPP turns itself on when you scale.** `spec.vllm.epp
 
 Source: [Scale requirements for AKS on Azure Local](https://learn.microsoft.com/azure/aks/aksarc/scale-requirements#supported-gpu-vm-sizes).
 
-Two GPU SKUs are below the Foundry Local **memory** floor despite carrying a GPU: `Standard_NC4_A2` and `Standard_NC4_A16` have 8 GiB of host RAM, the same as the forbidden `Standard_A4_v2`. `Standard_NK6` has 12 GiB, also below the 14 GiB allocatable minimum. **Having a GPU does not exempt a node from the host memory floor**, and three of the documented GPU SKUs fail it.
+Two GPU worker profiles are below the Foundry Local **memory** floor despite carrying a GPU: `Standard_NC4_A2` and `Standard_NC4_A16` have 8 GiB of worker VM RAM, the same as the forbidden `Standard_A4_v2`. `Standard_NK6` has 12 GiB, also below the 14 GiB allocatable minimum. **Having a GPU does not exempt a node from the worker memory floor**, and three documented GPU profiles fail it.
 
 **AMD: confirmed unsupported, and the sentence is unambiguous.** "Supported NVIDIA DDA-passthrough SKUs include `Standard_NC*_A2`, `Standard_NC*_L4_*`, `Standard_NC*_L40_*`, `Standard_NC*_L40S_*`, `Standard_NC*_RTX6000Pro_*`, and Tesla T4 `Standard_NK*`. AMD GPUs aren't supported." Source: [Requirements for Foundry Local on Azure Local](https://learn.microsoft.com/azure/azure-sovereign-clouds/private/foundry-local/concept-requirements#gpu-requirements). SPIKE-19's finding confirmed verbatim.
 
@@ -298,7 +312,7 @@ Two GPU SKUs are below the Foundry Local **memory** floor despite carrying a GPU
 - **DDA** dedicates "a physical GPU to your workload," workloads "run on the native driver and typically have full access to the GPU's functionality," VM density "Low (one GPU to one VM)," VRAM "Up to VRAM supported by the GPU."
 - **GPU-P** shares "a GPU with multiple workloads by splitting the GPU into dedicated fractional partitions," VM density "High (one GPU to many VMs)," VRAM "Up to VRAM supported by the GPU per partition."
 
-And the decisive footnote: **"AKS Arc doesn't currently support GPU partitions."** The support matrix by assignment type confirms it column by column: every NVIDIA model that is supported for AKS is supported under the DDA columns only, and the GPU-P column is labelled "VMs only". T4 is additionally a No under GPU-P entirely. A10 and A40 are supported for unmanaged VMs and GPU-P but are **not** supported for AKS at all. Source: [Prepare GPUs for Azure Local](https://learn.microsoft.com/azure/azure-local/manage/gpu-preparation). SPIKE-09's and SPIKE-19's DDA-not-partitioning finding is confirmed, and the consequence is unchanged: one GPU per AKS Arc worker node, no fractional sharing, and the loss of GPU live migration.
+And the decisive footnote: **"AKS Arc doesn't currently support GPU partitions."** The support matrix by assignment type confirms it column by column: every NVIDIA model that is supported for AKS is supported under the DDA columns only, and the GPU-P column is labelled "VMs only". T4 is additionally a No under GPU-P entirely. A10 and A40 are supported for unmanaged VMs and GPU-P but are **not** supported for AKS at all. Source: [Prepare GPUs for Azure Local](https://learn.microsoft.com/azure/azure-local/manage/gpu-preparation). SPIKE-09's and SPIKE-19's DDA-not-partitioning finding is confirmed. Each assigned GPU is a whole physical device, although a supported worker profile can assign one or two whole GPUs to one worker VM. Fractional sharing and GPU live migration are unavailable.
 
 **Two capacity constraints that follow from DDA and belong in a sizing plan.**
 
@@ -334,7 +348,7 @@ Source: [Run inference on Foundry Local on Azure Local](https://learn.microsoft.
 | `resources.requests.cpu` | `"4"` | Microsoft's CPU example. Half a `Standard_D8s_v3`. |
 | `resources.requests.memory` | `"16Gi"` | Microsoft's CPU example. Roughly 3.3x the 4.8 GB model (derived), which covers weights plus a working KV cache. |
 | `resources.limits.cpu` | `"8"` | Microsoft's CPU example. Equals the whole `Standard_D8s_v3`, so it is a burst ceiling, not a reservation. |
-| `resources.limits.memory` | `"24Gi"` **on a `Standard_D8s_v3`**, `"32Gi"` on a `Standard_D16s_v3` or larger | **Deviation from Microsoft's example, and deliberate.** 32Gi exceeds the >= 28 GiB allocatable on the recommended node (Q5 trap 2) and the pod will not schedule. 24Gi fits inside 28 GiB with room for system pods. Choosing 32Gi means choosing a bigger node. |
+| `resources.limits.memory` | `"24Gi"` **on a `Standard_D8s_v3`**, `"32Gi"` on a `Standard_D16s_v3` or larger | **Conservative deviation from Microsoft's example.** A 32Gi limit with a 16Gi request can schedule on the recommended node because Kubernetes schedules from requests. Lowering the limit to 24Gi prevents the manifest from promising a ceiling the node cannot safely provide after overhead. Choosing a 32Gi realizable ceiling means choosing a larger node. |
 | `resources.limits.gpu` | omitted entirely | "For CPU-only deployments ... remove the `gpu` limit." |
 | `compute` | `cpu` | Required field. |
 | `runtime` | not set | "You don't need to set the runtime manually for catalog models." The operator reads the framework from the catalog. Set it only for BYO. |
@@ -343,7 +357,7 @@ Source: [Run inference on Foundry Local on Azure Local](https://learn.microsoft.
 
 Sources for the non-`resources` rows: [ModelDeployment reference](https://learn.microsoft.com/azure/azure-sovereign-clouds/private/foundry-local/reference-model-deployment-operator), [Inference runtimes](https://learn.microsoft.com/azure/azure-sovereign-clouds/private/foundry-local/concept-inference-runtimes#how-the-runtime-is-selected).
 
-**The `limits.memory` deviation is the one judgement call in this spike and it is flagged as such.** Microsoft's example says 32Gi; Microsoft's node recommendation says 28 GiB allocatable; both cannot be honoured on one `Standard_D8s_v3`. This spike resolves it downward (fit the node) rather than upward (buy a bigger node) for the first increment, because ADR-0014's first increment is one small model and a `Standard_D16s_v3` is double the cost for headroom nothing is using. **A deployer whose model or context is larger should resolve it the other way.** Either resolution is defensible; silently emitting 32Gi onto a 32 GiB node is not.
+**The `limits.memory` deviation is the one judgement call in this spike and it is flagged as such.** Microsoft's example says 32Gi; Microsoft's node recommendation says at least 28 GiB allocatable. The 16Gi request allows scheduling, but the node cannot guarantee the full 32Gi ceiling. This spike resolves the operational risk downward for the first increment. A deployer whose measured peak is higher should select a larger node or explicitly accept overcommit. The manifest must not describe the limit as reserved or guaranteed memory.
 
 For completeness, the GPU catalog example Microsoft publishes is `requests` 2 CPU / 32Gi and `limits` 4 CPU / 64Gi with `gpu: 1`, which fits a `Standard_NC16_L4_1` (16 vCPU / 64 GiB) only in the sense that the limit equals the whole node. The same trap applies one size up.
 
@@ -382,22 +396,22 @@ These are the deliverable. Every cell carries a basis. Cells with no first-party
 
 Microsoft publishes no CPU, RAM, or disk minimum for this product (Q1). Rows 1 to 3 are therefore **transferred** from the first-party `ModelDeployment` resource examples for the same models on the sibling product, on the basis that the same ONNX model in the same runtime has the same working-set requirement whether the process runs in a container or on bare Windows. Row 4 is stated first-party. **Treat rows 1 to 3 as planning figures pending the ADR-0013 install test, not as documented requirements.**
 
-| Workload class | Model class (example) | Min cores | Min RAM | Disk | GPU needed | Node SKU |
+| Workload class | Model class (example) | Min cores | Min RAM | Disk | GPU needed | Node profile |
 |---|---|---|---|---|---|---|
 | **Smoke test / functional validation** | 0.5B to 4B (`qwen2.5-0.5b`, `phi-3.5-mini` at 2.53 GB) | **UNKNOWN.** No first-party minimum. 4 cores is the smallest CPU request in any first-party Foundry example (transferred) | **UNKNOWN.** No first-party minimum. 8 GiB is the smallest memory request in any first-party Foundry example (transferred) | Model size (2.53 GB for `phi-3.5-mini`) **plus execution provider packages, size UNKNOWN**. Budget 20 GB | No. CPU EP "is always available as a fallback" | n/a, single host |
 | **Interactive single user, 4B class** (the ADR-0013 committed increment) | `Phi-4-mini-instruct-generic-cpu`, 4.8 GB, `CPUExecutionProvider` | 4 cores sustained, 8 burst (transferred from the CPU example) | 16 GiB working set, 32 GiB headroom (transferred from the CPU example) | 4.8 GB model plus EP packages. Budget 30 GB | No. DirectX 12 GPU required **only** if the `WinML` package is used; a VM without passthrough returns empty content rather than erroring | n/a, single host |
 | **7B class** | `Mistral-7B-Instruct-v0.2` | **UNKNOWN.** Bracketed: >= 4 (4B figure) and <= 8+ (20B figure) | **UNKNOWN.** Bracketed: >= 16 GiB and <= 32 GB. Reference point: 15.64 GB required GPU memory under vLLM | Model size not published for the CPU ONNX variant. Budget 40 GB | No, but expect it to be slow. Microsoft's named cause of slow inference is "CPU-only model with a large parameter count" | n/a, single host |
-| **20B class** | `gpt-oss-20b` | **8+ vCPU minimum, 16+ recommended** (first-party) | **32 GB minimum, 64 GB recommended** (first-party) | **>= 50 GB minimum, 50 to 100 GB per replica recommended** (first-party) | **Yes.** Microsoft states this model "requires its own GPU": >= 24 GB VRAM minimum, >= 48 GB recommended. Note the device SDK's CUDA floor is RTX 30 series or later | n/a, single host |
+| **20B class** | `gpt-oss-20b` | 8+ vCPU minimum, 16+ recommended **on Azure Local** | 32 GB minimum, 64 GB recommended **on Azure Local** | >= 50 GB minimum, 50 to 100 GB per replica recommended **on Azure Local** | **Transferred, not a device requirement.** Microsoft states this model needs >= 24 GB GPU memory minimum and >= 48 GB recommended when it supplies an Agentic Retrieval endpoint on Azure Local | n/a, single host |
 
-Additional track 2 requirements, all first-party and non-negotiable: Windows build 26100 or later; .NET 9.0 SDK or later for the SDK path; admin rights to install; internet access for first-time model and execution-provider downloads.
+The Windows AI WinML tutorial requires Windows 11 build 26100 or later, .NET 9.0, and a DirectX 12 GPU for that sample path. Those are not universal requirements for the cross-platform SDK. Current product documentation requires the applicable language runtime and internet access for first-time model and execution-provider downloads, then permits cached offline use.
 
 ### Track 3: Foundry Local on Azure Local (AKS Arc)
 
-| Workload class | Model class | Node SKU | Min cores | Min RAM (allocatable) | Disk | GPU needed |
+| Workload class | Model class | AKS Arc node profile | Min cores | Min RAM (allocatable) | Disk | GPU needed |
 |---|---|---|---|---|---|---|
 | **Absolute documented floor** | 4B CPU catalog variant | `Standard_D4s_v3` (4 vCPU / 16 GiB) | 4 | >= 14 GiB | 200 GB node OS disk (default, dynamically expanding); 100 GiB model cache PVC default | No |
 | **Recommended CPU baseline** (the ADR-0014 committed increment) | `Phi-4-mini-instruct-generic-cpu`, 4.8 GB | `Standard_D8s_v3` (8 vCPU / 32 GiB) | 8 | >= 28 GiB | as above | No |
-| **CPU with Microsoft's full example limits** | 4B to 7B CPU catalog | `Standard_D16s_v3` (16 vCPU / 64 GiB) | 16 | 64 GiB | as above | No. Required if `limits.memory` is 32Gi, which does not fit a `Standard_D8s_v3` |
+| **CPU with peak headroom up to Microsoft's example limit** | 4B to 7B CPU catalog | 16 vCPU / 64 GiB (`Standard_D16s_v3` profile) | 16 | 64 GiB | as above | No. The 8-vCPU, 32-GiB profile can schedule the 16Gi request, but cannot safely provide the full 32Gi limit after overhead |
 | **GPU baseline, 4B to 7B, vLLM or `*-cuda-gpu`** | Phi-4-mini (7.806 GB VRAM), Mistral-7B (15.64 GB VRAM) | `Standard_NC16_L4_1` (1 GPU / 24 GiB VRAM / 16 vCPU / 64 GiB). `Standard_NC8_A2` (1 GPU / 16 GiB VRAM) fits the VRAM but only has 16 GiB host RAM | 16 | 64 GiB | as above | **Yes**, NVIDIA only, DDA passthrough, Linux node pool only. L4 is release 2512.0+ and marked Preview |
 | **20B class / Agentic Retrieval endpoint** | `gpt-oss-20b` (14.793 GB VRAM under vLLM; Microsoft's practical figure is >= 24 GB) | `Standard_NC16_L40S_1` (1 GPU / 48 GiB VRAM / 16 vCPU / 64 GiB) or `Standard_NC16_RTX6000Pro_1` | 8+ minimum, 16+ recommended | 32 GB minimum, 64 GB recommended | >= 50 GB, 50 to 100 GB per replica | **Yes**, >= 24 GB VRAM minimum, >= 48 GB recommended. L40S is release 2512.0+, RTX Pro 6000 is 2603.0+, both marked Preview |
 
@@ -411,7 +425,7 @@ Cluster-wide capacity additions, all first-party:
 | Worker node count | 2+ recommended | HA, or separating a GPU pool from a CPU pool |
 | Kubernetes version | 1.29 or later | Always |
 
-Forbidden or below-floor worker sizes, for a validation check: `Standard_A2_v2`, `Standard_K8S3_v1`, `Standard_A4_v2` (the `az aksarc create` default), and the GPU SKUs `Standard_NC4_A2`, `Standard_NC4_A16`, and `Standard_NK6`, all of which fall below the 14 GiB allocatable memory minimum.
+Forbidden or below-floor worker sizes, for a validation check: `Standard_A2_v2`, `Standard_K8S3_v1`, `Standard_A4_v2` (the `az aksarc create` default), and the GPU worker profiles `Standard_NC4_A2`, `Standard_NC4_A16`, and `Standard_NK6`, all of which fall below the 14 GiB allocatable memory minimum.
 
 ---
 
@@ -419,11 +433,11 @@ Forbidden or below-floor worker sizes, for a validation check: `Standard_A2_v2`,
 
 | # | Unknown | Why it is not in the docs | What resolves it |
 |---|---|---|---|
-| 1 | **Documented CPU core, RAM, and disk minimums for Foundry Local on Windows.** | Microsoft publishes an OS build, a .NET version, and a GPU requirement for the WinML package, and nothing else. The product is positioned for consumer devices where any modern machine is assumed adequate. | Nothing in documentation will resolve this; it is an absence, not an omission. The practical resolution is the ADR-0013 install test, which should record peak working-set memory and CPU utilization alongside the tokens-per-second figure it already scopes. Two extra counters, no extra runs. |
+| 1 | **Documented CPU core, RAM, and disk minimums for Foundry Local on Windows.** | Microsoft publishes no universal numeric floor. A Windows AI WinML tutorial publishes path-specific OS, SDK, and DirectX requirements, while the cross-platform SDK supports CPU fallback. | Nothing in documentation currently resolves the numeric floor. The practical resolution is the ADR-0013 install test, which should record peak working-set memory and CPU utilization alongside the tokens-per-second figure it already scopes. Two extra counters, no extra runs. |
 | 2 | **CPU inference throughput and latency, either track.** Carried unchanged from SPIKE-18 UNKNOWN #2 and SPIKE-19 UNKNOWN #7. | Microsoft publishes benchmarks only for vLLM on GPU, and vLLM cannot run on CPU. | Measure. Same fixed prompt, same model class, on both targets, so the two results compare. The published A10 vLLM figure (about 50 tokens/s single-request for Phi-4-mini) is a ceiling to judge against, not a prediction. |
 | 3 | **The default model cache path on Windows, and the on-disk size of the execution provider packages.** | The CLI reference documents the commands that read and change the cache location but never prints the default. EP package sizes are described only as "may be large" in sample code comments. | Both resolve in one command each at install time: `foundry cache location`, then measure the directory after the first `foundry model list`. Add both to the ADR-0013 install test's recorded output. |
 | 4 | **Whether the 100 GiB model cache PVC default applies to CPU `onnx-genai` deployments, and how to size it if so.** | The requirements page presents 100 GiB as the general cluster storage default; the CRD reference says `vllm.modelCacheStorageGi` "applies only to deployments that use `runtime: vllm`." The two statements do not compose. | Read `kubectl get pvc -n foundry-local-operator` after the first CPU `ModelDeployment` reaches Running, and check the requested size. Until then, do not emit `modelCacheStorageGi` on a CPU deployment. |
-| 5 | **Minimum VRAM per model class for the device SDK (track 2).** | No VRAM table is published for Foundry Local on Windows. The only per-model memory figures belong to vLLM on Azure Local. | Not resolvable from documentation. The vLLM figures are a defensible lower bound because ONNX Runtime has less memory optimization than vLLM's PagedAttention. Irrelevant to the committed CPU-only increment. |
+| 5 | **Minimum VRAM per model class for the device SDK (track 2).** | No VRAM table is published for Foundry Local on Windows. The only per-model memory figures belong to vLLM on Azure Local. | Not resolvable from documentation. Do not treat the vLLM figures as a lower bound because model packaging, quantization, context, and runtime differ. Irrelevant to the committed CPU-only increment. |
 | 6 | **Which Azure Local release the target instance runs, and which physical GPU cards are installed.** Carried from SPIKE-19 UNKNOWN 6a and 6b, narrowed. | Environment questions, not documentation questions. The **mapping** from release to supported GPU is now fully published (Q6), which is what SPIKE-19 UNKNOWN #4 asked for. | Compare the instance's release number against the Q6 table, and the physical card inventory against the supported model list. Read-only. Not needed for a CPU-only first increment. |
 | 7 | **Whether the automatic execution-provider update mechanism is acceptable on a governed host.** | Microsoft states plugin EPs "automatically update when new versions are available" and documents no way to pin or disable it. | Look for a `foundry service set` option controlling EP updates once installed, or accept it as a documented preview behaviour and record it as a risk in ADR-0013. |
 | 8 | **Per-execution-provider license terms.** | Listed per provider on the CLI reference (NVIDIA CUDA EULA, an Intel distribution license, a QNN license distributed inside a downloadable SDK zip), but not summarized and not machine-readable. | Read each applicable provider's license before a host uses that accelerator. Only the CPU provider applies to the committed increment, and it carries no additional license line. |
@@ -436,7 +450,7 @@ Unknowns 1, 2, 3, and 7 all resolve from the single install test ADR-0013 alread
 
 1. **Add the two sizing tables above to ADR-0013 and ADR-0014 as a sizing decision, not as an appendix.** Both ADRs commit to a hardware shape (a GPU-less Windows host, a `Standard_D8s_v3` worker pool) without saying what that shape can and cannot run. The tables close that. Track 2's table must carry the transferred-not-documented caveat visibly, because "Microsoft publishes no minimum" is itself the finding and softening it into a confident number would be dishonest.
 
-2. **Fix the 32Gi-on-a-32-GiB-node collision in ADR-0014, in both places it occurs.** ADR-0014 decision 4 already tunes `storeModel.cacheJob` memory down for the first increment, which is correct. Decision 6 forbids the CRD defaults but names no replacement, so a generator following it literally would reach for Microsoft's published example and emit `limits.memory: "32Gi"` onto a node with 28 GiB allocatable, producing an unschedulable pod. Add the explicit values from Q7, and add the rule as a validation check on the generator: **no `limits.memory` may exceed the target node's documented allocatable memory.** That check is cheap, it is arithmetic, and it catches the exact class of error twice.
+2. **Treat the 32Gi limit on a node with 28 GiB allocatable as overcommit, not a scheduling failure.** ADR-0014 decision 4 already tunes `storeModel.cacheJob` memory down for the first increment. Decision 6 should name explicit requests and limits, and validation should require each request to fit the target node's allocatable capacity. Limits may exceed allocatable capacity, but the design must not claim that the excess is guaranteed. Use measurements and headroom to decide whether to lower the limit or select a larger worker profile.
 
 3. **Correct SPIKE-18's binding-constraint framing wherever it is repeated.** The finding stands for the host it was measured on and fails as a general rule. Replace it with the two-stage formulation: RAM determines whether a model runs at all, cores determine how fast it runs once it fits. This matters for a methodology repo specifically, because a deployer with a 16 GB workstation reading "core count is the constraint" will size the wrong thing.
 
@@ -446,7 +460,7 @@ Unknowns 1, 2, 3, and 7 all resolve from the single install test ADR-0013 alread
 
 6. **Close SPIKE-19 UNKNOWN #4 as answered, and re-file its residue as an environment check.** The release gating is published and enumerated in Q6. Keep the two genuinely environmental questions (which release, which cards) where SPIKE-19 already put them, as UNKNOWN 6a and 6b, and delete UNKNOWN #4 rather than leaving a resolved research question sitting open as if it were a blocker. It is not a blocker for a CPU-only first increment in any case.
 
-7. **Record the GPU capacity taxes in ADR-0014 before anyone budgets a GPU purchase.** Three constraints materially change the cost of a GPU-backed track 3 and none is currently written down: GPUs must be homogeneous across every machine in the Azure Local instance; AKS Arc uses DDA only, so it is one whole GPU per worker node with no partitioning and no live migration; and a rolling node-pool upgrade needs one spare physical GPU per host or it hangs. **A two-node GPU-backed cluster is a four-GPU purchase, not a two-GPU purchase, if it is to be upgradeable.** That is the kind of number that changes a decision, and it should be in the ADR rather than discovered during the first upgrade.
+7. **Record the GPU capacity taxes in ADR-0014 before anyone budgets a GPU purchase.** GPUs must be homogeneous across the Azure Local instance, and AKS Arc uses whole-device DDA with no partitioning or GPU live migration. The AKS FAQ also publishes extra physical-GPU requirements for T4 `Standard_NK6` and `Standard_NK12` upgrades. Do not generalize that T4-specific count to every GPU family without a current Microsoft or vendor statement.
 
 8. **Do not substitute a third-party benchmark for the missing CPU throughput figure, in any document.** The temptation is real: plenty of third-party tokens-per-second numbers exist for these exact models. None of them is measured on this stack, this runtime, this quantization, or this hardware, and quoting one would give a decision a false foundation. The honest record is "Microsoft publishes none, here is the ceiling implied by the GPU figures, measure it." That is what this spike records.
 
@@ -454,9 +468,9 @@ Unknowns 1, 2, 3, and 7 all resolve from the single install test ADR-0013 alread
 
 Stated plainly, because the tasking asks for an actionable floor.
 
-**Track 2's floor is 4 cores and 16 GiB of RAM with 30 GB of free disk, for the 4B-class CPU model both SPIKE-18 and ADR-0013 committed to.** That figure is transferred from Microsoft's own resource example for the same model on the sibling product, not documented as a Windows minimum, and the tables say so. The host SPIKE-18 measured (8 cores, 63.9 GB, ~800 GB free) clears it by a wide margin, and so will any reasonable dedicated build VM. **Nothing in track 2 is blocked by hardware.** What is unmeasured is speed, and only speed.
+**Track 2's test profile is 4 cores, 16 GiB RAM, and 30 GB free disk for the committed 4B-class CPU experiment. It is not a product floor.** The CPU and RAM figures are transferred from Microsoft's resource example on the sibling Azure Local product, and the disk allowance is a planning budget. The host SPIKE-18 measured (8 cores, 63.9 GB, approximately 800 GB free) clears that test profile. What remains unmeasured is peak memory and inference speed on the actual device runtime.
 
-**Track 3's floor is one `Standard_D4s_v3` worker node with >= 14 GiB allocatable, and the practical floor is one `Standard_D8s_v3`.** Both are non-GPU sizes, both are documented, and neither requires a card purchase. ADR-0014's committed first increment sits exactly at the recommended row. **The GPU question genuinely does not arise until the increment grows to vLLM, a `*-cuda-gpu` variant, or Agentic Retrieval**, which is what ADR-0014 decision 3 already says and which this spike now backs with the full SKU, release, and VRAM detail.
+**Track 3's floor is one worker VM with 4 vCPU, 16 GiB RAM, and at least 14 GiB allocatable; the practical baseline is 8 vCPU, 32 GiB RAM, and at least 28 GiB allocatable.** Microsoft maps these to the `Standard_D4s_v3` and `Standard_D8s_v3` AKS Arc profile labels. They are local VM allocations backed by customer-owned Azure Local hardware, not Azure public-cloud VM purchases. **The GPU question does not arise until the increment grows to vLLM, a `*-cuda-gpu` variant, or Agentic Retrieval**, which is what ADR-0014 decision 3 already says and which this spike now backs with the physical GPU, local profile, release, and memory detail.
 
 **Three defects found, all cheap to fix, none of them fatal.** A memory limit that cannot schedule on the node Microsoft recommends (Q5, Q7). A cache-storage field whose documented scope contradicts the page that recommends it (Q3). And a binding-constraint claim in a prior spike that is true of one host and false in general (Q2). Each is a two-line correction to an existing document.
 
@@ -485,8 +499,8 @@ All first-party Microsoft Learn. Retrieved 2026-07-30.
 - Inference runtimes in Foundry Local on Azure Local (ONNX Runtime versus vLLM comparison, vLLM GPU-only, memory optimization differences, EPP performance figures, runtime selection from the catalog framework field): <https://learn.microsoft.com/azure/azure-sovereign-clouds/private/foundry-local/concept-inference-runtimes>
 - Model caching and StoreModel lifecycle (the StoreModel phases, the cache Job, the model-store-retriever init container): <https://learn.microsoft.com/azure/azure-sovereign-clouds/private/foundry-local/concept-model-caching>
 - Deploy Foundry Local as an Azure Arc extension (the `storeModel.cacheJob.resources` defaults of 16Gi and 32Gi and the tuning guidance, the ordered install steps, `entraAuth` parameters, `api.exposure`): <https://learn.microsoft.com/azure/azure-sovereign-clouds/private/foundry-local/deploy-foundry-local-arc-extension>
-- Scale requirements for AKS on Azure Local (the full supported worker and control plane VM size lists, the default VM sizes, the 200 GB dynamically expanding node OS disk from release 2509, the full GPU VM SKU tables, cluster and node pool scale limits): <https://learn.microsoft.com/azure/aks/aksarc/scale-requirements>
-- Use GPUs for compute-intensive workloads in AKS on Azure Local (the supported GPU model table with the release that added each, Linux-only node pools, the GPU VM SKU tables, the driver preparation sequence, and the FAQ on spare GPUs for rolling upgrades): <https://learn.microsoft.com/azure/aks/aksarc/deploy-gpu-node-pool>
+- Scale requirements for AKS on Azure Local (the supported worker and control plane node-profile lists, the default profiles, the 200 GB dynamically expanding node OS disk from release 2509, the GPU node-profile tables, cluster limits, and node-pool limits): <https://learn.microsoft.com/azure/aks/aksarc/scale-requirements>
+- Use GPUs for compute-intensive workloads in AKS on Azure Local (the supported GPU model table with the release that added each, Linux-only node pools, the GPU node-profile tables, the driver preparation sequence, and the FAQ on spare GPUs for rolling upgrades): <https://learn.microsoft.com/azure/aks/aksarc/deploy-gpu-node-pool>
 - Prepare GPUs for Azure Local (the DDA versus GPU-P comparison table, the GPU model support matrix by assignment type, the "AKS Arc doesn't currently support GPU partitions" footnote, the homogeneous-configuration host requirement): <https://learn.microsoft.com/azure/azure-local/manage/gpu-preparation>
 - What's new in AKS enabled by Azure Arc on Azure Local (the `Standard_D16s_v3` and `Standard_D32s_v3` addition in release 2503, the 200 GB default OS disk in 2509, GPU support history): <https://learn.microsoft.com/azure/aks/aksarc/aks-whats-new-local>
 - Requirements for Agentic Retrieval in Foundry Local (the GPT-OSS-20B host hardware table with CPU, RAM, storage and VRAM minimums and recommendations, the minimum cluster node capacity by mode, the two-embedding-GPU shape): <https://learn.microsoft.com/azure/azure-arc/agents-tools-foundry-local/requirements>

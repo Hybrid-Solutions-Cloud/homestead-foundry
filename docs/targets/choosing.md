@@ -69,8 +69,11 @@ The price of that is real:
 - **It costs money whether or not you infer.** The Azure Local host fee is per
   physical core per month. A cluster sitting idle still bills. This is the exact
   inverse of the cloud target's economics.
-- **There is a hardware floor.** `Standard_A4_v2` is explicitly ruled out.
-  `Standard_D8s_v3` or better is the recommendation for a CPU workload.
+- **There is a hardware floor.** Each Linux worker VM needs at least 4 vCPU,
+  16 GiB RAM, and 14 GiB allocatable memory. Microsoft recommends 8 vCPU,
+  32 GiB RAM, and 28 GiB allocatable memory. The cloud-style names in the AKS
+  Arc documentation are local node-size profile labels backed by your own
+  Azure Local hardware, not Azure public-cloud VM SKUs.
 
 ## The cost inversion is the argument people get wrong
 

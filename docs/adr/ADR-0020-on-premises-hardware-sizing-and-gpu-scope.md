@@ -7,9 +7,11 @@
 
 [SPIKE-25](../research/SPIKE-25-local-track-hardware-sizing) returned a result
 this repository has to decide how to handle rather than simply record:
-**Microsoft publishes no CPU, RAM, or disk minimum for Foundry Local on Windows
-at all.** The prerequisites name an OS build, a .NET SDK, and a GPU, and nothing
-else.
+**Microsoft publishes no universal CPU, RAM, disk, video-memory, or NPU minimum
+for Foundry Local.** A Windows AI WinML tutorial names an OS build, a .NET SDK,
+and a DirectX 12 GPU for that sample path. The cross-platform SDK supports CPU
+fallback, so tutorial prerequisites must not be presented as a product-wide
+hardware floor.
 
 It also refuted a claim this repository had already published.
 [SPIKE-18](../research/SPIKE-18-foundry-local-windows-server) stated that core
@@ -58,15 +60,22 @@ acceptable and how to avoid both.
 6. **On Azure Local Foundry, GPU support is gated by Azure Local release number,
    and that is an environment question rather than a research one.** Microsoft
    publishes which release added each NVIDIA model in a single table. The
-   deployer checks their release against that table; this repository does not
-   mirror it, because a mirrored compatibility table is a stale table.
+   deployer checks their release against that table. A public guide may include
+   a dated, sourced snapshot, but it must direct the reader to the live table
+   before procurement.
 
-7. **The GPU memory figures that are published are recorded, and the rest are
+7. **AKS Arc node-size labels are not treated as Azure public-cloud VM SKUs.**
+   Microsoft uses labels such as `Standard_D8s_v3` and `Standard_NC8_A2` for
+   local worker VM profiles. Hardware guidance leads with the actual vCPU, RAM,
+   GPU, storage, and node-count quantities and identifies the label only as a
+   deployment reference backed by customer-owned Azure Local hardware.
+
+8. **The GPU memory figures that are published are recorded, and the rest are
    not estimated.** Five vLLM entries publish GPU memory, up to 14.793 GB for
    `gpt-oss-20b` with Blackwell CC 10.0+ recommended. The other 95 do not, and
    this repository leaves them `UNKNOWN`.
 
-8. **Closing the sizing question requires a measurement, and the measurement is
+9. **Closing the sizing question requires a measurement, and the measurement is
    gated.** It needs an owner-authorized install on a disposable build VM, never
    on a working host. Until that happens the sizing guidance stays labelled
    transferred.
@@ -103,9 +112,10 @@ is defensible as long as the reasoning is shown.
 hardware that does not exist yet and owner authorization, and it must never run
 on the platform host.
 
-**Mirror Microsoft's GPU compatibility table.** Rejected. A copied compatibility
-matrix goes stale silently, which is the same defect class as a copied model
-catalog.
+**Present cloud-style AKS Arc profile labels as the hardware requirement.**
+Rejected. The labels are useful deployment inputs, but they hide the physical
+vCPU, memory, storage, GPU, and failure-capacity calculation that the customer
+must supply on Azure Local.
 
 ## Sources
 

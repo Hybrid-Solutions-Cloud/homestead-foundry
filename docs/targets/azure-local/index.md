@@ -32,8 +32,11 @@ Four things cost more than they first appear:
   and is reported as flaky.
 - **It bills whether or not you infer.** The Azure Local host fee is per physical
   core per month. This is the exact inverse of the cloud target's economics.
-- **There is a hardware floor.** `Standard_A4_v2` is explicitly ruled out.
-  `Standard_D8s_v3` or better is the recommendation for a CPU workload.
+- **There is a hardware floor.** Each Linux worker VM needs at least 4 vCPU,
+  16 GiB RAM, and 14 GiB allocatable memory. Microsoft recommends 8 vCPU,
+  32 GiB RAM, and 28 GiB allocatable memory. The `Standard_D4s_v3` and
+  `Standard_D8s_v3` names in the AKS Arc documentation are local node-size
+  profile labels, not Azure public-cloud VM SKUs or physical server models.
 
 A GPU is not among them. [ADR-0014](../../adr/ADR-0014-foundry-local-azure-local-deployment-layers)
 decision 3 amended ADR-0009's blanket GPU precondition to a per-workload one, so
