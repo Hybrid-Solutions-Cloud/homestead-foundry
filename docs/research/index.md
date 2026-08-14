@@ -36,3 +36,4 @@ Every research spike behind the architecture decisions, in order. Each grounds i
 | [SPIKE-32](./SPIKE-32-model-region-availability-matrix) | Every model against every region, and what actually differs between them |
 | [SPIKE-33](./SPIKE-33-client-tool-survey) | Which client tools can point at this endpoint, and what each one gets wrong |
 | [SPIKE-34](./SPIKE-34-orchestration-options) | Orchestration options, and which of them can be pointed at this account |
+| [SPIKE-35](./SPIKE-35-code-document-model-comparison) | Code and documentation candidates, token limits, billed rates, API differences, and the controlled comparison gate |

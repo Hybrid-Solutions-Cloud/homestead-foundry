@@ -88,6 +88,10 @@ not need an ADR to be added.
 
 ## What an evaluation has to produce
 
+For a reproducible code and documentation comparison, use the fixed fixtures,
+hard gates, cost envelope, and result schema in
+[Evaluating code and documentation models](./model-evaluation).
+
 A model does not get a status until someone can answer these. Anything
 unverifiable is marked `UNKNOWN` rather than guessed, which is the same standard
 the [research spikes](../research/) hold themselves to.
@@ -113,6 +117,7 @@ the [research spikes](../research/) hold themselves to.
 | Question | Page |
 |---|---|
 | How is a model chosen? | This page |
+| How are code and documentation models compared? | [Model evaluation](./model-evaluation) |
 | What did this project choose? | [Model catalog](../reference/model-catalog) |
 | What can I deploy on the cloud? | [Available models: Azure AI Foundry](../reference/model-availability-azure-cloud) |
 | What can I deploy on premises? | [Available models: Foundry Local and Azure Local Foundry](../reference/model-catalog-foundry-local) |

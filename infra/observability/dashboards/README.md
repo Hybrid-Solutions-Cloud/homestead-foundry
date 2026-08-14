@@ -13,10 +13,10 @@ not supported by the Azure API.
 `foundry-model-usage.dashboard.json` is the initial core definition. It is intentionally
 generic: `__SUBSCRIPTION_ID__`, `__FOUNDRY_RESOURCE_GROUP__`,
 `__FOUNDRY_RESOURCE_NAME__`, `__GATEWAY_RESOURCE_GROUP__`, `__GATEWAY_RESOURCE_NAME__`,
-and `__LOCATION__` are placeholders that a private overlay
+`__LOG_ANALYTICS_WORKSPACE_RESOURCE_ID__`, and `__LOCATION__` are placeholders that a private overlay
 must replace at deployment time. Do not replace them in this public file. The definition
-uses native `Microsoft.CognitiveServices/accounts` metrics, so it does not create a
-diagnostic setting or send metric data to Log Analytics.
+uses native `Microsoft.CognitiveServices/accounts` metrics for operational panels and
+the `FoundryModelCost_CL` Log Analytics table for billed-cost panels.
 
 It answers model-use questions by deployment and time range:
 
@@ -25,16 +25,16 @@ It answers model-use questions by deployment and time range:
 3. How much it was used: request and input, output, and total token trends.
 4. Whether service behavior was affected: availability, HTTP 429 throttles, and 5xx
    server errors.
-5. Directional cost estimation: token-based input/output cost by deployment and
-   aggregate token consumption.
+5. Actual billed cost: today, trailing seven days, month to date, daily trend, and
+   per-model token and cost totals from Cost Management ActualCost data.
 6. Content safety: HTTP 400 blocks by deployment (RAI content filtering).
 7. Model inventory: request volume across all 22 deployed models.
 8. Caller/consumer breakdown: requires `AzureOpenAIRequestUsage` diagnostic category
    enabled in the private overlay.
 
-Token use is a leading consumption signal, not a billed-currency calculation. Use Cost
-Management for actual and forecast charges. The cost estimation panels use Grafana's
-`currencyUSD` unit for directional trending only.
+Token use is a leading consumption signal, not a billed-currency calculation. The
+input/output token panel therefore uses a count unit. Only panels backed by Cost
+Management ActualCost use Grafana's `currencyUSD` unit.
 
 The first Foundry dashboard should contain only these operational views:
 
@@ -46,14 +46,16 @@ The first Foundry dashboard should contain only these operational views:
 4. Foundry deployment failures, selected Azure service and resource health events, and
    active alert state.
 5. Approved diagnostic and trace drill-down only after the data-collection gate is met.
-6. Directional cost estimation panels (token-based, not billed currency).
+6. Actual billed-cost panels sourced from Cost Management snapshots.
 7. Content safety / RAI block monitoring.
 8. Caller identity tracking via Usage diagnostics (requires `AzureOpenAIRequestUsage`
    enabled in the private overlay).
 
-Cost Management is not a native Grafana data source. Keep billing investigation and
-scheduled cost reporting in Cost Management rather than attempting to reproduce it in
-the dashboard.
+Cost Management is not a native Grafana data source. The optional cost collector bridges
+that gap by querying ActualCost with a managed-identity Logic App every four hours and
+writing one compact snapshot to Log Analytics through the Logs Ingestion API. Dashboard
+cost data is near real time relative to Cost Management, whose billing records can lag
+usage by several hours. The Azure portal remains authoritative for invoice investigation.
 
 ## Cost model
 
@@ -61,12 +63,12 @@ the dashboard.
 |---|---|---|---|
 | Platform metrics (`Microsoft.CognitiveServices/accounts`) | Azure Monitor metrics pipeline | **Free** | Panels 1-10 |
 | `AzureOpenAIRequestUsage` diagnostic logs | Log Analytics | Per GB ingested | Panel 11 only |
+| Cost Management ActualCost snapshot | `FoundryModelCost_CL` in Log Analytics | Minimal ingestion plus Logic App executions | Panels 18-23 |
 
-Ten of eleven panels run on free platform metrics. Only the caller/consumer breakdown
-(panel 11) requires paid Log Analytics ingestion. Set `logAnalyticsDailyQuotaGb` to a
-tight cap (e.g., 0.1 GB) in the private overlay to prevent surprise bills. No platform
-metrics are sent to Log Analytics, so the `foundryDiagnosticSetting.metrics` array should
-remain empty.
+The caller/consumer breakdown and compact ActualCost snapshots require paid Log Analytics
+ingestion. Set `logAnalyticsDailyQuotaGb` to a tight supported cap in the private overlay.
+No platform metrics are sent to Log Analytics, so the
+`foundryDiagnosticSetting.metrics` array should remain empty.
 
 ## The gateway row
 
