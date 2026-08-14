@@ -6,6 +6,11 @@ Scope: independent, first-party assessment of niche or emerging models for a COD
 
 Grounding read first: this spike's brief (the tasking), the model roster, and the model-roster reference. This spike verifies and deepens; it does not restate the plans.
 
+Follow-up: [SPIKE-33](./SPIKE-33-code-document-model-comparison) compares the
+deployed candidates against the current GPT baseline, records live billed token
+rates and API differences, and documents the controlled empirical comparison
+that remains to be run.
+
 ---
 
 ## What "K3" turned out to mean (stated explicitly and early, per the tasking)

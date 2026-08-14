@@ -124,6 +124,7 @@ export default defineConfig({
           { text: "Getting started", link: "/guide/getting-started" },
           { text: "Methodology", link: "/guide/methodology" },
           { text: "Model selection", link: "/guide/model-selection" },
+          { text: "Model evaluation", link: "/guide/model-evaluation" },
           { text: "Model registry", link: "/guide/model-registry" },
         ],
       },
@@ -208,6 +209,7 @@ export default defineConfig({
             { text: "Getting started", link: "/guide/getting-started" },
             { text: "Methodology", link: "/guide/methodology" },
             { text: "Model selection", link: "/guide/model-selection" },
+            { text: "Model evaluation", link: "/guide/model-evaluation" },
             { text: "Model registry", link: "/guide/model-registry" },
           ],
         },
@@ -359,8 +361,8 @@ export default defineConfig({
           ],
         },
       ],
-      // Grouped by subject rather than listed by number. Twenty-nine spikes in
-      // one flat list is unscannable: nobody reads SPIKE-01 through SPIKE-31
+      // Grouped by subject rather than listed by number. Thirty spikes in
+      // one flat list is unscannable: nobody reads SPIKE-01 through SPIKE-33
       // hunting for the cost one. Numbering is preserved in every label so a
       // citation from an ADR still resolves. Groups are collapsed by default
       // except the index, so the section opens as five headings, not a wall.
@@ -384,6 +386,7 @@ export default defineConfig({
             { text: "SPIKE-12 Image/animation/video alternatives", link: "/research/SPIKE-12-image-video-alternatives" },
             { text: "SPIKE-13 Tenant-wide TTS survey", link: "/research/SPIKE-13-tenant-wide-tts-survey" },
             { text: "SPIKE-15 Niche reviewer models", link: "/research/SPIKE-15-niche-reviewer-models" },
+            { text: "SPIKE-33 Code/document model comparison", link: "/research/SPIKE-33-code-document-model-comparison" },
             { text: "SPIKE-16 Virtual-trainer avatar", link: "/research/SPIKE-16-virtual-trainer-avatar" },
           ],
         },
