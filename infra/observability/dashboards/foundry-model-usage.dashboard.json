@@ -525,7 +525,7 @@
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "currencyUSD"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -552,7 +552,7 @@
       },
       "targets": [
         {
-          "alias": "Input cost: {{modeldeploymentname}}",
+          "alias": "Input tokens: {{modeldeploymentname}}",
           "azureMonitor": {
             "aggregation": "Total",
             "allowedTimeGrainsMs": [],
@@ -589,7 +589,7 @@
           "subscription": "__SUBSCRIPTION_ID__"
         },
         {
-          "alias": "Output cost: {{modeldeploymentname}}",
+          "alias": "Output tokens: {{modeldeploymentname}}",
           "azureMonitor": {
             "aggregation": "Total",
             "allowedTimeGrainsMs": [],
@@ -626,7 +626,8 @@
           "subscription": "__SUBSCRIPTION_ID__"
         }
       ],
-      "title": "Estimated cost by deployment (token-based, directional only)",
+      "description": "Raw input and output token volume. See the billed-cost section below for actual charges from Cost Management.",
+      "title": "Input and output token volume by deployment",
       "type": "timeseries"
     },
     {
@@ -636,7 +637,7 @@
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "currencyUSD"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -925,6 +926,390 @@
       "type": "timeseries"
     },
     {
+      "id": 17,
+      "type": "row",
+      "title": "Cost and consumption (actual billed data)",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 56
+      },
+      "panels": []
+    },
+    {
+      "id": 18,
+      "title": "Actual Foundry model cost today",
+      "description": "Cost Management ActualCost for the current UTC day. Billing data normally trails token telemetry by several hours.",
+      "type": "stat",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 57
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "azureLogAnalytics": {
+            "query": "FoundryModelCost_CL\n| top 1 by TimeGenerated desc\n| mv-expand row = CostQueryRows\n| extend Cost = todouble(row[0]), UsageDateText = tostring(toint(row[2]))\n| extend UsageDate = todatetime(strcat(substring(UsageDateText, 0, 4), '-', substring(UsageDateText, 4, 2), '-', substring(UsageDateText, 6, 2)))\n| summarize Value = sumif(Cost, UsageDate >= startofday(now()))",
+            "resultFormat": "table",
+            "resources": [
+              "__LOG_ANALYTICS_WORKSPACE_RESOURCE_ID__"
+            ],
+            "dashboardTime": false
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Log Analytics",
+          "refId": "A",
+          "subscription": "__SUBSCRIPTION_ID__"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "title": "Actual Foundry model cost, last 7 days",
+      "description": "Rolling seven-day ActualCost from the latest Cost Management snapshot.",
+      "type": "stat",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 57
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "azureLogAnalytics": {
+            "query": "FoundryModelCost_CL\n| top 1 by TimeGenerated desc\n| mv-expand row = CostQueryRows\n| extend Cost = todouble(row[0]), UsageDateText = tostring(toint(row[2]))\n| extend UsageDate = todatetime(strcat(substring(UsageDateText, 0, 4), '-', substring(UsageDateText, 4, 2), '-', substring(UsageDateText, 6, 2)))\n| summarize Value = sumif(Cost, UsageDate >= startofday(now() - 6d))",
+            "resultFormat": "table",
+            "resources": [
+              "__LOG_ANALYTICS_WORKSPACE_RESOURCE_ID__"
+            ],
+            "dashboardTime": false
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Log Analytics",
+          "refId": "A",
+          "subscription": "__SUBSCRIPTION_ID__"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "title": "Actual Foundry model cost, month to date",
+      "description": "Month-to-date ActualCost from the latest Cost Management snapshot.",
+      "type": "stat",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 57
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "azureLogAnalytics": {
+            "query": "FoundryModelCost_CL\n| top 1 by TimeGenerated desc\n| mv-expand row = CostQueryRows\n| extend Cost = todouble(row[0])\n| summarize Value = sum(Cost)",
+            "resultFormat": "table",
+            "resources": [
+              "__LOG_ANALYTICS_WORKSPACE_RESOURCE_ID__"
+            ],
+            "dashboardTime": false
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Log Analytics",
+          "refId": "A",
+          "subscription": "__SUBSCRIPTION_ID__"
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "title": "Billed tokens and actual cost by model",
+      "description": "Daily, rolling seven-day, and month-to-date billed usage from Cost Management. Cached-token meters are included. Azure Monitor token panels above are the near-real-time leading indicator.",
+      "type": "table",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 62
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Cost$"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Tokens$"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "azureLogAnalytics": {
+            "query": "FoundryModelCost_CL\n| top 1 by TimeGenerated desc\n| mv-expand row = CostQueryRows\n| extend Cost = todouble(row[0]), UsageQuantity = todouble(row[1]), UsageDateText = tostring(toint(row[2])), Meter = tostring(row[3])\n| extend UsageDate = todatetime(strcat(substring(UsageDateText, 0, 4), '-', substring(UsageDateText, 4, 2), '-', substring(UsageDateText, 6, 2)))\n| extend Model = case(Meter startswith '5.6 sol ', 'gpt-5-6-sol', Meter startswith '5.6 terra ', 'gpt-5-6-terra', Meter startswith '5.6 luna ', 'gpt-5-6-luna', Meter startswith 'V4 Pro ', 'deepseek-v4-pro', Meter startswith 'V4 Flash ', 'deepseek-v4-flash', Meter startswith 'Grok 4.2 ', 'grok-4-20-reasoning', Meter startswith '4.3 ', 'grok-4-3', Meter startswith 'Grok 4.1 ', 'grok-4-1-fast-reasoning', Meter startswith 'Large 3 ', 'mistral-large-3', Meter startswith 'Llama 4 Maverick 17B ', 'llama-4-maverick-17b', Meter startswith 'K2.7 Code ', 'kimi-k2-7-code', Meter startswith 'Phi-4-reasoning-', 'phi-4-reasoning', Meter startswith 'text-embedding-3-large', 'text-embedding-3-large', Meter startswith 'text-embedding-3-small', 'text-embedding-3-small', Meter)\n| extend Tokens = tolong(round(UsageQuantity * iff(Meter contains '1M Tokens', 1000000.0, 1000.0)))\n| summarize TodayTokens = sumif(Tokens, UsageDate >= startofday(now())), TodayCost = sumif(Cost, UsageDate >= startofday(now())), SevenDayTokens = sumif(Tokens, UsageDate >= startofday(now() - 6d)), SevenDayCost = sumif(Cost, UsageDate >= startofday(now() - 6d)), MonthTokens = sum(Tokens), MonthCost = sum(Cost) by Model\n| order by MonthCost desc",
+            "resultFormat": "table",
+            "resources": [
+              "__LOG_ANALYTICS_WORKSPACE_RESOURCE_ID__"
+            ],
+            "dashboardTime": false
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Log Analytics",
+          "refId": "A",
+          "subscription": "__SUBSCRIPTION_ID__"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "title": "Daily actual model cost",
+      "description": "ActualCost by billing date and model from the newest snapshot. The newest day can be incomplete.",
+      "type": "timeseries",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 74
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "azureLogAnalytics": {
+            "query": "FoundryModelCost_CL\n| top 1 by TimeGenerated desc\n| mv-expand row = CostQueryRows\n| extend Cost = todouble(row[0]), UsageDateText = tostring(toint(row[2])), Meter = tostring(row[3])\n| extend UsageDate = todatetime(strcat(substring(UsageDateText, 0, 4), '-', substring(UsageDateText, 4, 2), '-', substring(UsageDateText, 6, 2)))\n| extend Model = case(Meter startswith '5.6 sol ', 'gpt-5-6-sol', Meter startswith '5.6 terra ', 'gpt-5-6-terra', Meter startswith '5.6 luna ', 'gpt-5-6-luna', Meter startswith 'V4 Pro ', 'deepseek-v4-pro', Meter startswith 'V4 Flash ', 'deepseek-v4-flash', Meter startswith 'Grok 4.2 ', 'grok-4-20-reasoning', Meter startswith '4.3 ', 'grok-4-3', Meter startswith 'Grok 4.1 ', 'grok-4-1-fast-reasoning', Meter startswith 'Large 3 ', 'mistral-large-3', Meter startswith 'Llama 4 Maverick 17B ', 'llama-4-maverick-17b', Meter startswith 'K2.7 Code ', 'kimi-k2-7-code', Meter startswith 'Phi-4-reasoning-', 'phi-4-reasoning', Meter startswith 'text-embedding-3-large', 'text-embedding-3-large', Meter startswith 'text-embedding-3-small', 'text-embedding-3-small', Meter)\n| summarize Cost = sum(Cost) by UsageDate, Model\n| order by UsageDate asc",
+            "resultFormat": "time_series",
+            "resources": [
+              "__LOG_ANALYTICS_WORKSPACE_RESOURCE_ID__"
+            ],
+            "dashboardTime": false,
+            "timeColumn": "UsageDate"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Log Analytics",
+          "refId": "A",
+          "subscription": "__SUBSCRIPTION_ID__"
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "title": "Month-to-date actual cost by model",
+      "description": "ActualCost concentration by model from the newest Cost Management snapshot.",
+      "type": "barchart",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 74
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.8,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "horizontal",
+        "showValue": "always",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "azureLogAnalytics": {
+            "query": "FoundryModelCost_CL\n| top 1 by TimeGenerated desc\n| mv-expand row = CostQueryRows\n| extend Cost = todouble(row[0]), Meter = tostring(row[3])\n| extend Model = case(Meter startswith '5.6 sol ', 'gpt-5-6-sol', Meter startswith '5.6 terra ', 'gpt-5-6-terra', Meter startswith '5.6 luna ', 'gpt-5-6-luna', Meter startswith 'V4 Pro ', 'deepseek-v4-pro', Meter startswith 'V4 Flash ', 'deepseek-v4-flash', Meter startswith 'Grok 4.2 ', 'grok-4-20-reasoning', Meter startswith '4.3 ', 'grok-4-3', Meter startswith 'Grok 4.1 ', 'grok-4-1-fast-reasoning', Meter startswith 'Large 3 ', 'mistral-large-3', Meter startswith 'Llama 4 Maverick 17B ', 'llama-4-maverick-17b', Meter startswith 'K2.7 Code ', 'kimi-k2-7-code', Meter startswith 'Phi-4-reasoning-', 'phi-4-reasoning', Meter startswith 'text-embedding-3-large', 'text-embedding-3-large', Meter startswith 'text-embedding-3-small', 'text-embedding-3-small', Meter)\n| summarize Cost = sum(Cost) by Model\n| order by Cost desc",
+            "resultFormat": "table",
+            "resources": [
+              "__LOG_ANALYTICS_WORKSPACE_RESOURCE_ID__"
+            ],
+            "dashboardTime": false
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Log Analytics",
+          "refId": "A",
+          "subscription": "__SUBSCRIPTION_ID__"
+        }
+      ]
+    },
+    {
       "id": 12,
       "type": "row",
       "title": "Model gateway (optional; empty unless deployGateway is true)",
@@ -933,7 +1318,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 56
+        "y": 82
       },
       "panels": []
     },
@@ -950,7 +1335,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 57
+        "y": 83
       },
       "fieldConfig": {
         "defaults": {
@@ -1077,7 +1462,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 57
+        "y": 83
       },
       "fieldConfig": {
         "defaults": {
@@ -1146,7 +1531,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 65
+        "y": 91
       },
       "fieldConfig": {
         "defaults": {
@@ -1215,7 +1600,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 65
+        "y": 91
       },
       "fieldConfig": {
         "defaults": {

@@ -45,6 +45,16 @@ param deployGrafanaDashboardDefinitionPreview = false
 param grafanaDashboardDefinitionName = 'default'
 param grafanaDashboardDefinitionSerializedData = ''
 
+// Optional ActualCost snapshots for the billed-cost dashboard section. The
+// collector uses managed identity and writes one compact snapshot per run.
+param enableFoundryCostCollection = false
+param foundryCostCollectionConfiguration = {
+  targetSubscriptionId: '00000000-0000-0000-0000-000000000000'
+  targetResourceGroupName: 'rg-<initiative>-<env>-<region>-01'
+  collectionIntervalHours: 4
+  retentionInDays: 30
+}
+
 param alertRuleLocation = 'global'
 param enableActivityLogAlerts = false
 param activityLogAlertDefinitions = []

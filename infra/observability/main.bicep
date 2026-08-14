@@ -121,6 +121,12 @@ param grafanaDashboardDefinitionName string
 @description('Serialized source-controlled dashboard JSON. It must contain no credentials, private URLs, prompts, responses, or personal data.')
 param grafanaDashboardDefinitionSerializedData string
 
+@description('Whether to collect Cost Management ActualCost snapshots for the Foundry model dashboard.')
+param enableFoundryCostCollection bool = false
+
+@description('Cost collection settings: targetSubscriptionId, targetResourceGroupName, collectionIntervalHours, and retentionInDays.')
+param foundryCostCollectionConfiguration object = {}
+
 @description('Azure-supported location for Foundry alert rule resources.')
 param alertRuleLocation string
 
@@ -179,6 +185,8 @@ var names = {
   azureMonitorWorkspace: 'amw-${observabilityBaseName}'
   actionGroup: 'ag-${observabilityBaseName}'
   dashboard: 'dash-${workload}-${environment}-${regionCode}-${instance}'
+  costWorkflow: 'logic-${workload}-cost-${environment}-${regionCode}-${instance}'
+  costDataCollectionRule: 'dcr-${workload}-cost-${environment}-${regionCode}-${instance}'
 }
 
 var requiredTags = {
@@ -201,6 +209,8 @@ var deployMetricAlertDefinitions = enableMetricAlerts && !empty(metricAlertDefin
 var deployAlertProcessingRules = enableAlertProcessingRules && !empty(alertProcessingRuleDefinitions)
 var deployAvailability = enableApplicationInsights && enableAvailabilityTests && !empty(availabilityTestDefinitions)
 var deployScheduledQueries = enableScheduledQueryAlerts && !empty(scheduledQueryAlertDefinitions)
+var deployFoundryCostCollection = enableFoundryCostCollection && !empty(foundryCostCollectionConfiguration)
+var costManagementReaderRoleId = '72fafb9e-0641-4937-9268-a91bfd8191a3'
 
 module observabilityResourceGroup 'modules/resource-group.bicep' = {
   name: 'deploy-${names.resourceGroup}'
@@ -284,6 +294,39 @@ module grafanaDashboard 'modules/grafana-dashboard.bicep' = if (deployGrafanaDas
     deployDashboardDefinitionPreview: deployGrafanaDashboardDefinitionPreview
     dashboardDefinitionName: grafanaDashboardDefinitionName
     dashboardDefinitionSerializedData: grafanaDashboardDefinitionSerializedData
+  }
+}
+
+module foundryCostCollection 'modules/foundry-cost-collection.bicep' = if (deployFoundryCostCollection) {
+  name: 'deploy-${workload}-cost-collection-${instance}'
+  scope: resourceGroup(names.resourceGroup)
+  dependsOn: [
+    observabilityResourceGroup
+    logAnalytics
+  ]
+  params: {
+    logAnalyticsWorkspaceName: names.logAnalytics
+    location: location
+    tags: tags
+    targetSubscriptionId: foundryCostCollectionConfiguration.targetSubscriptionId
+    targetResourceGroupName: foundryCostCollectionConfiguration.targetResourceGroupName
+    collectionIntervalHours: foundryCostCollectionConfiguration.collectionIntervalHours
+    retentionInDays: foundryCostCollectionConfiguration.retentionInDays
+    workflowName: names.costWorkflow
+    dataCollectionRuleName: names.costDataCollectionRule
+  }
+}
+
+module foundryCostReaderRole 'modules/resource-group-role-assignment.bicep' = if (deployFoundryCostCollection) {
+  name: 'assign-${workload}-cost-reader-${instance}'
+  scope: resourceGroup(
+    foundryCostCollectionConfiguration.targetSubscriptionId,
+    foundryCostCollectionConfiguration.targetResourceGroupName
+  )
+  params: {
+    principalId: foundryCostCollection!.outputs.workflowPrincipalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: costManagementReaderRoleId
   }
 }
 
@@ -397,4 +440,5 @@ output capabilityStatus object = {
   availabilityTests: deployAvailability
   scheduledQueryAlerts: deployScheduledQueries
   dashboardDefinitionPreview: deployGrafanaDashboardShell && deployGrafanaDashboardDefinitionPreview && !empty(grafanaDashboardDefinitionSerializedData)
+  foundryCostCollection: deployFoundryCostCollection
 }
