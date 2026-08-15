@@ -2,7 +2,7 @@
 
 ## What this repo is
 
-A private, personally-run studio for designing, deploying, and documenting **Azure AI Foundry** infrastructure - research, decisions, design, diagrams, and as-built records for standing up Foundry model backbones (image, voice, and future modalities). The methodology is built to become an open-source knowledge and automation center: detailed documentation on Azure AI Foundry itself, plus the agent roster and Bicep automation that does the deploying. Its first proven build is a media backbone (MAI-Image-2.5 for scene art, MAI-Voice-2 for narration) serving two publishing brands - kept as a worked example in `docs/design/*.md`, not the primary framing.
+A **public**, personally-run studio for designing, deploying, and documenting **Azure AI Foundry** infrastructure - research, decisions, design, diagrams, and as-built records for standing up Foundry model backbones (image, voice, and future modalities). The methodology is built to become an open-source knowledge and automation center: detailed documentation on Azure AI Foundry itself, plus the agent roster and Bicep automation that does the deploying. Its first proven build is a media backbone (MAI-Image-2.5 for scene art, MAI-Voice-2 for narration) serving two publishing brands - kept as a worked example in `docs/design/*.md`, not the primary framing.
 
 The whole initiative is under `ai/`. Start at `ai/MASTER-PLAN.md`, then `ai/TASKS.md`. Planning and backlog live under the private planning workspace.
 
@@ -37,6 +37,7 @@ Sonnet for everything else. See `CLAUDE.md`'s "Model policy for this repo."
 
 - **No API agents.** Harness only. Never call a model API directly, no `ANTHROPIC_API_KEY` in any agent or script.
 - **No em-dashes** in committed prose. Grep before committing.
+- **This repository is PUBLIC.** Everything committed here is published. Design, decisions and method are meant to be read; anything that identifies or attacks one deployment is not. No real subscription or tenant identifiers, resource names, endpoints, keys, or spend figures. Run `node scripts/scan-public-safety.mjs` before committing.
 - **No secrets** committed. Tenants, subscriptions, keys, vaults by name only. Secrets live in the tenant Key Vault.
 - **WAF 5-pillar + CAF naming** for all Azure design (clear `rg-...`, resource, deployment, vault, budget names).
 - **Azure writes gate.** Confirm before any resource-creating `az` call. Bulk generation is held for the owner.
@@ -46,7 +47,7 @@ Sonnet for everything else. See `CLAUDE.md`'s "Model policy for this repo."
 
 | Fact | Value |
 |---|---|
-| GitHub org | Hybrid-Solutions-Cloud (private repo) |
+| GitHub org | Hybrid-Solutions-Cloud. **This repository is PUBLIC.** |
 | Local path | `D:/git/hybrid-solutions-cloud/homestead-foundry` |
 | Primary tenant | Decided by the environment check (credit sub preferred; a secondary tenant is the fallback) |
 | Key Vault | The chosen tenant's platform vault (named in `docs/design/*` worked-example appendices) |

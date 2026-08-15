@@ -5,7 +5,8 @@
 ## Claude Code notes
 
 - Subagents and config for this repo live in `.claude/`. The repo-level MCP config is `.mcp.json` (HCS Governance).
-- This is a **private** infra + design repo. Azure architecture, cost, and provisioning detail live here so they stay out of the public site repos.
+- **This repository is PUBLIC.** It is `Hybrid-Solutions-Cloud/homestead-foundry` on GitHub and anyone can read every file in it. It was private when this line first said so, and the line was not corrected when the repository was opened. Treat everything you write here as published, because it is.
+- Azure architecture, design, and provisioning **method** belong here and are meant to be read. What must not appear is anything that identifies or attacks one deployment: real subscription or tenant identifiers, real resource names, endpoints, keys, or spend figures. Use the placeholder shapes the existing docs already use, and run `node scripts/scan-public-safety.mjs` before committing.
 - The full initiative is under `ai/`. Start at `ai/MASTER-PLAN.md` and `ai/TASKS.md`.
 
 ## Model policy for this repo (owner directive)
