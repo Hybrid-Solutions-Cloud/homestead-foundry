@@ -156,6 +156,12 @@ param gatewayTokenSecretName string = ''
 @allowed(['B1', 'B2', 'B3', 'S1', 'P0v3', 'P1v3'])
 param gatewaySku string = 'B1'
 
+@description('A second Foundry account, in another region, for models the primary does not offer (e.g. sora-2, whisper, gpt-transcribe live in eastus2 while the primary account is eastus). Empty deploys the gateway pointed at the primary account only. Requires deployGateway.')
+param gatewaySecondaryAccountName string = ''
+
+@description('Vault secret holding the secondary account key. Required when gatewaySecondaryAccountName is set. Created by hand, like the primary key secret.')
+param gatewaySecondaryKeySecretName string = ''
+
 // ------------------------------ composed names -----------------------------
 
 var baseName = '${workload}-${env}-${regionToken}-${instance}'
@@ -280,6 +286,8 @@ module gateway 'modules/model-gateway.bicep' = if (deployGateway) {
     keyVaultResourceGroupName: empty(keyVaultResourceGroupName) ? names.resourceGroup : keyVaultResourceGroupName
     foundryKeySecretName: kvRefs.outputs.speechKeySecretName
     gatewayTokenSecretName: gatewayTokenSecretName
+    secondaryAccountName: gatewaySecondaryAccountName
+    secondaryKeySecretName: gatewaySecondaryKeySecretName
     sku: gatewaySku
     tags: tags
   }

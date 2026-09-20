@@ -60,12 +60,40 @@ param gatewayTokenSecretName string
 @description('Tags applied to every resource, so the gateway is attributable in Cost Management alongside the account it fronts.')
 param tags object = {}
 
+@description('A second Foundry account, in another region, for models the primary account does not offer. Empty skips wiring it. Reached under the /eus2 path prefix, byte-for-byte, because video polling and audio uploads carry no JSON model field to route on.')
+param secondaryAccountName string = ''
+
+@description('Vault secret holding the secondary account key. Required when secondaryAccountName is set.')
+param secondaryKeySecretName string = ''
+
+@description('Path prefix that routes to the secondary account. Matches FOUNDRY_PREFIX_2 in foundry-proxy.mjs.')
+param secondaryPrefix string = '/eus2'
+
 @description('B1 is the cheapest tier that stays warm. F1 exists but carries a daily CPU quota that stalls an editor mid-task, which is worse than not deploying at all.')
 @allowed(['B1', 'B2', 'B3', 'S1', 'P0v3', 'P1v3'])
 param sku string = 'B1'
 
 var vaultDnsSuffix = environment().suffixes.keyvaultDns
 var foundryEndpoint = 'https://${foundryAccountName}.services.ai.azure.com/openai/v1'
+var hasSecondary = !empty(secondaryAccountName)
+// The secondary base is /openai, not /openai/v1: this account's audio routes
+// only answer on the classic /deployments/<name>/audio/transcriptions?api-version=
+// path, and the v1 audio route returns DeploymentNotFound (measured 2026-09-19).
+var secondaryEndpoint = hasSecondary ? 'https://${secondaryAccountName}.services.ai.azure.com/openai' : ''
+var secondaryAppSettings = hasSecondary ? [
+  {
+    name: 'FOUNDRY_ENDPOINT_2'
+    value: secondaryEndpoint
+  }
+  {
+    name: 'FOUNDRY_KEY_2'
+    value: '@Microsoft.KeyVault(SecretUri=https://${keyVaultName}${vaultDnsSuffix}/secrets/${secondaryKeySecretName}/)'
+  }
+  {
+    name: 'FOUNDRY_PREFIX_2'
+    value: secondaryPrefix
+  }
+] : []
 
 resource plan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: planName
@@ -110,7 +138,7 @@ resource gateway 'Microsoft.Web/sites@2023-12-01' = {
       // than as a path separator, so a nested layout silently fails to start
       // with MODULE_NOT_FOUND. A flat package cannot hit that.
       appCommandLine: 'node foundry-proxy.mjs'
-      appSettings: [
+      appSettings: concat([
         {
           name: 'FOUNDRY_ENDPOINT'
           value: foundryEndpoint
@@ -140,7 +168,7 @@ resource gateway 'Microsoft.Web/sites@2023-12-01' = {
           name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
           value: 'false'
         }
-      ]
+      ], secondaryAppSettings)
     }
   }
 }
