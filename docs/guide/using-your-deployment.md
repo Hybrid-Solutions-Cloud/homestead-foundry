@@ -1,5 +1,7 @@
 # Using your deployment
 
+> Current cloud update (2026-09-25): [model roster](../reference/cloud-model-roster-2026-09-25), [router and MCP roles](../guide/model-router), [gateway](../guide/model-gateway), and [cost/quality research](../research/model-selection-2026-09-25). Earlier dated examples are historical.
+
 You ran the [deployment runbook](./deployment.md) and it succeeded. Resources exist. This page takes you from there to your first working inference call.
 
 Everything here is copy-paste. Replace the placeholders and it runs.

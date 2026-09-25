@@ -1,5 +1,16 @@
 # Session handoff
 
+## Documentation and model research - 2026-09-25
+
+AB#9316. Refreshed gateway/router/MCP/monitoring guides and added the dated cloud
+roster and primary-source Azure price/quality review. Corrected stale migration
+inventory language and linked current pages from navigation, catalog and Azure
+guides. Grok 4.6 is a deep/coding/IaC contender; vendor-latest 4.7 is distinguished
+from the 4.6 deployment and account-scoped catalog availability. Recommendations
+remain proposals; no runtime roles changed and no paid model evaluation ran.
+Public safety and site build/deployment are release checks. The private overlay
+owns exact names, price meter evidence, current operations and this public pin.
+
 ## Foundry generation migration - 2026-09-25
 
 AB#9316. Initial implementation merged in PR 16. This follow-up preserves all

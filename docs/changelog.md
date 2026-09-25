@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-25 - Router, models and operational documentation
+
+Added the [router guide](./guide/model-router), refreshed [gateway documentation](./guide/model-gateway),
+published the [cloud roster](./reference/cloud-model-roster-2026-09-25) and
+[cost/quality review](./research/model-selection-2026-09-25), and documented
+consolidated monitoring. Recommendations do not change runtime routing.
+
 Release history for this project. The authoritative file is `CHANGELOG.md` in the repository root, in [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format; this page mirrors it. Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## 0.2.0 - 2026-07-25

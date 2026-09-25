@@ -52,23 +52,30 @@ default backend. Check this behavior before moving asynchronous consumers.
    new accounts/projects without deleting or reducing existing allocations.
 3. Run the model deployment script using the reviewed manifest and policy.
    Its results distinguish successful deployments from quota-blocked entries.
-   Use explicit legacy routes for blocked models; reachable does not mean migrated.
+   During an approved overlap, explicit legacy routes can serve blocked models;
+   reachable does not mean migrated. Remove those routes after full cutover.
 4. Provision gateway secrets, publish the package and validate authentication,
    streaming, direct-model requests, router requests and backend-specific paths.
 5. Deploy monitoring and validate actual records, queries and alert delivery.
    Infrastructure deployment success alone does not verify telemetry coverage.
 6. Synchronize local and remote MCP policy, release the remote server, and update
    editor endpoints only after the new route passes end-to-end checks.
-7. Exercise rollback and record the cutover time. Retain the old generation for
-   the agreed observation interval. Retirement requires a separate decision.
+7. Exercise rollback and record cutover. Retain the old generation for the agreed
+   observation interval unless the owner explicitly supersedes that plan with
+   immediate retirement. Account deletion/purge removes that rollback option;
+   record the decision and remove stale routes, secrets and monitoring scopes.
 
 ## Monitoring semantics
 
-The dashboard includes native Foundry and gateway metrics for both generations,
-deployment inventory, latency, token usage, stop reasons, error codes, router
+The dashboard includes native Foundry and gateway metrics for configured accounts,
+latency, token usage, stop reasons, error codes, router
 selection, service tiers, MCP traffic, non-chat API operations, actual cost and
 monitoring freshness. Native panels include all configured accounts; the
-generation/model filters apply to the detailed gateway panels.
+generation/model filters apply to the detailed gateway panels. After retirement,
+configure only active accounts. The completed-migration inventory table is not
+part of the operational dashboard. Use two-column charts, compact cost summaries
+and wide detail tables. See the [router](./model-router) and
+[gateway](./model-gateway) guides for ongoing operation.
 
 First-token timing measures the first streamed content, reasoning or tool-output
 delta. Total duration measures the gateway request. Generation speed is an

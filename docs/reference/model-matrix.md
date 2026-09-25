@@ -5,6 +5,8 @@ aside: false
 
 # Model availability matrix
 
+> Current cloud update (2026-09-25): [model roster](./cloud-model-roster-2026-09-25), [router and MCP roles](../guide/model-router), [gateway](../guide/model-gateway), and [cost/quality research](../research/model-selection-2026-09-25). Earlier dated examples are historical.
+
 Every model, every region, side by side. **233 models across 42 regions**, where
 the two on-premises targets are treated as regions because that is how an
 operator meets them: a place a model either runs or does not.
