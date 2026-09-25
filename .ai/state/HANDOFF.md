@@ -13,7 +13,7 @@ an existing Model Router deployment. Successful provisioning alone is not proof
 that its selected model subset is configured. The dashboard now packs charts two per row and compact cost summaries three per row, retaining full width for wide detail tables. Layout bounds and non-overlap were checked, and the live definition was read back. The private overlay owns exact
 names, release evidence and operator-authorized old environment retirement.
 Gateway smoke tests and the previously merged MCP production release passed.
-The private overlay pins each reviewed release.
+The private overlay pins each reviewed release. Removed the completed-migration status table and its heading from the operational dashboard; remaining panel IDs, queries and compact layout are preserved.
 
 Updated: 2026-08-11
 
