@@ -2,20 +2,18 @@
 
 ## Foundry generation migration - 2026-09-25
 
-Branch `feature/foundry-v2-migration`, AB#9316. Source and documentation changes
-are local, uncommitted and unpushed. Earlier task records below are historical.
+AB#9316. Initial implementation merged in PR 16. This follow-up preserves all
+original dashboard views in the combined dashboard, includes billed usage and
+cost by meter, fixes cross-workspace MCP queries, rejects truncated cost totals,
+and emits collector workflow diagnostics. All 28 dashboard log queries passed
+against the private deployment; all four new collectors ingested snapshots.
 
-New implementation: `infra/migration/`, `gateway/`, model deployment and
-operations-dashboard scripts, operations/cost/budget infrastructure. Added
-`docs/guide/parallel-migration.md` and linked it from the README. The guide
-documents routing, Model Router, asynchronous backend affinity, telemetry
-semantics, validation and rollback without private deployment identifiers.
-
-Private foundation and operations deployments succeeded. Gateway/client cutover,
-full model migration, monitoring data verification, remote MCP release and
-publication are incomplete. The private overlay owns exact results and naming.
-Do not infer completion from template deployment success or advance its core
-pin until the reviewed public revision is published. Old resources remain.
+The model deployment script now reconciles and reads back routing settings on
+an existing Model Router deployment. Successful provisioning alone is not proof
+that its selected model subset is configured. The private overlay owns exact
+names, release evidence and operator-authorized old environment retirement.
+Gateway smoke tests and the previously merged MCP production release passed.
+The private overlay will pin the reviewed follow-up merge.
 
 Updated: 2026-08-11
 
