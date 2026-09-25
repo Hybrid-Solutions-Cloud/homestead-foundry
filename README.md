@@ -25,6 +25,7 @@ Homestead Foundry runs a real, published production deployment - the Azure AI Fo
 
 ## Start here
 
+- **[Parallel migration and Model Router](docs/guide/parallel-migration.md)** - replacement resources, gateway routing, monitoring semantics and cutover checks.
 - **[Getting started](docs/guide/getting-started.md)** - what Azure AI Foundry is and what you need before you deploy anything.
 - **[Deployment guide](docs/guide/deployment.md)** - stand up your own Foundry account and model deployments from the Bicep in [`infra/`](infra/).
 - **[Model registry](docs/guide/model-registry.md)** - how the registry drives which models get deployed. Copy [`models/registry.starter.json`](models/registry.starter.json) and edit it for your own roster.
