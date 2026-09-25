@@ -8,6 +8,9 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Documented activation of the owner-approved cost-aware MCP role defaults,
+  retaining bounded automatic routing and explicit escalation.
+
 - Current cloud model/version roster, Azure price and quality research, and a
   dedicated guide distinguishing MCP roles, Model Router and regional gateway
   routing. Updated gateway limits, monitoring semantics and site navigation.

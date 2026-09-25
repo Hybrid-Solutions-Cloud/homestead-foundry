@@ -2,7 +2,10 @@
 
 Use small models for routine work, mid-priced capable models for difficult
 coding and infrastructure, and expensive models for escalations. These are
-research-based evaluation candidates. No runtime roles changed in this review.
+research-based choices, not proven workload winners. The owner subsequently
+approved applying the starting role map below on September 25. The private
+overlay records activation and hosted release evidence. The original research
+itself did not run a paid benchmark.
 
 ## Azure prices
 
@@ -92,18 +95,20 @@ modality-specific evaluation and are outside this chat-role ranking.
 
 ## Promotion criteria
 
-### Proposed starting role map
+### Adopted starting role map
 
 For a concrete cost-aware starting configuration: `fast`, `cheap-bulk` and
 routine `docs` use GPT-6 Luna; `code` stays Kimi K2.7 Code; `deep` and `adversary`
 use Grok 4.6; `iac` uses GPT-6 Sol; `second-opinion` stays DeepSeek V4 Pro; `auto`
 keeps the Balanced GPT-5.6 subset. Keep `fast` as the omitted-role default.
-This is a proposal pending workload validation, not the running configuration.
+The owner approved this configuration for activation after the research review.
+Workload-quality evaluation remains necessary; operational smoke tests verify
+connectivity and role resolution, not which model is best at a task.
 Use explicit stronger-role calls for complex documentation. Astra is an
 escalation option rather than a default. The current MCP does not implement
 automatic quality-based escalation chains; callers make those decisions.
 
-### Validate before promotion
+### Evaluate subsequent changes
 
 Use fixed representative tasks, exact versions and equal acceptance criteria.
 Measure accepted answers, syntax/tests, unsupported claims, reviewer editing

@@ -59,8 +59,12 @@ coverage and cost freshness. First-token timing requires streaming; normal
 non-streaming MCP requests cannot populate it. A successful router response
 proves connectivity, not task quality or cost optimality.
 
-The [dated research](../research/model-selection-2026-09-25) proposes cheaper task
-defaults; those recommendations are not the running policy. See the
+The [dated research](../research/model-selection-2026-09-25) led to the
+owner-approved September 25 role update: GPT-6 Luna for fast/docs/cheap-bulk,
+Kimi K2.7 Code for code, Grok 4.6 for deep/adversary, GPT-6 Sol for iac,
+DeepSeek V4 Pro for second-opinion, and the existing Balanced router for auto.
+Escalation requires an explicit caller decision; there is no automatic fallback
+chain. The private overlay records the hosted release and live verification. See the
 [cloud roster](../reference/cloud-model-roster-2026-09-25),
 [gateway guide](./model-gateway) and
 [monitoring operations](../implementation/foundry-observability-operations).

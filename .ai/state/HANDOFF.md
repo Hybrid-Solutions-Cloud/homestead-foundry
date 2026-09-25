@@ -1,5 +1,13 @@
 # Session handoff
 
+## Activate cost-aware roles - 2026-09-25
+
+AB#9316. Owner approved applying the researched role map. Updated the router
+guide and research to distinguish adopted defaults from future quality evaluation.
+Private overlay owns exact policy and release evidence; platform PR 41 bundles
+the generated policy and guidance. Default stays fast, auto stays Balanced, and
+escalation remains explicit. No public runtime code changed in this follow-up.
+
 ## Documentation and model research - 2026-09-25
 
 AB#9316. Refreshed gateway/router/MCP/monitoring guides and added the dated cloud
