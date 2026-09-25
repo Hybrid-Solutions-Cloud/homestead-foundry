@@ -91,6 +91,37 @@ for (const id of [13,14,15,16]) {
   }));panels.push(p);
 }
 const variable = (name, values) => ({ name, type:'custom', query:values.join(','), multi:true, includeAll:true, allValue:'.*', current:{text:'All',value:'$__all'}, options:[] });
+// Keep charts readable without making every panel occupy a full screen row.
+const wideTables = new Set([
+  'Deployment inventory and remaining migration work',
+  'Input, output, cached and reasoning tokens',
+  'Billed usage and actual cost by model meter',
+  'Actual product and shared-platform cost by resource and meter',
+  'MCP server Foundry call logs',
+]);
+const layout = [];
+let layoutY = 0, section = [];
+function flushSection() {
+  const rank = p => p.type === 'stat' ? 0 : ['timeseries','barchart'].includes(p.type) ? 1 : wideTables.has(p.title) ? 3 : 2;
+  section.sort((a,b) => rank(a)-rank(b));
+  let x = 0, height = 0;
+  for (const p of section) {
+    const w = p.type === 'stat' ? 8 : wideTables.has(p.title) ? 24 : 12;
+    const h = p.type === 'stat' ? 5 : wideTables.has(p.title) ? 10 : 8;
+    if (x + w > 24) { layoutY += height; x = 0; height = 0; }
+    p.gridPos = { x, y: layoutY, w, h };
+    layout.push(p); x += w; height = Math.max(height,h);
+    if (x === 24) { layoutY += height; x = 0; height = 0; }
+  }
+  if (x) layoutY += height;
+  section = [];
+}
+for (const p of panels) {
+  if (p.type !== 'row') { section.push(p); continue; }
+  flushSection(); p.gridPos = { x:0, y:layoutY++, w:24, h:1 }; layout.push(p);
+}
+flushSection();
+panels.splice(0,panels.length,...layout);
 const dashboard={ title:'Homestead Foundry operations', description:'Active environment coverage. Request metadata only; no prompt or response capture. Detailed timing is available on the instrumented gateway.', schemaVersion:41, version:1, refresh:'1m', timezone:'browser', time:{from:'now-24h',to:'now'}, editable:true, panels,
   templating:{list:[base.templating.list[0],variable('generation',[...new Set(c.accounts.map(a=>a.generation))]),variable('model',c.models.map(m=>m.deployment))]}, tags:['foundry','operations','migration','cost'] };
 writeFileSync(outputPath,JSON.stringify(dashboard,null,2)+'\n');
