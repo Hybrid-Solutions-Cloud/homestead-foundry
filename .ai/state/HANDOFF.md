@@ -1,5 +1,22 @@
 # Session handoff
 
+## Foundry generation migration - 2026-09-25
+
+Branch `feature/foundry-v2-migration`, AB#9316. Source and documentation changes
+are local, uncommitted and unpushed. Earlier task records below are historical.
+
+New implementation: `infra/migration/`, `gateway/`, model deployment and
+operations-dashboard scripts, operations/cost/budget infrastructure. Added
+`docs/guide/parallel-migration.md` and linked it from the README. The guide
+documents routing, Model Router, asynchronous backend affinity, telemetry
+semantics, validation and rollback without private deployment identifiers.
+
+Private foundation and operations deployments succeeded. Gateway/client cutover,
+full model migration, monitoring data verification, remote MCP release and
+publication are incomplete. The private overlay owns exact results and naming.
+Do not infer completion from template deployment success or advance its core
+pin until the reviewed public revision is published. Old resources remain.
+
 Updated: 2026-08-11
 
 ## Current task
