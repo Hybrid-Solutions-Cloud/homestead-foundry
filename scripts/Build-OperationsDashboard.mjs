@@ -41,9 +41,7 @@ for (const id of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
   if (id === 10) { p.title = 'HTTP 400 requests by deployment'; p.description = 'All HTTP 400 responses. These include invalid requests and are not all guardrail blocks. See the provider-code panel for identified guardrail events.'; p.targets.forEach(t=>t.alias=t.alias.replace('Blocked:','HTTP 400:')); }
   panels.push(p);
 }
-row('Inventory and migration');
-const inventory = c.models.map(m => [m.deployment, m.backend, m.targetRegion, m.state, m.capacity].map((s, i) => i === 4 ? Number(s) : JSON.stringify(s)).join(',')).join(',\n');
-logPanel('Deployment inventory and remaining migration work', `datatable(Model:string,ActiveBackend:string,TargetRegion:string,MigrationState:string,CapacityUnits:long)[${inventory}]`, 'table', 'short', 'Generated from verified deployment results; capacity units are model-specific, not directly comparable.');
+nextId += 2; // Retired rollout heading/table IDs remain reserved for stable panel links.
 logPanel('Traffic by backend and generation', requests + '\n| summarize Requests=count(), Failures=countif(Status >= 500), P95Ms=percentile(Duration,95) by Backend, Generation, Model');
 row('Response timing, token use and completion reasons');
 logPanel('First-token latency p50 and p95', requests + '\n| where isnotnull(FirstToken)\n| summarize P50=percentile(FirstToken,50), P95=percentile(FirstToken,95) by bin(TimeGenerated,5m), Model', 'timeseries', 'ms', 'Streaming requests only. Measures the first content/reasoning/tool-output delta, not the first network byte.');
@@ -93,7 +91,6 @@ for (const id of [13,14,15,16]) {
 const variable = (name, values) => ({ name, type:'custom', query:values.join(','), multi:true, includeAll:true, allValue:'.*', current:{text:'All',value:'$__all'}, options:[] });
 // Keep charts readable without making every panel occupy a full screen row.
 const wideTables = new Set([
-  'Deployment inventory and remaining migration work',
   'Input, output, cached and reasoning tokens',
   'Billed usage and actual cost by model meter',
   'Actual product and shared-platform cost by resource and meter',
@@ -123,6 +120,6 @@ for (const p of panels) {
 flushSection();
 panels.splice(0,panels.length,...layout);
 const dashboard={ title:'Homestead Foundry operations', description:'Active environment coverage. Request metadata only; no prompt or response capture. Detailed timing is available on the instrumented gateway.', schemaVersion:41, version:1, refresh:'1m', timezone:'browser', time:{from:'now-24h',to:'now'}, editable:true, panels,
-  templating:{list:[base.templating.list[0],variable('generation',[...new Set(c.accounts.map(a=>a.generation))]),variable('model',c.models.map(m=>m.deployment))]}, tags:['foundry','operations','migration','cost'] };
+  templating:{list:[base.templating.list[0],variable('generation',[...new Set(c.accounts.map(a=>a.generation))]),variable('model',c.models.map(m=>m.deployment))]}, tags:['foundry','operations','cost'] };
 writeFileSync(outputPath,JSON.stringify(dashboard,null,2)+'\n');
 console.log(`Generated ${panels.length} dashboard panels/rows.`);
