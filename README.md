@@ -12,7 +12,7 @@ You've come across Azure AI Foundry and you want to actually *do* something with
 
 - **A knowledge center.** Documentation that explains Azure AI Foundry itself - what it is, how to install and configure it, and how to work with the models it hosts (image, voice, video, reasoning/review) - written for someone new to it, not just for the person who built this.
 - **An automation center.** Infrastructure-as-code (Bicep) and a roster of AI agents (see [`AGENTS.md`](AGENTS.md)) that do the research, design, deployment, and verification work for you - point them at your own Azure tenant and they follow the same disciplined, reviewed process this repo runs on itself.
-- **A model catalog.** One place that tracks which AI models are available, deployed, and recommended for which kind of work, so you're choosing from a known-good list instead of guessing.
+- **A model catalog.** One place that distinguishes available models, deployed versions, research recommendations and workload evaluation evidence.
 - **Modular by design.** Take the whole thing, or take just the one piece you need - a single model, a single Bicep module, a single agent - and drop it into your own project.
 
 ## Proof it holds up
@@ -24,6 +24,9 @@ Homestead Foundry runs a real, published production deployment - the Azure AI Fo
 <!-- safety-scan-worked-example:end -->
 
 ## Start here
+
+- **[Router and MCP roles](docs/guide/model-router.md)** and **[gateway](docs/guide/model-gateway.md)** - how automatic and explicit model selection work together.
+- **[Current cloud roster](docs/reference/cloud-model-roster-2026-09-25.md)** and **[cost/quality research](docs/research/model-selection-2026-09-25.md)** - new models, published evidence and proposed task defaults.
 
 - **[Parallel migration and Model Router](docs/guide/parallel-migration.md)** - replacement resources, gateway routing, monitoring semantics and cutover checks.
 - **[Getting started](docs/guide/getting-started.md)** - what Azure AI Foundry is and what you need before you deploy anything.

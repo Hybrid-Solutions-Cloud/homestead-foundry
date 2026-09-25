@@ -1,5 +1,10 @@
 # Model selection
 
+For the current cloud roster, read the [2026-09-25 inventory](../reference/cloud-model-roster-2026-09-25)
+and [cost/quality research](../research/model-selection-2026-09-25). Deployment,
+compatibility checks, published benchmarks and workload evaluation are distinct
+evidence levels. Recommendations do not automatically change running MCP roles.
+
 How a model gets into this project, how it gets rejected, and why the catalog
 you are reading is shorter than the list of models you could deploy.
 
@@ -25,7 +30,7 @@ one for the other will mislead you:
 
 **The catalog is a shortlist, not a menu.** It records the decisions one
 methodology reached for one workload. It began as the model set this project
-originally needed, and it has grown by evaluation since. A model absent from it
+originally needed, and it has grown through research and deployment since. A model absent from it
 is not unavailable; it is unevaluated, or it was evaluated and rejected, in
 which case there is a row saying so.
 

@@ -1,152 +1,73 @@
-# The model gateway: when your tool and your model disagree
+# Model gateway
 
-::: warning Most deployments do not need this
-This is **off by default** and should stay off unless you have hit the problem it
-solves. It costs roughly **$12 a month** and buys nothing if the tools you use
-already work against the models you deployed. Read the next section, and if none
-of it describes you, skip this page.
-:::
+The gateway is the common authenticated entry point for editor, MCP and API
+clients in the current two-region deployment. It selects a configured Foundry
+account, forwards requests and streams, and records metadata. Azure
+[Model Router](./model-router) sits behind it as a selectable deployment.
 
-## The problem it exists for
-
-A model you deploy is reached by tools you did not write. Those tools send
-request parameters of their own choosing, and some of them offer no way to change
-what they send.
-
-GitHub Copilot Chat is the case that forced this page. It sends
-`temperature: 0.1` on every request, and its custom-endpoint configuration has
-**no field for temperature**. Reasoning models reject any temperature but their
-default:
-
-```
-400 Unsupported value: 'temperature' does not support 0.1 with this model.
-    Only the default (1) value is supported.
-```
-
-So the model works perfectly over `curl` and is **unusable through that editor**.
-
-**There is no fix on the Azure side, and this is the part worth being precise
-about.** A deployment has no setting that permits or forbids a temperature.
-Redeploying the model, or recreating the deployment "without locking parameters
-to defaults", changes nothing. Measured against a live deployment, the same model
-returns the identical 400 on both API surfaces:
-
-| Request | `/chat/completions` | `/responses` |
-|---|---|---|
-| no temperature | 200 | 200 |
-| `temperature: 1` | 200 | 200 |
-| **`temperature: 0.1`** | **400** | **400** |
-
-The parameter is chosen by the client and rejected by the model. **The only place
-to intervene is between them.**
-
-## Who needs it, and who does not
-
-**You do not need it if** every model you deploy accepts what your tools send.
-On one account measured in August 2026, **ten of eleven chat deployments accepted
-`temperature: 0.1` without complaint** - every Grok variant, DeepSeek, Kimi,
-Llama and Mistral. Only the three reasoning deployments refused. If your roster
-looks like that and you are not using the reasoning models from an editor, deploy
-nothing and move on.
-
-**You need it if** any of these is true:
-
-- A tool you cannot configure sends a parameter one of your models refuses.
-- You want the account key out of editor configuration files, which settings-sync
-  copies between machines.
-- You want more than one machine or person reaching the models through one
-  durable address.
-
-**Vendor family does not predict which models refuse.** Grok's *reasoning*
-variants accepted a custom temperature; the OpenAI reasoning models did not. Test
-the deployment, do not infer it from the name.
-
-## What it does
-
-It forwards every request untouched. **Only when the endpoint answers 400 with
-`unsupported_value` and names a parameter** does it drop that parameter and retry
-once.
-
-That inversion is the whole design. A gateway carrying a list of which models
-reject which parameters is wrong the day a new model ships. Letting the endpoint
-decide keeps working for parameters and models that do not exist yet, and it
-leaves alone the models that accept temperature rather than flattening them all
-to a default.
-
-Two details that are not optional:
-
-- **A 400 arrives before any response body streams**, so the retry costs one
-  round trip and never truncates a stream.
-- **The body is piped straight through.** Agentic chat clients use server-sent
-  events, and a gateway that buffers turns a live token stream into a long pause
-  followed by a wall of text.
-
-## Deploying it
-
-Set three parameters. It is a module of the main stack, in the same resource
-group, so a teardown removes it with everything else.
-
-```bicep
-param deployGateway bool = true
-param gatewayTokenSecretName string = '<initiative>-gateway-token'
-param gatewaySku string = 'B1'
-```
-
-Create the gateway token in the vault first. It is a **separate secret from the
-account key**, on purpose: it can be rotated without touching Azure, and if it
-leaks it cannot be replayed against the Foundry account.
-
-```bash
-az keyvault secret set --vault-name <vault> --name <initiative>-gateway-token \
-  --value "$(openssl rand -base64 32)"
-```
-
-`B1` is the cheapest tier that stays warm. The free tier exists and carries a
-daily CPU quota that stalls an editor mid-task, which is worse than not deploying
-at all.
-
-## Pointing tools at it
-
-Replace the **endpoint** everywhere. The deployment name you send does not
-change.
-
-| Tool | Where |
+| Component | Responsibility |
 |---|---|
-| GitHub Copilot Chat | model picker, Manage Models, custom endpoint |
-| Cursor | Settings, Models, Override OpenAI Base URL |
-| Cline / Roo | provider "OpenAI Compatible" |
-| Continue | `apiBase` in `config.yaml` |
+| Client/MCP role | Select direct deployment or router |
+| Gateway | Authenticate, map to regional backend, forward responses, observe usage |
+| Azure Model Router | Select an eligible model using its mode and subset |
+| Foundry deployment | Inference with configured version, SKU, quota and content policy |
 
-```
-https://<gateway-name>.azurewebsites.net/v1
-```
+## Configuration and authentication
 
-The API key each tool asks for is now the **gateway token**, not the account key.
-The account key never leaves the gateway.
+The implementation is `gateway/foundry-proxy.mjs`, with metadata collection in
+`gateway/telemetry.mjs`. Private `routing.json` supplies `backends`, `models`,
+`prefixes` and `defaultBackend`. Credential environment variable names belong
+in configuration; values are supplied by hosted Key Vault references. Clients
+use the separate gateway token.
 
-## What it costs you beyond the money
+The base address ends in `/v1`. Authentication accepts
+`Authorization: Bearer <gateway-token>` or `api-key: <gateway-token>`.
+`GET /v1/models` lists configured routes, not MCP permissions or guaranteed
+Chat Completions compatibility. `GET /health` checks the process without
+authentication; it does not test inference or upstream credentials.
 
-**The gateway becomes a dependency.** If it is down, the models are unreachable,
-where previously they were reachable and some requests were rejected. That is a
-better failure mode - one cause, one fix, and it is obvious - but it is not a
-free win, and it is the honest reason to leave this off unless you need it.
+## Regional routing
 
-## Why not API Management
+Explicit prefixes take precedence over the JSON `model` field. Otherwise a
+known model maps to its backend; unmapped requests use the default backend.
+After removing a prefix, forwarded paths must start with `/v1` or `/deployments`.
+Requests cannot select arbitrary backend hosts.
 
-Azure API Management carries a richer AI Gateway policy set: per-consumer token
-quotas, semantic caching, and load balancing across several deployments of the
-same model. It is the right answer **when governing multiple consumers is the
-requirement**, which is what [ADR-0012](../adr/ADR-0012-agent-mcp-gateway-governance)
-gates to a future agent phase.
+Use a backend-specific prefix throughout multipart and asynchronous operations,
+including polling, downloading and deletion. Such requests may have no JSON
+model field. There is no job-ID-to-backend store. Unprefixed follow-up requests
+use the default account and can return not-found for jobs created elsewhere.
 
-It is also roughly **$48 a month for a tier with no SLA**, and roughly **$150 a
-month** for the cheapest tier that has one, against roughly **$12** here. For
-putting a parameter shim somewhere durable, that is an order of magnitude of cost
-for capability that goes unused. Adopt it when the governance is the point, not
-to fix a temperature.
+## Compatibility and limits
 
-## See also
+For a provider HTTP 400 explicitly identifying an unsupported parameter, the
+gateway can remove `temperature`, `top_p`, `presence_penalty`,
+`frequency_penalty`, `logprobs` or `top_logprobs` and retry up to six times.
+It preserves tools, messages, model and output limits. It does not translate
+Chat Completions to Responses, repair arbitrary 422 errors or retry throttles.
+`X-Foundry-Proxy-Stripped` identifies removed fields; retry-after and rate-limit
+headers are forwarded when supplied.
 
-- [Model behaviour and limits](./model-behaviour-and-limits), the failures this repairs and why they happen.
-- [Connect your tools](./connect-your-tools), configuring each client.
-- [Content safety](./content-safety), the other thing that blocks an editor integration.
+Default request limit is 32 MiB and timeout is 600 seconds, configurable through
+`FOUNDRY_MAX_REQUEST_BYTES` and `FOUNDRY_TIMEOUT_MS`. Clients and MCP may have
+shorter timeouts. Client disconnect aborts upstream work. Streaming preserves
+backpressure; partial streams and cancellation are observable. Clients must
+choose model-compatible output-limit parameters.
+
+## Operations
+
+Publish both gateway modules and private `routing.json` together. Validate
+Key Vault reference resolution, authentication rejection, direct and router
+inference, and streaming with usage. Deployment success and health do not prove
+these checks.
+
+Telemetry includes request ID, requested/returned model, region, status,
+duration, provider token fields and stream timing without retaining prompt or
+response content. Coverage varies by API/provider. MCP allow/block rules apply
+in MCP, not to everyone possessing a gateway token. See
+[monitoring operations](../implementation/foundry-observability-operations) and
+[migration](./parallel-migration).
+
+App Service, monitoring and inference have separate charges. Size the gateway
+from current regional rates and measured demand; the historical fixed monthly
+estimate is not a current production forecast.

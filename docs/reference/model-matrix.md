@@ -1,4 +1,6 @@
 ---
+
+> Current cloud update (2026-09-25): [model roster](../reference/cloud-model-roster-2026-09-25), [router and MCP roles](../guide/model-router), [gateway](../guide/model-gateway), and [cost/quality research](../research/model-selection-2026-09-25). Earlier dated examples are historical.
 pageClass: matrix-page
 aside: false
 ---

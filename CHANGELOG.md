@@ -8,6 +8,11 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Current cloud model/version roster, Azure price and quality research, and a
+  dedicated guide distinguishing MCP roles, Model Router and regional gateway
+  routing. Updated gateway limits, monitoring semantics and site navigation.
+  Research recommendations are explicitly separate from running role policy.
+
 - A [model availability matrix](docs/reference/model-matrix.md): 233 models
   against 42 regions, where the two on-premises targets are treated as regions.
   Interactive, filterable, sortable, with per-region deployment types, capacity

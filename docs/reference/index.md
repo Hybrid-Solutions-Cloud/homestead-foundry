@@ -1,5 +1,8 @@
 # Reference
 
+Current cloud deployment snapshot: [2026-09-25 model roster](./cloud-model-roster-2026-09-25).
+See [router usage](../guide/model-router) and [cost/quality research](../research/model-selection-2026-09-25).
+
 The living catalogs. These are the pages that change most often, because they
 record what is on the table today rather than a decision made once.
 

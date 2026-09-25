@@ -1,5 +1,28 @@
 # Foundry observability operations guide
 
+## Current consolidated dashboard
+
+The operational dashboard combines native Foundry requests, availability,
+latency, tokens and billing with gateway, router, MCP and cost-collector views.
+It uses two-column charts, three compact cost summaries per row and wide detail
+tables. Completed-migration status is kept in deployment evidence, not a panel.
+The private overlay identifies the single live dashboard resource and scopes.
+
+Inspect requested versus returned model to understand Azure router selection.
+First-token time requires streamed content/reasoning/tool output; non-streaming
+MCP calls have no such measurement. Generation speed is an estimate from stream
+timing and reported usage. Finish reasons and cached/reasoning token fields are
+provider-dependent; missing coverage is not zero. Cached/reasoning tokens are
+subsets, not additions to input/output. Media polling latency is not job duration.
+
+Review HTTP errors, throttles, retries, cancellations, interrupted streams,
+content-filter error codes, MCP request logs and cost snapshot freshness.
+Prompt/response content is not retained in gateway telemetry. Cost by meter and
+forecast come from billing snapshots and can lag usage. Shared platform costs
+must be labeled separately; a product budget must explicitly define its scopes.
+Configured action groups are not proof of successful notification delivery.
+See [router operation](../guide/model-router) and [gateway behavior](../guide/model-gateway).
+
 ::: info Scope: Azure AI Foundry
 This page describes the **Azure AI Foundry** target, the hosted-cloud target of
 [ADR-0011](../adr/ADR-0011-multi-target-deployment-automation). Foundry Local and

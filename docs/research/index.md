@@ -1,5 +1,8 @@
 # Research spikes
 
+Current operational review: [Model quality and Azure cost, 2026-09-25](./model-selection-2026-09-25).
+This separates deployed models, published benchmarks and proposed routing changes.
+
 Every research spike behind the architecture decisions, in order. Each grounds its findings in a first-party Microsoft Learn source or a named vendor's own documentation, and each traces forward to one or more ADRs.
 
 | Spike | Topic |

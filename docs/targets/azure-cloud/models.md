@@ -1,5 +1,7 @@
 # Models: Azure AI Foundry
 
+> Current cloud update (2026-09-25): [model roster](../../reference/cloud-model-roster-2026-09-25), [router and MCP roles](../../guide/model-router), [gateway](../../guide/model-gateway), and [cost/quality research](../../research/model-selection-2026-09-25). Earlier dated examples are historical.
+
 ::: tip Compare this target against the other two
 [The model availability matrix](../../reference/model-matrix) puts every model on all three targets side by side, across every region, and marks what is not available where.
 :::

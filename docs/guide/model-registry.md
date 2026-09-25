@@ -1,5 +1,7 @@
 # Model registry
 
+> Current cloud update (2026-09-25): [model roster](../reference/cloud-model-roster-2026-09-25), [router and MCP roles](../guide/model-router), [gateway](../guide/model-gateway), and [cost/quality research](../research/model-selection-2026-09-25). Earlier dated examples are historical.
+
 `models/registry.schema.json` is the JSON Schema every registry file validates against. It exists so a consuming project can resolve a model by a stable `id` instead of hardcoding a Foundry deployment name directly in application code - the same problem that caused two brand-specific consumer repos in this project's own first build to drift out of sync with each other over time (see the ADR-0008 worked example for that history).
 
 ## Entry shape
