@@ -1,4 +1,4 @@
-// Additive operations coverage. Keeps the original dashboard and budgets intact.
+// Operations coverage. Set dashboardName to the existing dashboard to consolidate views.
 param location string = 'eastus'
 param workspaceName string
 param actionGroupName string

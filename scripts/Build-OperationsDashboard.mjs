@@ -23,7 +23,7 @@ const requests = `AppEvents
 | extend Model=tostring(Properties.requestedModel), Selected=tostring(Properties.selectedModel), Backend=tostring(Properties.backend), Generation=tostring(Properties.backendGeneration), Consumer=tostring(Properties.consumer), Status=toint(Measurements.status), Duration=todouble(Measurements.durationMs), FirstToken=todouble(Measurements.firstTokenMs), Finish=tostring(Properties.finishReason)
 | where Generation matches regex '\${generation:regex}' and Model matches regex '\${model:regex}'`;
 row('Health and usage across all Foundry resources');
-for (const id of [1, 2, 3, 4, 5, 6]) {
+for (const id of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
   const p = structuredClone(base.panels.find(x => x.id === id));
   p.id = nextId++; p.gridPos = { x: 0, y, w: 24, h: 8 }; y += 8;
   const original = p.targets;
@@ -36,7 +36,9 @@ for (const id of [1, 2, 3, 4, 5, 6]) {
       resourceGroup: a.resourceGroup, resourceName: a.name, subscription: c.subscriptionId }];
     return target;
   }));
-  p.description = 'Native metrics include both generations and both regions. The generation/model dropdowns apply to the detailed gateway telemetry panels below.';
+  p.description = 'Native metrics include configured active accounts and regions. The generation/model dropdowns apply to the detailed gateway telemetry panels below.';
+  if (id === 9) p.title = `Model inventory: request volume by deployment (${c.models.length} deployments)`;
+  if (id === 10) { p.title = 'HTTP 400 requests by deployment'; p.description = 'All HTTP 400 responses. These include invalid requests and are not all guardrail blocks. See the provider-code panel for identified guardrail events.'; p.targets.forEach(t=>t.alias=t.alias.replace('Blocked:','HTTP 400:')); }
   panels.push(p);
 }
 row('Inventory and migration');
@@ -56,18 +58,24 @@ row('Model Router, Priority and MCP');
 logPanel('Auto selected-model distribution', requests + '\n| where Model == "model-router"\n| summarize Requests=count(), Input=sum(tolong(Measurements.inputTokens)), Output=sum(tolong(Measurements.outputTokens)), P95Ms=percentile(Duration,95) by Selected', 'table', 'short', 'Selected model comes from the provider response, never from a model self-description.');
 logPanel('Requested versus served service tier', requests + '\n| summarize Requests=count(), P95Ms=percentile(Duration,95) by Model, Requested=tostring(Properties.requestedTier), Served=tostring(Properties.servedTier)');
 logPanel('MCP and direct API calls', requests + '\n| summarize Requests=count(), Failures=countif(Status>=400), P95Ms=percentile(Duration,95) by Consumer, Model');
-logPanel('MCP server lifecycle and Foundry call logs', `ContainerAppConsoleLogs_CL\n| where $__timeFilter(TimeGenerated)\n| where ContainerAppName_s == '${c.mcpAppName}'\n| where Log_s contains 'FoundryMcpCall'\n| extend Call=parse_json(Log_s)\n| project TimeGenerated, Model=tostring(Call.deployment), Selected=tostring(Call.selectedModel), DurationMs=todouble(Call.durationMs), Status=toint(Call.status), RequestId=tostring(Call.requestId)`);
+logPanel('Caller / consumer breakdown (gateway)', requests + '\n| summarize Requests=count(), Input=sum(tolong(Measurements.inputTokens)), Output=sum(tolong(Measurements.outputTokens)) by Consumer, Model', 'table', 'short', 'Consumer is the gateway API/MCP label, not an authenticated individual user identity.');
+logPanel('MCP server Foundry call logs', `workspace('${c.mcpWorkspaceId || c.workspaceId}').ContainerAppConsoleLogs_CL\n| where $__timeFilter(TimeGenerated)\n| where ContainerAppName_s == '${c.mcpAppName}'\n| where Log_s contains 'FoundryMcpCall'\n| extend Call=parse_json(Log_s)\n| project TimeGenerated, Model=tostring(Call.deployment), Selected=tostring(Call.selectedModel), DurationMs=todouble(Call.durationMs), Status=toint(Call.status), RequestId=tostring(Call.requestId)`);
 row('Media and document operations');
 logPanel('Non-chat API traffic and duration', requests + '\n| where tostring(Properties.api) !contains "chat/completions" and tostring(Properties.api) !contains "responses"\n| summarize Requests=count(), Failures=countif(Status>=400), P95Ms=percentile(Duration,95) by Api=tostring(Properties.api), Model', 'table', 'short', 'Job creation and polling are API operations. Provider job completion and media-unit counts require provider fields; request duration is not job duration.');
 row('Actual costs and monitoring reliability');
-const costs = `FoundryProductCost_CL
-| summarize arg_max(TimeGenerated,*) by SourceScope
+const costs = `union isfuzzy=true (FoundryProductCost_CL | summarize arg_max(TimeGenerated,*) by SourceScope), (FoundryModelCost_CL | top 1 by TimeGenerated desc | extend SourceScope='retired-environment-snapshot')
 | mv-expand Row=CostQueryRows
 | extend Names=CostQueryColumns
 | mv-apply Column=Names on (summarize Columns=make_list(tostring(Column.name)))
-| extend Cost=todouble(Row[array_index_of(Columns,'Cost')]), Currency=tostring(Row[array_index_of(Columns,'Currency')]), Resource=tostring(Row[array_index_of(Columns,'ResourceId')]), Meter=tostring(Row[array_index_of(Columns,'Meter')]), UsageDateText=tostring(Row[array_index_of(Columns,'UsageDate')])
+| extend Cost=todouble(Row[array_index_of(Columns,'Cost')]), Currency=tostring(Row[array_index_of(Columns,'Currency')]), Resource=iff(array_index_of(Columns,'ResourceId')<0,'Retired Foundry (historical snapshot)',tostring(Row[array_index_of(Columns,'ResourceId')])), Meter=tostring(Row[array_index_of(Columns,'Meter')]), UsageDateText=tostring(Row[array_index_of(Columns,'UsageDate')])
 | extend UsageDate=todatetime(strcat(substring(UsageDateText,0,4),'-',substring(UsageDateText,4,2),'-',substring(UsageDateText,6,2)))`;
-logPanel('Actual product cost by resource and meter', costs + '\n| summarize Today=sumif(Cost,UsageDate>=startofday(now())), Last7Days=sumif(Cost,UsageDate>=startofday(now()-6d)), MonthToDate=sum(Cost) by Resource,Meter,Currency\n| order by MonthToDate desc', 'table', 'currencyUSD', 'Cost Management actual cost across old/new product and monitoring resource groups. Billed data is delayed. Meter names are preserved; no invented deployment attribution.', false);
+for (const [title, condition] of [['Actual cost today','UsageDate>=startofday(now())'],['Actual cost, last 7 days','UsageDate>=startofday(now()-6d)'],['Actual cost, month to date','UsageDate>=startofmonth(now())']]) {
+  logPanel(title, costs + `\n| summarize Cost=sumif(Cost,${condition}) by Currency`, 'stat', 'currencyUSD', 'Includes configured product and shared-platform groups. Billing data is delayed.', false);
+}
+logPanel('Billed usage and actual cost by model meter', costs + '\n| extend BilledUsage=todouble(Row[array_index_of(Columns,"UsageQuantity")])\n| extend TokenScale=case(Meter contains "1M Tokens",1000000.0,Meter contains "1K Tokens",1000.0,real(null))\n| extend BilledTokens=BilledUsage*TokenScale\n| summarize TodayCost=sumif(Cost,UsageDate>=startofday(now())), Last7DaysCost=sumif(Cost,UsageDate>=startofday(now()-6d)), MonthCost=sumif(Cost,UsageDate>=startofmonth(now())), MonthBilledUsage=sumif(BilledUsage,UsageDate>=startofmonth(now())), MonthBilledTokens=sumif(BilledTokens,UsageDate>=startofmonth(now())), TokenUnitKnown=countif(isnotnull(TokenScale)) by Resource,Meter,Currency\n| order by MonthCost desc', 'table', 'short', 'Billing meters identify the billed model/product. Token conversion only uses explicit 1M/1K token meter units; TokenUnitKnown distinguishes unavailable conversion from zero. Non-token media/service quantities are not labeled tokens.', false);
+logPanel('Daily actual cost by model meter', costs + '\n| summarize Cost=sum(Cost) by UsageDate,Meter,Currency\n| order by UsageDate asc', 'timeseries', 'currencyUSD', 'Billing-meter attribution, not a guessed deployment mapping.', false);
+logPanel('Month-to-date actual cost by model meter', costs + '\n| where UsageDate>=startofmonth(now())\n| summarize Cost=sum(Cost) by Meter,Currency\n| order by Cost desc', 'barchart', 'currencyUSD', 'Billing-meter attribution, not a guessed deployment mapping.', false);
+logPanel('Actual product and shared-platform cost by resource and meter', costs + '\n| summarize Today=sumif(Cost,UsageDate>=startofday(now())), Last7Days=sumif(Cost,UsageDate>=startofday(now()-6d)), MonthToDate=sumif(Cost,UsageDate>=startofmonth(now())) by Resource,Meter,Currency\n| order by MonthToDate desc', 'table', 'currencyUSD', 'Billed data is delayed. Shared monitoring/MCP groups include costs for other consumers. Resource and meter names are preserved; no invented deployment attribution.', false);
 logPanel('Daily actual product cost', costs + '\n| summarize Cost=sum(Cost) by UsageDate,Currency,Resource\n| order by UsageDate asc', 'timeseries', 'currencyUSD', '', false);
 logPanel('Cost collector freshness', 'FoundryProductCost_CL\n| summarize LastSnapshot=max(TimeGenerated) by SourceScope\n| extend AgeHours=datetime_diff("minute",now(),LastSnapshot)/60.0', 'table', 'short', 'Snapshots refresh every four hours; billing data has additional delay.', false);
 logPanel('Gateway telemetry freshness and field coverage', 'AppEvents\n| where Name=="FoundryGatewayRequest"\n| summarize LastSeen=max(TimeGenerated),Requests=count(),Streaming=countif(tostring(Properties.streaming)=="true"),WithUsage=countif(isnotnull(Measurements.inputTokens)),WithFirstToken=countif(isnotnull(Measurements.firstTokenMs)) by AppRoleName', 'table', 'short', '', false);
@@ -83,7 +91,7 @@ for (const id of [13,14,15,16]) {
   }));panels.push(p);
 }
 const variable = (name, values) => ({ name, type:'custom', query:values.join(','), multi:true, includeAll:true, allValue:'.*', current:{text:'All',value:'$__all'}, options:[] });
-const dashboard={ title:'Homestead Foundry operations', description:'Old/new environment coverage. Request metadata only; no prompt or response capture. Detailed timing is available on the instrumented gateway.', schemaVersion:41, version:1, refresh:'1m', timezone:'browser', time:{from:'now-24h',to:'now'}, editable:true, panels,
-  templating:{list:[base.templating.list[0],variable('generation',['01','02']),variable('model',c.models.map(m=>m.deployment))]}, tags:['foundry','operations','migration','cost'] };
+const dashboard={ title:'Homestead Foundry operations', description:'Active environment coverage. Request metadata only; no prompt or response capture. Detailed timing is available on the instrumented gateway.', schemaVersion:41, version:1, refresh:'1m', timezone:'browser', time:{from:'now-24h',to:'now'}, editable:true, panels,
+  templating:{list:[base.templating.list[0],variable('generation',[...new Set(c.accounts.map(a=>a.generation))]),variable('model',c.models.map(m=>m.deployment))]}, tags:['foundry','operations','migration','cost'] };
 writeFileSync(outputPath,JSON.stringify(dashboard,null,2)+'\n');
 console.log(`Generated ${panels.length} dashboard panels/rows.`);

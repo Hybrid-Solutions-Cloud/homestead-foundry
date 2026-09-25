@@ -29,16 +29,28 @@ foreach ($model in @($manifest.models | Where-Object { $_.targetRegion -eq $Loca
     try {
         $existing = Invoke-Arm 'GET' "$accountPath/deployments?api-version=2025-06-01"
         $found = @($existing.value | Where-Object { $_.name -eq $model.deployment })
-        if ($found.Count -gt 0 -and $found[0].properties.provisioningState -eq 'Succeeded') {
+        if ($found.Count -gt 0 -and $model.ContainsKey('routing')) {
+            # Successful provisioning alone does not prove the router subset was applied.
+            $deploymentUri = "$accountPath/deployments/$([uri]::EscapeDataString($model.deployment))?api-version=2025-10-01-preview"
+            $body = @{ sku = @{ name = $model.sku; capacity = $model.capacity }; properties = @{ model = $model.model; raiPolicyName = $model.policy; versionUpgradeOption = 'NoAutoUpgrade'; routing = $model.routing } }
+            $null = Invoke-Arm 'PUT' $deploymentUri $body
+            $state = Invoke-Arm 'GET' $deploymentUri
+            if ($state.properties.routing.mode -ne $model.routing.mode -or
+                (Compare-Object @($state.properties.routing.models | ForEach-Object { "$($_.format)/$($_.name)/$($_.version)" }) @($model.routing.models | ForEach-Object { "$($_.format)/$($_.name)/$($_.version)" }))) {
+                throw 'Router settings readback differs from the requested model subset.'
+            }
+            $record.status = if ($state.properties.provisioningState -eq 'Succeeded') { 'deployed' } else { 'failed' }
+            $record.reason = 'Router mode and model subset reconciled and verified'
+        } elseif ($found.Count -gt 0 -and $found[0].properties.provisioningState -eq 'Succeeded') {
             $record.status = 'deployed'; $record.reason = 'Existing successful target deployment'
         } else {
             $usage = Invoke-Arm 'GET' "$arm/providers/Microsoft.CognitiveServices/locations/$Location/usages?api-version=2025-06-01"
             $quotaModelName = if ($model.model.name -eq 'model-router') { 'ModelRouter' } else { $model.model.name }
             $quota = @($usage.value | Where-Object { $_.name.value -ieq "OpenAI.$($model.sku).$quotaModelName" -or $_.name.value -ieq "AIServices.$($model.sku).$quotaModelName" })
             if ($quota.Count -ne 1) {
-                $record.status = 'quota-unresolved'; $record.reason = 'Expected one exact model/SKU quota pool; old route retained'
+                $record.status = 'quota-unresolved'; $record.reason = 'Expected one exact model/SKU quota pool'
             } elseif (($quota[0].limit - $quota[0].currentValue) -lt $model.capacity) {
-                $record.status = 'quota-blocked'; $record.reason = "Available $($quota[0].limit - $quota[0].currentValue); old allocation preserved"
+                $record.status = 'quota-blocked'; $record.reason = "Available capacity $($quota[0].limit - $quota[0].currentValue) is insufficient"
             } else {
                 $properties = @{ model = $model.model; raiPolicyName = $model.policy; versionUpgradeOption = 'NoAutoUpgrade' }
                 if ($model.ContainsKey('routing')) { $properties.routing = $model.routing }

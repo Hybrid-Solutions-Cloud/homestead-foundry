@@ -178,7 +178,7 @@ resource costCollectionWorkflow 'Microsoft.Logic/workflows@2019-05-01' = {
               type: 'ActualCost'
               timeframe: 'Custom'
               timePeriod: {
-                from: '@{formatDateTime(utcNow(),\'yyyy-MM-01T00:00:00Z\')}'
+                from: '@{formatDateTime(addToTime(utcNow(),-1,\'Month\'),\'yyyy-MM-01T00:00:00Z\')}'
                 to: '@{utcNow()}'
               }
               dataset: {
@@ -211,10 +211,22 @@ resource costCollectionWorkflow 'Microsoft.Logic/workflows@2019-05-01' = {
             }
           }
         }
+        Verify_complete_result: {
+          type: 'If'
+          runAfter: { Query_Foundry_model_cost: ['Succeeded'] }
+          expression: '@not(empty(body(\'Query_Foundry_model_cost\')?[\'properties\']?[\'nextLink\']))'
+          actions: {
+            Reject_truncated_snapshot: {
+              type: 'Terminate'
+              inputs: { runStatus: 'Failed', runError: { code: 'CostPaginationRequired', message: 'Cost query returned another page; do not publish an incomplete total.' } }
+            }
+          }
+          else: { actions: {} }
+        }
         Ingest_cost_snapshot: {
           type: 'Http'
           runAfter: {
-            Query_Foundry_model_cost: [
+            Verify_complete_result: [
               'Succeeded'
             ]
           }
@@ -232,7 +244,7 @@ resource costCollectionWorkflow 'Microsoft.Logic/workflows@2019-05-01' = {
               {
                 TimeGenerated: '@{utcNow()}'
                 SourceScope: costQueryScope
-                PeriodStart: '@{formatDateTime(utcNow(),\'yyyy-MM-01T00:00:00Z\')}'
+                PeriodStart: '@{formatDateTime(addToTime(utcNow(),-1,\'Month\'),\'yyyy-MM-01T00:00:00Z\')}'
                 PeriodEnd: '@{utcNow()}'
                 CostQueryColumns: '@body(\'Query_Foundry_model_cost\')?[\'properties\']?[\'columns\']'
                 CostQueryRows: '@body(\'Query_Foundry_model_cost\')?[\'properties\']?[\'rows\']'
@@ -251,6 +263,16 @@ resource costCollectionWorkflow 'Microsoft.Logic/workflows@2019-05-01' = {
       outputs: {}
     }
     parameters: {}
+  }
+}
+
+resource workflowDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'operations-runtime'
+  scope: costCollectionWorkflow
+  properties: {
+    workspaceId: workspace.id
+    logs: [{ category: 'WorkflowRuntime', enabled: true }]
+    metrics: []
   }
 }
 
