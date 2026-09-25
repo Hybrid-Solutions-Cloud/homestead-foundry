@@ -86,9 +86,12 @@ availability evidence, not a claim that 4.7 is unavailable everywhere. Recheck
 the intended Azure account, SKU, quota and Azure rate before proposing a 4.7
 deployment; direct-provider availability/pricing is not Azure availability/pricing.
 
-Keep Phi-4 Reasoning, Llama 4 Maverick and the known-broken DeepSeek V4.1 alias
-blocked in MCP pending compatibility checks. The other V4.1 deployment is not
-automatically equivalent. This review did not verify a V4.1 Azure meter mapping;
+The owner removed the legacy MCP exclusions for Phi-4 Reasoning, Llama 4
+Maverick and the formerly failing DeepSeek V4.1 alias on September 25. All
+deployed chat/router entries are permitted. The earlier DeepSeek failure was
+recorded in the retired environment; it did not establish failure in the new
+environment. Permission is separate from task-quality evaluation, and the two
+V4.1 deployment aliases remain distinct. This review did not verify a V4.1 Azure meter mapping;
 do not apply V4 prices to it. Likewise, a Grok 4.2 meter label does not prove the
 rate of every 4.20 deployment variant. Media, audio and embeddings require
 modality-specific evaluation and are outside this chat-role ranking.

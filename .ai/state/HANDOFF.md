@@ -1,5 +1,12 @@
 # Session handoff
 
+## Remove legacy model exclusions - 2026-09-25
+
+AB#9316. Owner explicitly instructed removal of the three legacy MCP model
+blocks. Research guidance now reflects all deployed chat/router entries being
+permitted; historical failures are not current access policy. Exact runtime
+policy and release evidence belong to the private overlay and platform.
+
 ## Activate cost-aware roles - 2026-09-25
 
 AB#9316. Owner approved applying the researched role map. Updated the router
