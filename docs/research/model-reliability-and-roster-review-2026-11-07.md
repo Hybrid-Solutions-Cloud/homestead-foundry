@@ -28,7 +28,7 @@ The gateway logs metadata only (no prompts or responses): requested model, statu
 Two readings follow, and only the first is established:
 
 - **Established:** the failures are the caller giving up, not Azure returning errors. Grok 4.7 defaults to `reasoning_effort: high` ([Grok on Foundry](https://learn.microsoft.com/azure/foundry/foundry-models/how-to/use-foundry-models-grok#request-parameters)), and a high-effort answer can exceed any timeout shorter than a few minutes.
-- **Inference, untested:** DeepSeek V4 reports no reasoning tokens through this path, so it may be running with thinking disabled or at low effort, which would explain answers that are fast but shallow. Foundry does not document a thinking switch for DeepSeek V4, while DeepSeek's own API enables thinking by default ([DeepSeek thinking mode](https://api-docs.deepseek.com/guides/thinking_mode)).
+- **Verified:** DeepSeek V4 reports no reasoning tokens through this path because thinking is off unless `reasoning_effort` is sent. See [Why DeepSeek V4 can seem not capable](#why-deepseek-v4-can-seem-not-capable).
 
 The telemetry covers only the hosted MCP consumer. Editor traffic did not appear in it, so the editor path is unmeasured here.
 
@@ -43,6 +43,10 @@ The telemetry covers only the hosted MCP consumer. Editor traffic did not appear
 
 Moving the proxy to another Azure host does not help, because every option sits behind roughly the same idle ceiling.
 
+A second Grok failure was found by direct probing: Grok 4.7 rejects `stop` and `presence_penalty` with HTTP 400 `decode_bad_request`, and the error carries no `param` field, so a gateway that strips only when `param` is set passes the failure through. Any editor or tool that sends those fields to Grok fails every call. Grok 4.7 does accept `temperature`, `top_p`, `max_tokens`, `max_completion_tokens` and `reasoning_effort` (low, medium, high), and calls tools correctly. Streaming a reasoning model returned the first byte exactly when the answer started, so nothing is sent during reasoning.
+
+On a moderate prompt Grok 4.7 answered in 11 to 17 seconds at every effort setting, so the long calls come from large agentic prompts, where reasoning scales with context. Lowering effort is a ceiling on worst-case time, not a guarantee of speed.
+
 Three further documented behaviours compound it:
 
 - **429 handling.** Rate limiting counts the prompt plus `max_tokens` at admission, checks requests per minute over 1 or 10 second windows, counts rejected requests, and can lower a Standard deployment's effective limit under load. Use `retry-after-ms` with backoff and jitter ([429 explainer](https://learn.microsoft.com/microsoft-cloud/dev/dev-proxy/concepts/azure-openai-429-token-rate-limit#why-you-get-a-429-below-your-quota)). A gateway that does not retry turns every 429 into a failed turn.
@@ -51,15 +55,16 @@ Three further documented behaviours compound it:
 
 ## Why DeepSeek V4 can seem not capable
 
-Ranked by likelihood, each with a test. All are inference until tested.
+**Verified by direct calls on 2026-11-07:** DeepSeek V4 Pro and V4.1 Flash run with thinking **off** by default. The same moderately hard prompt produced about 410 output tokens and no `reasoning_content` by default. With `reasoning_effort: "high"` or `"max"` it produced 1,550 to 2,630 tokens and returned `message.reasoning_content`, in 11 to 18 seconds. A `thinking` body field is rejected with HTTP 400 (`unrecognized_request_argument`), so `reasoning_effort` is the switch on Foundry. A client that never sends it gets a fast, shallow model.
 
-1. **Tool-call turn two breaks.** DeepSeek's API requires `reasoning_content` to be passed back on later tool turns or it returns 400. Foundry's generic guidance says not to. Which rule Foundry's serving enforces is unknown.
-2. **Tool calling may not be wired for V4 Pro.** The catalog says tool calling is supported; the DeepSeek tutorial says V4 Pro does not support it.
-3. **Reasoning arrives inline.** The tutorial says reasoning is returned inside `<think>` tags in `content`; the how-to says `message.reasoning_content`. A client that shows raw thinking as the answer looks poor.
-4. **Thinking off or low.** If Foundry ignores `reasoning_effort` and defaults weakly, answers are fast but shallow.
-5. **Quota mismatch on the Flash deployments** (above).
+What works, also verified:
 
-A full-capability profile to try first: Chat Completions, streaming, thinking enabled, `reasoning_effort` high or max, no sampling parameters, a sized `max_completion_tokens`, `reasoning_content` echoed on tool turns if required, and `<think>` normalised in the gateway.
+- **Tool calling**, including two parallel tool calls in one turn, on both models.
+- **Two-turn tool flows** succeed with and without echoing `reasoning_content` back, so no gateway workaround is needed on Foundry (DeepSeek's own API differs).
+- **No inline `<think>` tags**: reasoning arrives in `reasoning_content`.
+- `temperature`, `stop` and `max_tokens` are accepted.
+
+Remaining weak spots: the Flash deployments are small (250 and 375 capacity) against a 1M token window, so one large agentic turn can exhaust a minute of quota, and system prompts are followed less strictly by reasoning models. Set `reasoning_effort` high in the client or a gateway profile, and size the editor's input and output limits to the quota.
 
 ## Retirements
 
@@ -145,15 +150,15 @@ Deployment-level levers: a Data Zone Standard deployment of the same model draws
 
 ## Open tests
 
-Nothing below has been verified. Each needs one direct call to the Foundry endpoint, not through the gateway.
+Verified on 2026-11-07 and removed from this list: Grok 4.7 parameter acceptance (`stop` and `presence_penalty` rejected), DeepSeek tool calling, `reasoning_content` handling, inline `<think>` (absent), the DeepSeek thinking switch (`reasoning_effort`), and time to first byte when streaming (no bytes during reasoning).
 
-1. Does Grok 4.7 send any bytes before the answer when streaming at high effort, and how long until the first token at low versus high effort?
-2. Does Grok 4.7 reject or ignore `temperature`, `top_p` and `max_tokens`?
-3. DeepSeek V4: tool calling, `reasoning_content` echo, inline `<think>`, effort and thinking parameters, `max_tokens` versus `max_completion_tokens`, and Responses API availability.
-4. Requests and tokens per capacity unit for DeepSeek V4 and the other Grok deployments (read `properties.rateLimits`).
-5. Whether the asynchronous content filter takes effect on xAI and DeepSeek deployments.
-6. Whether Responses `background: true` works for Grok 4.7, which would be the clean fix for non-streaming callers.
-7. Where the editor's `temperature: 0.1` comes from.
+Still unverified. Each needs one direct call to the Foundry endpoint, not through the gateway.
+
+1. Grok 4.7 time to answer at each effort on a large (80K to 150K token) agentic prompt, which is where the long calls occur.
+2. Requests and tokens per capacity unit for DeepSeek V4 and the other Grok deployments (read `properties.rateLimits`).
+3. Whether the asynchronous content filter takes effect on xAI and DeepSeek deployments.
+4. Whether Responses `background: true` works for Grok 4.7, which would be the clean fix for non-streaming callers.
+5. Where the editor's `temperature: 0.1` comes from.
 
 ## Sources
 
