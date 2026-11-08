@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-07 - Live audit, reliability review and roster refresh
+
+Published the [2026-11-07 cloud roster](./reference/cloud-model-roster-2026-11-07) (44 deployments, 43
+model/version rows, with catalog lifecycle and retirement dates) and the
+[reliability and roster review](./research/model-reliability-and-roster-review-2026-11-07):
+measured evidence that reasoning models fail against short client timeouts rather than
+being broken, the retirements due in the next 60 days, new catalog models, router
+limits, and a recommended management architecture. The September roster and the July
+as-built record are marked historical. Recommendations do not change runtime routing.
+
 ## 2026-09-25 - Router, models and operational documentation
 
 Added the [router guide](./guide/model-router), refreshed [gateway documentation](./guide/model-gateway),

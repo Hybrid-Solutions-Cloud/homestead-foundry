@@ -1,5 +1,9 @@
 # As-built record
 
+::: warning Historical record
+This page records the July 2026 single-region build of twenty-two deployments and is kept as a worked example of the method. The current estate has 44 deployments across two accounts and two regions. For the current model list, versions and retirement dates, read the [2026-11-07 cloud roster](../reference/cloud-model-roster-2026-11-07).
+:::
+
 ::: info Scope: Azure AI Foundry
 This page describes the **Azure AI Foundry** target, the hosted-cloud target of
 [ADR-0011](../adr/ADR-0011-multi-target-deployment-automation). Foundry Local and

@@ -164,6 +164,12 @@ Tested one way, a model looks fine; tested the other, it never worked.
 
 ---
 
+## Reasoning models answer in minutes, not seconds
+
+**The failure:** a client or proxy gives up and reports no response, while the deployment is healthy and still working.
+
+Reasoning models generate all of their reasoning tokens before the first answer token, even when streaming ([quotas and limits](https://learn.microsoft.com/azure/foundry/foundry-models/quotas-limits#setting-client-side-timeout)). Grok 4.7 defaults to high reasoning effort. In one measured 30 day window, its median non-streaming answer took about 160 seconds, and close to half of calls were abandoned by a 210 second client timeout, while a DeepSeek model on the same path answered in about 10 seconds. The cure is on the caller side: stream, lower the reasoning effort for interactive work, raise the timeout, and keep bytes flowing through any proxy. See the [reliability and roster review](../research/model-reliability-and-roster-review-2026-11-07).
+
 ## 2. Capacity is a per-minute budget, and it is small
 
 **The failure:**

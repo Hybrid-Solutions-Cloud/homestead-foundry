@@ -1,6 +1,6 @@
 # Model selection
 
-For the current cloud roster, read the [2026-09-25 inventory](../reference/cloud-model-roster-2026-09-25)
+For the current cloud roster, read the [2026-11-07 inventory](../reference/cloud-model-roster-2026-11-07)
 and [cost/quality research](../research/model-selection-2026-09-25). Deployment,
 compatibility checks, published benchmarks and workload evaluation are distinct
 evidence levels. Recommendations do not automatically change running MCP roles.
