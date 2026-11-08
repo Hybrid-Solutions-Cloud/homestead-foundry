@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { UsageObserver } from './telemetry.mjs';
+import { UsageObserver, normalizeTelemetry } from './telemetry.mjs';
+
+test('gateway list fields serialize as comma-joined names and empty values are dropped', () => {
+  const out = normalizeTelemetry({ strippedParams: ['stop', 'presence_penalty'], fallbackTo: undefined, queuedMs: 0, keepAlivesSent: 2, clampedReasoningEffort: null });
+  assert.deepEqual(out, { strippedParams: 'stop,presence_penalty', queuedMs: 0, keepAlivesSent: 2 });
+});
 
 test('fragmented UTF-8 SSE preserves timing, selected model, usage and stop reason', () => {
   let time = 0;

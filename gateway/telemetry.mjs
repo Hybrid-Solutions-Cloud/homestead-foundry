@@ -1,4 +1,15 @@
 // Request metadata only. Never record prompts, completions, headers or raw errors.
+//
+// Gateway fields emitted alongside the observer result (all metadata, names only):
+//   retries                 strip-on-400 resends
+//   upstreamRetries         429/502/503/504 resends across every target
+//   retries429              the subset of upstreamRetries caused by 429
+//   fallbackTo              comma-joined fallback deployments tried; the last one served
+//   injectedReasoningEffort effort added by the profile default
+//   clampedReasoningEffort  effort the request was clamped down to (requestedReasoningEffort keeps the original)
+//   queuedMs                time spent waiting for the per-deployment concurrency slot
+//   keepAlivesSent          SSE keep-alive comments written before the first upstream byte
+//   strippedParams          comma-joined parameter names removed by profile or strip-on-400
 export class UsageObserver {
   constructor(now = () => performance.now()) {
     this.now = now;
@@ -69,7 +80,16 @@ export class UsageObserver {
   }
 }
 
-export function emitTelemetry(properties) {
+export function normalizeTelemetry(properties) {
+  const out = {};
+  for (const [key, value] of Object.entries(properties)) {
+    if (value == null) continue;
+    out[key] = Array.isArray(value) ? value.map(String).join(',') : value;
+  }
+  return out;
+}
+export function emitTelemetry(raw) {
+  const properties = normalizeTelemetry(raw);
   const event = { event: 'FoundryGatewayRequest', time: new Date().toISOString(), ...properties };
   console.log(JSON.stringify(event));
   const connection = Object.fromEntries((process.env.APPLICATIONINSIGHTS_CONNECTION_STRING || '')

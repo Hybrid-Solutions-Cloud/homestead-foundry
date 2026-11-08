@@ -1,0 +1,60 @@
+{
+  "$comment": "Example routing for gateway/foundry-proxy.mjs. Placeholders only. Copy to gateway/routing.json (gitignored) and fill in your own endpoints and deployment names. Set FOUNDRY_ROUTING_PATH to point elsewhere. Keys never live here: keyEnv names an environment variable, which the App Service resolves from Key Vault.",
+  "generation": "example",
+  "defaultBackend": "primary",
+  "backends": {
+    "primary": {
+      "endpoint": "https://aif-myworkload-dev-eastus2-01.openai.azure.com/openai",
+      "keyEnv": "FOUNDRY_KEY_PRIMARY",
+      "region": "eastus2",
+      "generation": "example"
+    },
+    "secondary": {
+      "endpoint": "https://aif-myworkload-dev-westus3-01.openai.azure.com/openai",
+      "keyEnv": "FOUNDRY_KEY_SECONDARY",
+      "region": "westus3",
+      "generation": "example"
+    }
+  },
+  "prefixes": {
+    "/westus3": "secondary"
+  },
+  "models": {
+    "chat-reasoning-example-01": { "backend": "primary" },
+    "chat-thinking-example-01": { "backend": "primary" },
+    "chat-fast-example-01": { "backend": "secondary" }
+  },
+  "profiles": {
+    "*": {
+      "$comment": "Default profile merged under every deployment. Any key set on a named profile replaces the same key here (arrays replace, they do not merge). Remove the whole profiles object to forward bodies exactly as received.",
+      "dropParams": [],
+      "maxConcurrency": 8
+    },
+    "chat-reasoning-example-01": {
+      "$comment": "Shape for a reasoning model that rejects OpenAI sampling extras with HTTP 400 and buffers all output until reasoning ends.",
+      "dropParams": ["stop", "presence_penalty", "frequency_penalty", "logit_bias"],
+      "defaultReasoningEffort": "medium",
+      "maxReasoningEffort": "high",
+      "tokenLimitParam": "max_completion_tokens",
+      "fallback": ["chat-thinking-example-01", "chat-fast-example-01"],
+      "maxConcurrency": 4,
+      "$fields": {
+        "dropParams": "Parameter names removed from the request body before the first upstream call. Saves a 400 round trip for known rejections. Only names present in the body are touched.",
+        "defaultReasoningEffort": "One of low, medium, high, xhigh, max. Injected as reasoning_effort when the body has neither reasoning_effort nor a reasoning object. Recorded as injectedReasoningEffort.",
+        "maxReasoningEffort": "One of low, medium, high, xhigh, max. A higher requested effort (body, reasoning.effort or the x-foundry-reasoning-effort header) is clamped down to this value. Recorded as clampedReasoningEffort with requestedReasoningEffort keeping the original.",
+        "tokenLimitParam": "max_tokens or max_completion_tokens. Whichever of the two the client sent is renamed to this name so the model accepts it. Values are never changed.",
+        "fallback": "Ordered deployment names that must exist in models. After 429/502/503/504 retries are exhausted the gateway rewrites body.model to the next name, switches to that deployment's backend, and retries again. The response header X-Foundry-Fallback lists the names tried; the last one served.",
+        "maxConcurrency": "In-flight request limit for this deployment. Overrides FOUNDRY_MAX_CONCURRENCY_PER_MODEL. Requests beyond the limit wait up to FOUNDRY_QUEUE_TIMEOUT_MS, then receive 429 with Retry-After."
+      }
+    },
+    "chat-thinking-example-01": {
+      "$comment": "Shape for a model whose thinking mode is switched on by reasoning_effort and which rejects a vendor-specific thinking field.",
+      "dropParams": ["thinking"],
+      "maxReasoningEffort": "max"
+    },
+    "chat-fast-example-01": {
+      "$comment": "A non-reasoning model needs no profile keys; it still inherits the defaults from *.",
+      "maxConcurrency": 16
+    }
+  }
+}

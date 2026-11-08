@@ -45,3 +45,6 @@ pmo/
 
 # Generated per-subscription model catalog (regenerate with scripts/build-model-catalog.mjs)
 infra/params/model-catalog.json
+
+# Gateway routing is deployment-specific (real endpoints and deployment names); placeholders live in routing.example.json
+gateway/routing.json
