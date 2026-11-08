@@ -1,5 +1,9 @@
 # Model gateway
 
+::: warning Reasoning models and the four minute ceiling
+A gateway hosted on App Service, Container Apps or API Management is cut off by the platform when no response bytes arrive for about four minutes, and Foundry reasoning models send nothing until reasoning finishes, even when streaming. A client with a shorter timeout fails sooner still. A measured run of Grok 4.7 at its default effort took a median of about 160 seconds, and close to half of the calls were abandoned at a 210 second client timeout. See the [reliability and roster review](../research/model-reliability-and-roster-review-2026-11-07) for the evidence and the hardening list: stream upstream, send keep-alive comments, retry 429 with backoff, cap reasoning effort for non-streaming callers, and never retry a content-filter 400.
+:::
+
 The gateway is the common authenticated entry point for editor, MCP and API
 clients in the current two-region deployment. It selects a configured Foundry
 account, forwards requests and streams, and records metadata. Azure

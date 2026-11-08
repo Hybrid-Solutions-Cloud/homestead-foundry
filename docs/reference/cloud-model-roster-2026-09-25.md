@@ -1,5 +1,9 @@
 # Cloud model roster: 2026-09-25
 
+::: warning Superseded
+This is a historical snapshot. The current list, with 44 deployments and retirement dates, is the [2026-11-07 roster](./cloud-model-roster-2026-11-07).
+:::
+
 Published model names and versions represented in the current two-region deployment. Actual deployment aliases, resource names, capacities and access policy remain in the private overlay. This is a dated deployment snapshot, not a list of all Azure availability or a quality certification. Two aliases of DeepSeek V4.1 account for the difference between model/version rows and 40 deployments. The registry also has a Speech capability entry for MAI-Voice-2, not a model deployment.
 
 See [model research](../research/model-selection-2026-09-25), [router usage](../guide/model-router) and [gateway](../guide/model-gateway). Non-chat models use their modality-specific APIs; inclusion here does not imply Chat Completions compatibility.

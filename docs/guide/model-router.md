@@ -65,6 +65,6 @@ Kimi K2.7 Code for code, Grok 4.6 for deep/adversary, GPT-6 Sol for iac,
 DeepSeek V4 Pro for second-opinion, and the existing Balanced router for auto.
 Escalation requires an explicit caller decision; there is no automatic fallback
 chain. The private overlay records the hosted release and live verification. See the
-[cloud roster](../reference/cloud-model-roster-2026-09-25),
+[cloud roster](../reference/cloud-model-roster-2026-11-07),
 [gateway guide](./model-gateway) and
 [monitoring operations](../implementation/foundry-observability-operations).

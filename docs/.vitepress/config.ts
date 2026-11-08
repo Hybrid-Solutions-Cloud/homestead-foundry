@@ -126,6 +126,7 @@ export default defineConfig({
           { text: "Methodology", link: "/guide/methodology" },
           { text: "Model selection", link: "/guide/model-selection" },
           { text: "Cost and quality review", link: "/research/model-selection-2026-09-25" },
+          { text: "Reliability and roster review", link: "/research/model-reliability-and-roster-review-2026-11-07" },
           { text: "Model evaluation", link: "/guide/model-evaluation" },
           { text: "Model registry", link: "/guide/model-registry" },
         ],
@@ -190,7 +191,7 @@ export default defineConfig({
         items: [
           { text: "Reference index", link: "/reference/" },
           { text: "Model availability matrix", link: "/reference/model-matrix" },
-          { text: "Current cloud roster", link: "/reference/cloud-model-roster-2026-09-25" },
+          { text: "Current cloud roster", link: "/reference/cloud-model-roster-2026-11-07" },
           { text: "Model catalog (what this project chose)", link: "/reference/model-catalog" },
           { text: "Available: Azure AI Foundry", link: "/reference/model-availability-azure-cloud" },
           { text: "Available: Foundry Local", link: "/reference/model-availability-foundry-local" },
@@ -215,6 +216,7 @@ export default defineConfig({
             { text: "Methodology", link: "/guide/methodology" },
             { text: "Model selection", link: "/guide/model-selection" },
           { text: "Cost and quality review", link: "/research/model-selection-2026-09-25" },
+          { text: "Reliability and roster review", link: "/research/model-reliability-and-roster-review-2026-11-07" },
             { text: "Model evaluation", link: "/guide/model-evaluation" },
             { text: "Model registry", link: "/guide/model-registry" },
           ],
@@ -358,7 +360,7 @@ export default defineConfig({
           text: "Compare everything at once",
           items: [
             { text: "Model availability matrix", link: "/reference/model-matrix" },
-          { text: "Current cloud roster", link: "/reference/cloud-model-roster-2026-09-25" },
+          { text: "Current cloud roster", link: "/reference/cloud-model-roster-2026-11-07" },
           ],
         },
         {
