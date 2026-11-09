@@ -10,6 +10,8 @@ param metricAlertDefinitions array = []
 param queryAlertDefinitions array = []
 param tags object
 param costResourceGroups array = []
+@description('Optional synthetic availability tests, for example a probe of the gateway health endpoint. Each item is { name, kind, properties }.')
+param availabilityTests array = []
 
 resource workspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = { name: workspaceName }
 resource actionGroup 'Microsoft.Insights/actionGroups@2023-01-01' existing = { name: actionGroupName }
@@ -68,6 +70,15 @@ module queryAlerts 'modules/scheduled-query-alerts.bicep' = {
   params: {
     alertDefinitions: queryAlertDefinitions
     actionGroupResourceId: actionGroup.id
+    location: location
+    tags: tags
+  }
+}
+module syntheticTests 'modules/availability-tests.bicep' = if (!empty(availabilityTests)) {
+  name: 'operations-availability-tests'
+  params: {
+    tests: availabilityTests
+    applicationInsightsResourceId: insights.id
     location: location
     tags: tags
   }
