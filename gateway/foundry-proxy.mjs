@@ -11,6 +11,8 @@
 //             defaultReasoningEffort injected when the body has no reasoning_effort or reasoning object
 //             maxReasoningEffort     a higher requested effort is clamped down to this value
 //             tokenLimitParam        max_tokens / max_completion_tokens is renamed to this name
+//             minOutputTokens        a smaller requested output limit is raised to this value, so a
+//                                    reasoning model is not cut off before it writes an answer
 //             fallback               ordered deployments (must exist in models) tried after retries
 //             maxConcurrency         per-deployment in-flight limit for this deployment
 //           Profiles apply to chat/completions, completions and responses paths only.
@@ -139,6 +141,13 @@ export function applyProfile(body, profile, headerEffort, meta, stripped) {
       delete body[name]; changed = true;
     }
   }
+  const floor = Math.floor(Number(profile.minOutputTokens));
+  if (floor > 0) {
+    for (const name of ['max_output_tokens', 'max_completion_tokens', 'max_tokens']) {
+      if (typeof body[name] !== 'number' || body[name] >= floor) continue;
+      meta.requestedOutputTokens ??= body[name]; body[name] = floor; meta.raisedOutputTokens = floor; changed = true;
+    }
+  }
   const hasEffort = body.reasoning_effort !== undefined || (body.reasoning !== null && typeof body.reasoning === 'object');
   if (!hasEffort && EFFORTS.includes(profile.defaultReasoningEffort)) {
     body.reasoning_effort = profile.defaultReasoningEffort; meta.injectedReasoningEffort = profile.defaultReasoningEffort; changed = true;
@@ -251,7 +260,7 @@ const server = http.createServer(async (req, res) => {
       if (applyProfile(body, profile, headerEffort, meta, stripped)) payload = Buffer.from(JSON.stringify(body));
     }
     meta.requestedTier = body?.service_tier || 'default';
-    meta.requestedOutputTokens = body?.max_output_tokens ?? body?.max_completion_tokens ?? body?.max_tokens;
+    meta.requestedOutputTokens ??= body?.max_output_tokens ?? body?.max_completion_tokens ?? body?.max_tokens;
     if (body?.reasoning_effort !== undefined) meta.reasoningEffort = String(body.reasoning_effort).slice(0, 20);
     const wantStream = body?.stream === true;
     meta.streaming = wantStream;

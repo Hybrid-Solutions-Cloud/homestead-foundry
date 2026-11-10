@@ -118,7 +118,7 @@ test('gateway v2 profiles, strip-on-400, retries, fallback, concurrency and keep
     profiles: {
       '*': { dropParams: ['thinking'] },
       'grok-like': { defaultReasoningEffort: 'medium', maxReasoningEffort: 'high', tokenLimitParam: 'max_completion_tokens', fallback: ['think-like', 'fast-like', 'missing-model'] },
-      single: { maxConcurrency: 1 },
+      single: { maxConcurrency: 1, minOutputTokens: 4000 },
     },
   }, { FOUNDRY_RETRY_BASE_MS: '5', FOUNDRY_RETRY_BUDGET_MS: '3000', FOUNDRY_KEEPALIVE_MS: '100', FOUNDRY_QUEUE_TIMEOUT_MS: '300' });
   const post = (body, extra = {}) => fetch(base + '/v1/chat/completions', { method: 'POST', headers: { ...headers, ...extra }, body: JSON.stringify(body) });
@@ -131,6 +131,17 @@ test('gateway v2 profiles, strip-on-400, retries, fallback, concurrency and keep
     const mine = requests.filter(r => scenarioOf(r.body) === 'grok-rejects');
     assert.equal(mine.length, 3);
     assert.equal(mine[2].body.stop, undefined); assert.equal(mine[2].body.presence_penalty, undefined); assert.equal(mine[2].body.max_tokens, 10);
+  });
+
+  await t.test('minOutputTokens raises a small limit and leaves larger or absent limits alone', async () => {
+    const send = async (content, extra) => { const r = await post({ model: 'single', messages: [{ role: 'user', content }], ...extra }); assert.equal(r.status, 200); await r.text(); return requests.find(q => scenarioOf(q.body) === content).body; };
+    assert.equal((await send('floor-small', { max_completion_tokens: 800 })).max_completion_tokens, 4000);
+    assert.equal((await send('floor-large', { max_tokens: 9000 })).max_tokens, 9000);
+    const none = await send('floor-none', {});
+    assert.equal(none.max_tokens, undefined); assert.equal(none.max_completion_tokens, undefined);
+    await sleep(100);
+    const raised = events().find(e => e.raisedOutputTokens);
+    assert.equal(raised.raisedOutputTokens, 4000); assert.equal(raised.requestedOutputTokens, 800);
   });
 
   await t.test('content_filter 400 is returned unchanged without a retry', async () => {

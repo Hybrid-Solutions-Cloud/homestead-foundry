@@ -36,6 +36,7 @@
       "defaultReasoningEffort": "medium",
       "maxReasoningEffort": "high",
       "tokenLimitParam": "max_completion_tokens",
+      "minOutputTokens": 8000,
       "fallback": ["chat-thinking-example-01", "chat-fast-example-01"],
       "maxConcurrency": 4,
       "$fields": {
@@ -43,6 +44,7 @@
         "defaultReasoningEffort": "One of low, medium, high, xhigh, max. Injected as reasoning_effort when the body has neither reasoning_effort nor a reasoning object. Recorded as injectedReasoningEffort.",
         "maxReasoningEffort": "One of low, medium, high, xhigh, max. A higher requested effort (body, reasoning.effort or the x-foundry-reasoning-effort header) is clamped down to this value. Recorded as clampedReasoningEffort with requestedReasoningEffort keeping the original.",
         "tokenLimitParam": "max_tokens or max_completion_tokens. Whichever of the two the client sent is renamed to this name so the model accepts it. Values are never changed.",
+        "minOutputTokens": "Positive integer. When the client sends max_tokens, max_completion_tokens or max_output_tokens below this value it is raised to it; a request with no limit is left alone. Reasoning tokens count against the output limit, so a small limit can be spent entirely on reasoning and return finish_reason length with no answer. Keep the value within the model's maximum output. Recorded as raisedOutputTokens with requestedOutputTokens keeping the original.",
         "fallback": "Ordered deployment names that must exist in models. After 429/502/503/504 retries are exhausted the gateway rewrites body.model to the next name, switches to that deployment's backend, and retries again. The response header X-Foundry-Fallback lists the names tried; the last one served.",
         "maxConcurrency": "In-flight request limit for this deployment. Overrides FOUNDRY_MAX_CONCURRENCY_PER_MODEL. Requests beyond the limit wait up to FOUNDRY_QUEUE_TIMEOUT_MS, then receive 429 with Retry-After."
       }
