@@ -7,6 +7,7 @@
 //   fallbackTo              comma-joined fallback deployments tried; the last one served
 //   injectedReasoningEffort effort added by the profile default
 //   clampedReasoningEffort  effort the request was clamped down to (requestedReasoningEffort keeps the original)
+//   raisedOutputTokens      output limit the request was raised to by minOutputTokens (requestedOutputTokens keeps the original)
 //   queuedMs                time spent waiting for the per-deployment concurrency slot
 //   keepAlivesSent          SSE keep-alive comments written before the first upstream byte
 //   strippedParams          comma-joined parameter names removed by profile or strip-on-400
