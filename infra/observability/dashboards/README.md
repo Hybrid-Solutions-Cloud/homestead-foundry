@@ -28,7 +28,7 @@ It answers model-use questions by deployment and time range:
 5. Actual billed cost: today, trailing seven days, month to date, daily trend, and
    per-model token and cost totals from Cost Management ActualCost data.
 6. Content safety: HTTP 400 blocks by deployment (RAI content filtering).
-7. Model inventory: request volume across all 22 deployed models.
+7. Model inventory: request volume across all deployed models.
 8. Caller/consumer breakdown: requires `AzureOpenAIRequestUsage` diagnostic category
    enabled in the private overlay.
 
@@ -69,6 +69,39 @@ The caller/consumer breakdown and compact ActualCost snapshots require paid Log 
 ingestion. Set `logAnalyticsDailyQuotaGb` to a tight supported cap in the private overlay.
 No platform metrics are sent to Log Analytics, so the
 `foundryDiagnosticSetting.metrics` array should remain empty.
+
+## The generated operations dashboard
+
+`scripts/Build-OperationsDashboard.mjs` compiles a larger operations dashboard from this
+base file plus a private configuration file. It adds gateway request telemetry, cost and
+the sections below. Panels added after the first release take ids from 200 upward so
+existing panel links keep working.
+
+| Section | What it answers | Data it needs |
+|---|---|---|
+| Gateway health at a glance | Is the gateway up, are requests succeeding, what is being cancelled, retried or sent to a fallback, and which callers are visible | Gateway request telemetry. The availability panels stay empty until a synthetic test is deployed through the `availabilityTests` parameter of `operations.bicep`. |
+| Rate-limit pressure by deployment | Which deployments are throttled, and how close observed peaks come to the configured allocation | Gateway request telemetry and the `capacity` of each model in the configuration |
+| Model Router (native metrics) | Which underlying model served router traffic, how often the router fell back, and how long routing decisions take | Free platform metrics: `ModelRouterRequests`, `ModelRouterFallbackCount`, `ModelRouterLatency`, `ModelRouterInputTokens`, `ModelRouterOutputTokens` |
+| Model providers | Usage split between models sold directly by Azure and models served by a partner runtime inside the account | `providerGroup` on each model in the configuration |
+| Foundry MCP Server and control-plane changes | Which Foundry resources were created, changed or deleted, and whether the hosted Foundry MCP Server was the client | Azure Activity Log and Microsoft Entra sign-in logs exported to the workspace. Panels stay empty without them. |
+| Model lifecycle | Days left before each deployed model version retires | `retirementDate` on each model in the configuration |
+
+Optional configuration keys read by the generator:
+
+| Key | Purpose |
+|---|---|
+| `models[].providerGroup` | Group label for the provider panels. A deployment without one shows as Unclassified. |
+| `models[].capacity`, `models[].chat` | Allocation used by the rate-limit panel. Non-chat deployments are left out. |
+| `models[].retirementDate`, `models[].successor` | Rows of the retirement countdown. |
+| `defaultProviderGroup` | The group treated as the baseline. Defaults to `Azure direct`. |
+| `routerDeployment`, `routerRegions` | Model Router deployment name and the regions that host it. |
+| `providerMeterPatterns` | List of `{ group, pattern }` used to split billed cost by provider group. The cost panel is only generated when this is set, because meter names must be checked against real billing data first. |
+| `foundryMcpAppId` | Overrides the published application id of the hosted Foundry MCP Server. |
+
+The hosted Foundry MCP Server is run by Microsoft and publishes no per-tool telemetry to
+the customer. What can be observed is indirect: sign-ins to its application, and the
+Activity Log records of the changes it makes with the signed-in user's permissions.
+Read-only tools leave no Activity Log record.
 
 ## The gateway row
 

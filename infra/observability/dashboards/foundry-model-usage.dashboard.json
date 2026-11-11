@@ -767,7 +767,7 @@
           "subscription": "__SUBSCRIPTION_ID__"
         }
       ],
-      "title": "Model inventory: request volume by deployment (all 22 deployed models)",
+      "title": "Model inventory: request volume by deployment (all deployed models)",
       "type": "timeseries"
     },
     {

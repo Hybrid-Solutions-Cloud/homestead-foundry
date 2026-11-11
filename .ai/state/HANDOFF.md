@@ -1,5 +1,11 @@
 # Session handoff
 
+## Operations dashboard and gateway output floor - 2026-11-09
+
+Owner approved in session. PR 25 (open): the dashboard generator gains gateway health, native Model Router metrics, provider groups (Azure direct and partner-hosted), Foundry MCP Server control-plane changes, a retirement countdown, an optional availability test parameter in operations.bicep, and a subscription-scope Activity Log export template. PR 26 (open): gateway profile key minOutputTokens raises a small caller output limit so reasoning models are not cut off before answering; 19 gateway tests pass.
+
+Next: merge PR 25 and PR 26, then the private overlay pins the new core commit. The Foundry MCP Server sign-in panel stays empty until a tenant admin exports Entra sign-in logs to the operations workspace. Exact resource names, deployment evidence and telemetry figures live in the private overlay.
+
 ## Remove legacy model exclusions - 2026-09-25
 
 AB#9316. Owner explicitly instructed removal of the three legacy MCP model
